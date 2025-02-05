@@ -203,10 +203,6 @@ export default function Overview() {
         }
       };
 
-      const handleTabChange = (index) => {
-        setSelectedIndex(index);
-      };
-      
   return (
     <Box pt={{ base: "100px", md: "80px", xl: "80px" }}>
       {/* Main Fields */}
@@ -319,7 +315,6 @@ export default function Overview() {
                 </Box>
                 ): !dLoading && 'No bank details available'}
               
-              <Progress size='xs' isIndeterminate width={'100%'} />
               </>
               )}
             </TabPanel>
