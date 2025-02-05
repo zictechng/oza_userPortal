@@ -1,13 +1,3 @@
-# [Horizon UI ⚡️](https://horizon-ui.com/horizon-ui-chakra) [![Tweet](https://img.shields.io/twitter/url/http/shields.io.svg?style=social&logo=twitter)](https://twitter.com/intent/tweet?url=https://horizon-ui.com/&text=Check%20Horizon%20UI,%20the%20trendiest%20open-source%20admin%20template%20for%20Chakra%20UI%20&%20React!)
-
-![version](https://img.shields.io/badge/version-2.0.0-brightgreen.svg)
-![license](https://img.shields.io/badge/license-MIT-blue.svg)
-[![GitHub issues open](https://img.shields.io/github/issues/horizon-ui/horizon-ui-chakra.svg?maxAge=2592000)](https://github.com/horizon-ui/horizon-ui-chakra/issues?q=is%3Aopen+is%3Aissue)
-
-<p>&nbsp;</p>
-
-[<img alt="Horizon UI" src="https://i.ibb.co/fdyTwz1/introduction-image-2.png" /> ](https://github.com/horizon-ui/horizon-ui-chakra)
-
 <p>&nbsp;</p>
 
 
@@ -93,7 +83,7 @@ some advices for our users that want to report an issue:
 
 1. Make sure that you are using the latest version of the Horizon UI Dashbaord.
    Check the CHANGELOG from your dashboard on our
-   [CHANGE LOG File](https://github.com/horizon-ui/horizon-ui-chakra/blob/main/CHANGELOG.md?ref=readme-horizon).
+  
 2. Providing us reproducible steps for the issue will shorten the time it takes
    for it to be fixed.
 3. Some issues may be browser specific, so specifying in what browser you
@@ -105,11 +95,4 @@ some advices for our users that want to report an issue:
 
 Connect with the community! Feel free to ask questions, report issues, and meet
 new people that already use Horizon UI!
-
-💬 [Join the #HorizonUI Discord Community!](https://discord.gg/f6tEKFBd4m)
-
 ### Copyright and license
-
-⭐️ [Copyright 2023 Simmmple ](https://www.simmmple.com/?ref=readme-horizon)
-
-📄 [Horizon UI License](https://www.simmmple.com/licenses?ref=readme-horizon)
