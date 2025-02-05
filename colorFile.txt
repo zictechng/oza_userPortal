@@ -1,0 +1,28 @@
+    textBlack:'#353535',
+    primaryColor1: "#1D2667",
+    primaryColor2: "#010A4F",
+    secondaryColor1:#5363CE
+    
+    primaryLightBlue: "#595F90",
+    yellowColor1: "#F4D41B",
+    bgColor:"#F7F7F7",
+    shahColorLight:"#F2F3F7",
+    shahColorDark:"#EEEFF3",
+    greenColorLight:"#E6F0FC",
+    textColorBlack:"#D9DDE0",
+    textColorBlack2:"#6C737B",
+
+    redColor: "#e32f45",
+    lightRed: "#f0cecc",
+    greenColor:"#1CB377",
+    lightGreenColor1: "#A0DFC6",
+    lightGreenColor2: "#DCF2EA",
+
+    #5363CE
+
+    get some development components from here
+
+    https://react-bootstrap.netlify.app/docs/components/modal
+
+
+    {/* https://www.youtube.com/watch?v=r44RKWyfcFw&amp;fbclid=IwAR21beSJORalzmzokxDRcGfkZA1AtRTE__l5N4r09HcGS5Y6vOluyouM9EM */}
