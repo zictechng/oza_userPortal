@@ -145,8 +145,8 @@ export default function CheckoutPaypal() {
                 }}
               />
             ) : (
-              <Text fontSize="18px" color="green.500" textAlign="center">
-                Payment Completed! Redirecting you to the home page...
+              <Text fontSize="18px" color="red.500" textAlign="center">
+                Something went wrong processing your payment or payment already processed! If your account was debited, please contact support.
               </Text>
             )}
           </Box>

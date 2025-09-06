@@ -575,7 +575,7 @@ import { capturePaypalPayment } from "storeMtg/paypalCheckoutSlice";
                   onClick={()=> payPalCheckout()}
                   disabled={payBtnLoader}>
                    {payBtnLoader ? <Text><Spinner _hover={payBtnLoader ? {color: "#FFF"} : {color:'#1D2667'}} animationDuration="0.8s" size="sm" /> Waiting</Text>
-                    :'Pay With Paypal'}
+                    :'Transfer With Paypal'}
                   </Button>
                 }
                   
