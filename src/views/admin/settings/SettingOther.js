@@ -435,7 +435,7 @@ export default function TopCreatorTable(props) {
             </AlertDialogHeader>
 
             <AlertDialogBody>
-              Are you sure you want to delete profile? You can't undo this action afterwards.
+              Are you sure you want to delete/block your profile? You can't undo this action afterwards.
             </AlertDialogBody>
 
             <AlertDialogFooter>
