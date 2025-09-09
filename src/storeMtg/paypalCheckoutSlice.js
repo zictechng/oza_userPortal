@@ -99,8 +99,12 @@ export const getPaypalPayment = createAsyncThunk(
         const response= await client.post(
         'api/capture-payment', dataSend,
             {
+            // headers: {
+            //     Authorization: `Bearer ${userToken}`,
+            // },
             headers: {
-                Authorization: `Bearer ${userToken}`,
+              "Content-Type": "application/json",
+              Authorization: `Bearer ${userToken}`,
             },
             }
         );

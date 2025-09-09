@@ -474,7 +474,7 @@ import {
                               width={{ md: '100%', lg: '100%', base: '100%' }}
                               onClick={()=> handlePaystackButtonClick()}
                               disabled={payBtnLoader}>
-                                {payBtnLoader ? <Text><Spinner _hover={payBtnLoader ? {color: "#FFF"} : {color:'#1D2667'}} animationDuration="0.8s" size="sm" /> Waiting</Text>
+                                {payBtnLoader ? <Text><Spinner _hover={payBtnLoader ? {color: "#FFF"} : {color:'#1D2667'}} animationDuration="0.8s" size="sm" /> Wait</Text>
                                 :'Pay With Paystack'}
                               </Button>
                               :''
@@ -494,7 +494,7 @@ import {
                                   width={{md: '100%', lg: '100%', base: '100%' }}
                                   onClick={()=> manualTransfer()}>
                                   
-                                  {fundLoading ? <Text><Spinner _hover={fundLoading ? {color: "#FFF"} : {color:'#1D2667'}} animationDuration="0.8s" size="sm" /> Waiting</Text>
+                                  {fundLoading ? <Text><Spinner _hover={fundLoading ? {color: "#FFF"} : {color:'#1D2667'}} animationDuration="0.8s" size="sm" /> Wait</Text>
                                 :'Manual Transfer'}
                               </Button>
                                 {!onlinePayment &&

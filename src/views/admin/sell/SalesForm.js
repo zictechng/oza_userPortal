@@ -574,7 +574,7 @@ import { capturePaypalPayment } from "storeMtg/paypalCheckoutSlice";
                   width={{ md: '100%', lg: '100%', base: '100%' }}
                   onClick={()=> payPalCheckout()}
                   disabled={payBtnLoader}>
-                   {payBtnLoader ? <Text><Spinner _hover={payBtnLoader ? {color: "#FFF"} : {color:'#1D2667'}} animationDuration="0.8s" size="sm" /> Waiting</Text>
+                   {payBtnLoader ? <Text><Spinner _hover={payBtnLoader ? {color: "#FFF"} : {color:'#1D2667'}} animationDuration="0.8s" size="sm" /> Wait</Text>
                     :'Transfer With Paypal'}
                   </Button>
                 }
@@ -593,7 +593,7 @@ import { capturePaypalPayment } from "storeMtg/paypalCheckoutSlice";
                       width={{md: '100%', lg: '100%', base: '100%' }}
                       onClick={()=>manualTransfer()}
                       disabled={fundLoading}>
-                      {fundLoading ? <Text><Spinner _hover={fundLoading ? {color: "#FFF"} : {color:'#1D2667'}} animationDuration="0.8s" size="sm" /> Waiting</Text>
+                      {fundLoading ? <Text><Spinner _hover={fundLoading ? {color: "#FFF"} : {color:'#1D2667'}} animationDuration="0.8s" size="sm" /> Wait</Text>
                     :'Manual Transfer'}
                   </Button>
                     {!onlinePayment &&

@@ -7,7 +7,6 @@ import {
   Grid,
   Heading, 
   Text,
-  Spinner,
   useToast,
 } from "@chakra-ui/react";
 
@@ -37,7 +36,6 @@ export default function CheckoutPaypal() {
       
       }, [approvalUrl]);
 
-
     // Handle success response
     const handlePaymentSuccess = (details, data) => {
       console.log("Payment details ", details, data);
@@ -57,8 +55,8 @@ export default function CheckoutPaypal() {
       };
         dispatch(capturePaypalPayment(captureData)).then((res) => {
           if (res.payload.msg ==='201') {
-            console.log("Payment Captured Successfully", res.payload);
             setPaymentCompleted(true);
+            console.log("Payment Captured Successfully", res.payload);
             toast({
               title: "Congratulations",
               description: 'Your transaction was successfully done! ',
@@ -144,11 +142,13 @@ export default function CheckoutPaypal() {
                   clientId: PaypalDemoKey, // Replace with your actual PayPal client ID
                 }}
               />
+              
             ) : (
               <Text fontSize="18px" color="red.500" textAlign="center">
                 Something went wrong processing your payment or payment already processed! If your account was debited, please contact support.
               </Text>
             )}
+           
           </Box>
         </Flex>
       </Card>
