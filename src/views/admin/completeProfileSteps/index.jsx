@@ -118,7 +118,7 @@ export default function CompleteProfileSteps() {
               <Box width={{ base: "100%"}}>
                     <Accordion allowToggle>
                                 <AccordionItem>
-                                    <AccordionButton _expanded={{ bg: "#1D2667", color: "white" }}
+                                    <AccordionButton _expanded={{ bg: "#5464c4", color: "white" }}
                                     onClick={() => setIsExpanded2(!isExpanded2)}>
                                     <Box flex="1" textAlign="left" fontSize={{ base: "20px", lg: "18px" }}>
                                         Complete Profile Details
@@ -149,7 +149,7 @@ export default function CompleteProfileSteps() {
               <Box width={{ base: "100%", lg: "100%" }}>
                     <Accordion allowToggle>
                                 <AccordionItem>
-                                    <AccordionButton _expanded={{ bg: "#1D2667", color: "white" }}
+                                    <AccordionButton _expanded={{ bg: "#5464c4", color: "white" }}
                                     onClick={() =>setIsExpanded3(!isExpanded3)}>
                                     <Box flex="1" textAlign="left" fontSize={{ base: "20px", lg: "18px" }}>
                                         Upload Profile Photo
@@ -180,7 +180,7 @@ export default function CompleteProfileSteps() {
               <Box width={{ base: "100%", lg: "100%" }}>
                     <Accordion allowToggle>
                                 <AccordionItem>
-                                    <AccordionButton _expanded={{ bg: "#1D2667", color: "white" }}
+                                    <AccordionButton _expanded={{ bg: "#5464c4", color: "white" }}
                                     onClick={()=>setIsExpanded4(isExpanded4)}>
                                     <Box flex="1" textAlign="left" fontSize={{ base: "20px", lg: "18px" }}>
                                         Upload Document ID
@@ -211,7 +211,7 @@ export default function CompleteProfileSteps() {
                 <Box width={{ base: "100%", lg: "100%" }}>
                     <Accordion allowToggle>
                                 <AccordionItem>
-                                    <AccordionButton _expanded={{ bg: "#1D2667", color: "white" }}
+                                    <AccordionButton _expanded={{ bg: "#5464c4", color: "white" }}
                                     onClick={()=>setIsExpanded5(isExpanded5)}>
                                     <Box flex="1" textAlign="left" fontSize={{ base: "20px", lg: "18px" }}>
                                         Proof Account Ownership
@@ -243,7 +243,7 @@ export default function CompleteProfileSteps() {
                 <Box width={{ base: "100%", lg: "100%" }}>
                     <Accordion allowToggle>
                                 <AccordionItem>
-                                    <AccordionButton _expanded={{ bg: "#1D2667", color: "white" }}
+                                    <AccordionButton _expanded={{ bg: "#5464c4", color: "white" }}
                                     onClick={()=>setIsExpanded6(isExpanded6)}>
                                     <Box flex="1" textAlign="left" fontSize={{ base: "20px", lg: "18px" }}>
                                         Proof of Address

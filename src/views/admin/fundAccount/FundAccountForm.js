@@ -276,7 +276,7 @@ import { getFundLimitRate } from "storeMtg/getFundingLimitSlice";
                       mt='40px'
                       width={{base: '100%' }}>
                           <Button
-                          bg='#1D2667'
+                          bg='#5464c4'
                           color='white'
                           _hover={{ bg: "#5363CE" }}
                           _active={{ bg: "#5363CE" }}
@@ -320,8 +320,8 @@ import { getFundLimitRate } from "storeMtg/getFundingLimitSlice";
                         <Button
                             bg='#5363CE'
                             color='white'
-                            _hover={{ bg: "#1D2667" }}
-                            _active={{ bg: "#1D2667" }}
+                            _hover={{ bg: "#5464c4" }}
+                            _active={{ bg: "#5464c4" }}
                             _focus={{ bg: "#5363CE" }}
                             fontWeight='500'
                             fontSize='14px'
@@ -338,8 +338,8 @@ import { getFundLimitRate } from "storeMtg/getFundingLimitSlice";
                             bg='#5363CE'
                             color='white'
 
-                            _hover={{ bg: "#1D2667" }}
-                            _active={{ bg: "#1D2667" }}
+                            _hover={{ bg: "#5464c4" }}
+                            _active={{ bg: "#5464c4" }}
                             _focus={{ bg: "#5363CE" }}
                             fontWeight='500'
                             fontSize='14px'
@@ -349,7 +349,7 @@ import { getFundLimitRate } from "storeMtg/getFundingLimitSlice";
                             width={{md: '100%', lg: '100%', base: '100%' }}
                             disabled={btnLoader}
                             onClick={manualTransfer}>
-                           {btnLoader ? <Text><Spinner _hover={btnLoader ? {color: "#FFF"} : {color:'#1D2667'}} animationDuration="0.8s" size="sm" /> Waiting</Text>
+                           {btnLoader ? <Text><Spinner _hover={btnLoader ? {color: "#FFF"} : {color:'#5464c4'}} animationDuration="0.8s" size="sm" /> Waiting</Text>
                            :'Manual Transfer'}
                         </Button>
                         {!onlinePayment && <Text color='#222' fontSize='20px'>{showMessageButton}</Text>

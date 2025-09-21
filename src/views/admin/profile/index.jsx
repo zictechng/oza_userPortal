@@ -561,8 +561,8 @@ export default function Overview() {
             borderWidth={2}
             borderColor="#5363CE"
             _hover={{ bg: "#5363CE", color: "#fff" }}
-              _active={{ bg: "#1D2667", color:'#FFF' }}
-              _focus={{ bg: "#1D2667", color:'#FFF' }}
+              _active={{ bg: "#5464c4", color:'#FFF' }}
+              _focus={{ bg: "#5464c4", color:'#FFF' }}
             fontWeight='500'
               fontSize='14px'
               py='20px'

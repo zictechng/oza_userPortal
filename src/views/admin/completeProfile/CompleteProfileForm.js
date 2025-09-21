@@ -318,7 +318,7 @@ export default function Upload(props) {
                    mt='40px'
                     width={{sm: '100%' }}>
                         <Button
-                          bg='#1D2667'
+                          bg='#5464c4'
                           color='white'
                           _hover={{ bg: "#5363CE" }}
                           _active={{ bg: "#5363CE" }}

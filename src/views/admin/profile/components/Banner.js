@@ -148,8 +148,8 @@ export default function Banner(props) {
           borderWidth={2}
           borderColor="#5363CE"
           _hover={{ bg: "#5363CE", color: "#fff" }}
-            _active={{ bg: "#1D2667" }}
-            _focus={{ bg: "#1D2667", color: "#fff", borderColor:'#1D2667'  }}
+            _active={{ bg: "#5464c4" }}
+            _focus={{ bg: "#5464c4", color: "#fff", borderColor:'#5464c4'  }}
           fontWeight='500'
             fontSize='14px'
             
@@ -158,7 +158,7 @@ export default function Banner(props) {
         </Button> */}
         {user.userData.acct_approved_status !=='none'?
       <RiVerifiedBadgeFill size='40px' color="#5363CE"
-      _hover={{ bg: "#1D2667", color: "#fff" }}/>
+      _hover={{ bg: "#5464c4", color: "#fff" }}/>
       :(<Text color='#aaa' fontSize='16px' >Account verification pending</Text>)}
         
       </Center> 

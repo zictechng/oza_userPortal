@@ -418,7 +418,7 @@ import {
                       mt='40px'
                       width={{sm: '100%' }}>
                       <Button
-                      bg='#1D2667'
+                      bg='#5464c4'
                       color='white'
                       _hover={{ bg: "#5363CE" }}
                       _active={{ bg: "#5363CE" }}
@@ -463,8 +463,8 @@ import {
                               <Button
                               bg='#5363CE'
                               color='white'
-                              _hover={{ bg: "#1D2667" }}
-                              _active={{ bg: "#1D2667" }}
+                              _hover={{ bg: "#5464c4" }}
+                              _active={{ bg: "#5464c4" }}
                               _focus={{ bg: "#5363CE" }}
                               fontWeight='500'
                               fontSize='14px'
@@ -474,7 +474,7 @@ import {
                               width={{ md: '100%', lg: '100%', base: '100%' }}
                               onClick={()=> handlePaystackButtonClick()}
                               disabled={payBtnLoader}>
-                                {payBtnLoader ? <Text><Spinner _hover={payBtnLoader ? {color: "#FFF"} : {color:'#1D2667'}} animationDuration="0.8s" size="sm" /> Wait</Text>
+                                {payBtnLoader ? <Text><Spinner _hover={payBtnLoader ? {color: "#FFF"} : {color:'#5464c4'}} animationDuration="0.8s" size="sm" /> Wait</Text>
                                 :'Pay With Paystack'}
                               </Button>
                               :''
@@ -483,8 +483,8 @@ import {
                               <Button
                                   bg='#5363CE'
                                   color='white'
-                                  _hover={{ bg: "#1D2667" }}
-                                  _active={{ bg: "#1D2667" }}
+                                  _hover={{ bg: "#5464c4" }}
+                                  _active={{ bg: "#5464c4" }}
                                   _focus={{ bg: "#5363CE" }}
                                   fontWeight='500'
                                   fontSize='14px'
@@ -494,7 +494,7 @@ import {
                                   width={{md: '100%', lg: '100%', base: '100%' }}
                                   onClick={()=> manualTransfer()}>
                                   
-                                  {fundLoading ? <Text><Spinner _hover={fundLoading ? {color: "#FFF"} : {color:'#1D2667'}} animationDuration="0.8s" size="sm" /> Wait</Text>
+                                  {fundLoading ? <Text><Spinner _hover={fundLoading ? {color: "#FFF"} : {color:'#5464c4'}} animationDuration="0.8s" size="sm" /> Wait</Text>
                                 :'Manual Transfer'}
                               </Button>
                                 {!onlinePayment &&

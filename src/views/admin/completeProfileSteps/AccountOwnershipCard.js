@@ -413,16 +413,16 @@ const [loading2fa, setLoading2FA] = useState(false);
                     direction={{ base: 'column', '2xl': 'row' }}>
                       {!otpSend &&
                       <Button
-                        bg={'#5363CE'}
+                        bg={'#5464c4'}
                         color="white"
                         width={{ base: '30%', lg: '20%' }}
                         height="50px"
                         border="2px"
                         borderWidth={2}
                         borderColor="#FFF"
-                        _hover={{ bg: '#1D2667', color: '#fff' }}
+                        _hover={{ bg: '#5464c4', color: '#fff' }}
                         _active={{ bg: 'white' }}
-                        _focus={{ bg: '#1D2667' }}
+                        _focus={{ bg: '#5464c4' }}
                         fontWeight="500"
                         fontSize="14px"
                         mt={10}
@@ -538,16 +538,16 @@ const [loading2fa, setLoading2FA] = useState(false);
                 mb="20px"
               >
                 <Button
-                  bg={'#1D2667'}
+                  bg={'#5464c4'}
                   color="white"
                   width={{ base: '80%', lg: '30%' }}
                   height="50px"
                   border="2px"
                   borderWidth={2}
                   borderColor="#FFF"
-                  _hover={{ bg: '#5363CE', color: '#fff' }}
+                  _hover={{ bg: '#5464c4', color: '#fff' }}
                   _active={{ bg: 'white' }}
-                  _focus={{ bg: '#1D2667' }}
+                  _focus={{ bg: '#5464c4' }}
                   fontWeight="500"
                   fontSize="14px"
                   mt={10}

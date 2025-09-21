@@ -279,7 +279,7 @@ else if (
                   h={{ base: "48px", md: "56px" }}
                   bg={boxBg}
                   icon={
-                    <Icon w={{ base: "24px", md: "32px" }} h={{ base: "24px", md: "32px" }} as={MdBarChart} color="#5363CE" />
+                    <Icon w={{ base: "24px", md: "32px" }} h={{ base: "24px", md: "32px" }} as={MdBarChart} color="#7f8cda" />
                   }
                 />
               }
@@ -338,7 +338,7 @@ else if (
                   h={{ base: "48px", md: "56px" }}
                   bg={boxBg}
                   icon={
-                    <Icon w={{ base: "24px", md: "32px" }} h={{ base: "24px", md: "32px" }} as={WarningIcon} color="#5363CE" />
+                    <Icon w={{ base: "24px", md: "32px" }} h={{ base: "24px", md: "32px" }} as={WarningIcon} color="#7f8cda" />
                   }
                 />
               }

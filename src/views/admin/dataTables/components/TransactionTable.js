@@ -93,7 +93,7 @@ export default function ComplexTable(props) {
               }}
             >
               <Button
-                bg="#1D2667"
+                bg="#5464c4"
                 color="white"
                 _hover={{ bg: '#5363CE' }}
                 _active={{ bg: '#5363CE' }}
@@ -110,7 +110,7 @@ export default function ComplexTable(props) {
               </Button>
 
               <Button
-                bg="#1D2667"
+                bg="#5464c4"
                 color="white"
                 _hover={{ bg: '#5363CE' }}
                 _active={{ bg: '#5363CE' }}
@@ -127,7 +127,7 @@ export default function ComplexTable(props) {
               </Button>
 
               <Button
-                bg="#1D2667"
+                bg="#5464c4"
                 color="white"
                 _hover={{ bg: '#5363CE' }}
                 _active={{ bg: '#5363CE' }}

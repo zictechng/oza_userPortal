@@ -242,7 +242,7 @@ export default function ManualPayment() {
       <Box width={{ base: "100%", lg: "68%" }}>
         <Accordion allowToggle>
                     <AccordionItem>
-                        <AccordionButton _expanded={{ bg: "#1D2667", color: "white" }}>
+                        <AccordionButton _expanded={{ bg: "#5464c4", color: "white" }}>
                         <Box flex="1" textAlign="left" fontSize={{ base: "25px", lg: "22px" }}>
                             View Company Payment Details
                         </Box>
@@ -375,7 +375,7 @@ export default function ManualPayment() {
       </Box>
        <Flex direction={{ base: "column", "2xl": "row" }} alignItems="center" justifyContent='center' mr={{ base: "column", lg: "400px" }} mb='20px'>
                           <Button
-                              bg={'#1D2667'}
+                              bg={'#5464c4'}
                               color='white'
                               width={{ base: "80%", lg: "30%" }}
                               height='50px'
@@ -384,7 +384,7 @@ export default function ManualPayment() {
                               borderColor="#FFF"
                               _hover={{ bg: "#5363CE", color: "#fff" }}
                                 _active={{ bg: "white" }}
-                                _focus={{ bg: "#1D2667" }}
+                                _focus={{ bg: "#5464c4" }}
                               fontWeight='500'
                                 fontSize='14px'
                                  mt={20}

@@ -105,7 +105,7 @@ export default function Conversion(props) {
         },
       },
     },
-    colors: ["#5cad82", "#c7585b", "#b5aa65"], // Custom slice colors
+    colors: ["#7f8cda", "#c7585b", "#b5aa65"], // Custom slice colors
     legend: {
       show: true, // Enable legend
     },

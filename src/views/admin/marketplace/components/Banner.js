@@ -25,7 +25,7 @@ import {
 import { AddIcon} from "@chakra-ui/icons";
 
 // Assets
-import banner from "assets/img/nfts/NftBanner1.png";
+import banner from "assets/img/nfts/homeBanner1.png";
 import { useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 
@@ -98,7 +98,7 @@ export default function Banner() {
         mb={{ base: "32px", md: "20px" }}
 
         lineHeight='20px'>
-       {user.appData?.app_launch_title} <p>We ensure a more profitable experience when selling your virtual funds at attractive rates.</p>
+       {user.appData?.app_launch_title} <p>We ensure a more profitable experience when selling your virtual funds with us at attractive rates.</p>
       </Text>
       <Flex align='center' mb={{ sm: "0px", md: "20px" }} >
         <Button
@@ -116,7 +116,7 @@ export default function Banner() {
           Sell
         </Button>
         <Button
-          bg='#5363CE'
+          bg='#7f8cda'
           color='white'
           _hover={{ bg: "rgb(93, 105, 184)" }}
           _active={{ bg: "black" }}

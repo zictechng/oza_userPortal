@@ -37,9 +37,9 @@ import { authUserLogin } from "storeMtg/authSlice";
 function SignIn() {
   const navigate = useNavigate();
   // Chakra color mode
-  const textColor = useColorModeValue("#1D2667", "white");
+  const textColor = useColorModeValue("#5464c4", "white");
   const textColorSecondary = "gray.400";
-  const textColorDetails = useColorModeValue("#1D2667.700", "secondaryGray.600");
+  const textColorDetails = useColorModeValue("#5464c4.700", "secondaryGray.600");
   const googleHover = useColorModeValue(
     { bg: "#1D2aa7" },
     { bg: "blueAlpha.300" }
@@ -266,7 +266,7 @@ function SignIn() {
               </FormControl>
               <NavLink to='https://ozaapp.com/forget-password'>
                 <Text
-                  color={'#1D2667'}
+                  color={'#5464c4'}
                   fontSize='sm'
                   w='124px'
                   fontWeight='500'>
@@ -276,7 +276,7 @@ function SignIn() {
             </Flex>
             <Button
               fontSize='sm'
-              bg={loading? "#aaa" : "#1D2667" }
+              bg={loading? "#aaa" : "#5464c4" }
               color={'white'}
               fontWeight='500'
               w='100%'
@@ -298,7 +298,7 @@ function SignIn() {
               I don't have an account?
               <NavLink to='https://ozaapp.com/signup'>
                 <Text
-                  color={'#1D2667'}
+                  color={'#5464c4'}
                   as='span'
                   ms='5px'
                   fontWeight='500'>

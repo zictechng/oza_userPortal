@@ -384,7 +384,7 @@ const [imageValue, setImageValue] = useState('');
                 mb="20px"
               >
                 <Button
-                  bg={'#1D2667'}
+                  bg={'#5464c4'}
                   color="white"
                   width={{ base: '80%', lg: '30%' }}
                   height="50px"
@@ -393,7 +393,7 @@ const [imageValue, setImageValue] = useState('');
                   borderColor="#FFF"
                   _hover={{ bg: '#5363CE', color: '#fff' }}
                   _active={{ bg: 'white' }}
-                  _focus={{ bg: '#1D2667' }}
+                  _focus={{ bg: '#5464c4' }}
                   fontWeight="500"
                   fontSize="14px"
                   mt={20}

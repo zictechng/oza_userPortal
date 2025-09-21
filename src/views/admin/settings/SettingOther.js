@@ -337,7 +337,7 @@ export default function TopCreatorTable(props) {
           </ModalBody>
 
           <ModalFooter>
-            <Button mr={3} bg={'#1D2667'} color='#fff' _hover={{ bg: "#5363CE", color: "#fff" }}
+            <Button mr={3} bg={'#5464c4'} color='#fff' _hover={{ bg: "#5363CE", color: "#fff" }}
             onClick={() => handleAccountPinSubmit()}>
             {acctLoading ? <Text><Spinner color="white.500" animationDuration="0.8s" size="sm" /> Processing</Text> : 'Update'}
             </Button>
@@ -413,7 +413,7 @@ export default function TopCreatorTable(props) {
           </ModalBody>
 
           <ModalFooter>
-            <Button mr={3} bg={'#1D2667'} color='#fff' _hover={{ bg: "#5363CE", color: "#fff" }}
+            <Button mr={3} bg={'#5464c4'} color='#fff' _hover={{ bg: "#5363CE", color: "#fff" }}
               onClick={() => handlePassSubmit()}>
             {dataLoading ? <Text><Spinner color="white.500" animationDuration="0.8s" size="sm" /> Processing</Text> : 'Update'}
             </Button>

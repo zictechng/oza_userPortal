@@ -52,7 +52,7 @@ export default function ExchangeRate() {
                 <Accordion allowToggle>
                   <AccordionItem>
                     <AccordionButton
-                      _expanded={{ bg: '#1D2667', color: 'white' }}
+                      _expanded={{ bg: '#5464c4', color: 'white' }}
                     >
                       <Box
                         flex="1"
@@ -87,7 +87,7 @@ export default function ExchangeRate() {
                 <Accordion allowToggle>
                   <AccordionItem>
                     <AccordionButton
-                      _expanded={{ bg: '#1D2667', color: 'white' }}
+                      _expanded={{ bg: '#5464c4', color: 'white' }}
                     >
                       <Box
                         flex="1"

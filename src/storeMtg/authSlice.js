@@ -95,6 +95,7 @@ export const authUserLogin = createAsyncThunk(
     "user/logout",
     async (logout_data) => {
       try {
+        //console.log('logout data send ', logout_data)
       const authLogout = await client.get(`/api/user_logout/${logout_data}`); // Call logout endpoint
       const response = await authLogout.data;
       return response;

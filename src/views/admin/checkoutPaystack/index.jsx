@@ -285,16 +285,16 @@ export default function CheckoutPaystack() {
                     px="27px"
                     me="38px"
                     borderRadius="15px"
-                    borderColor="#1D2667"
+                    borderColor="#5464c4"
                     borderWidth="2px" /* Adjusted for a more subtle border */
                     transition="background-color 0.3s"
-                    _hover={{ bg: "#1D2667", color: "#FFFFFF"}}
-                    _active={{ bg: "#1D2667" }}
+                    _hover={{ bg: "#5464c4", color: "#FFFFFF"}}
+                    _active={{ bg: "#5464c4" }}
                     _focus={{ bg: "#5363CE", outline: "none" }} /* Corrected outline styling */
                     width={{ md: "40%", lg: "40%", base: "80%", sm:'80%', '': '80%' }}
                     disabled={btnLoader} // Disable button when loading
                     onClick={handlePaystackClick}>
-                    {btnLoader ? <Text><Spinner _hover={btnLoader ? {color: "#FFF"} : {color:'#1D2667'}} animationDuration="0.8s" size="sm" /> Waiting</Text>
+                    {btnLoader ? <Text><Spinner _hover={btnLoader ? {color: "#FFF"} : {color:'#5464c4'}} animationDuration="0.8s" size="sm" /> Waiting</Text>
                     : 'Continue with Paystack' } 
                     
                     {/* Hidden PaystackButton */}

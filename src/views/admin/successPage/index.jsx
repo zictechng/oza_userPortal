@@ -92,9 +92,9 @@ export default function CompleteProfileSteps() {
                             <Button
                               bg='#5363CE'
                               color='white'
-                              _hover={{ bg: "#1D2667" }}
-                              _active={{ bg: "#1D2667" }}
-                              _focus={{ bg: "#1D2667" }}
+                              _hover={{ bg: "#5464c4" }}
+                              _active={{ bg: "#5464c4" }}
+                              _focus={{ bg: "#5464c4" }}
                               fontWeight='500'
                               fontSize='14px'
                               py='20px'

@@ -27,13 +27,13 @@ export default function Banner(props) {
     "14px 17px 40px 4px rgba(112, 144, 176, 0.08)",
     "unset"
   );
-  const bgButton = useColorModeValue("#1D2667", "whiteAlpha.100");
+  const bgButton = useColorModeValue("#5464c4", "whiteAlpha.100");
   const bgHover = useColorModeValue(
-    { bg: "#5363CE" },
+    { bg: "#7f8cda" },
     { bg: "whiteAlpha.100" }
   );
   const bgFocus = useColorModeValue(
-    { bg: "#1D2667" },
+    { bg: "#5464c4" },
     { bg: "whiteAlpha.100" }
   );
 

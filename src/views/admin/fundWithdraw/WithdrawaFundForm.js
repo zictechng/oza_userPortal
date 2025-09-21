@@ -256,7 +256,7 @@ import { updateBalance } from "storeMtg/authSlice";
                       mt='40px'
                       width={{base: '100%' }}>
                       <Button
-                      bg='#1D2667'
+                      bg='#5464c4'
                       color='white'
                       _hover={{ bg: "#5363CE" }}
                       _active={{ bg: "#5363CE" }}
@@ -296,10 +296,10 @@ import { updateBalance } from "storeMtg/authSlice";
               </ModalBody>
 
               <ModalFooter>
-                <Button mr={3} bg={'#1D2667'} color='#fff' _hover={{ bg: "#5363CE", color: "#fff" }}
+                <Button mr={3} bg={'#5464c4'} color='#fff' _hover={{ bg: "#5363CE", color: "#fff" }}
                 onClick={()=> processWithdrawal()}
                 disabled={withdrawLoading}>
-                  {withdrawLoading ? <Text><Spinner _hover={withdrawLoading ? {color: "#FFF"} : {color:'#1D2667'}} animationDuration="0.8s" size="sm" /> Waiting</Text>
+                  {withdrawLoading ? <Text><Spinner _hover={withdrawLoading ? {color: "#FFF"} : {color:'#5464c4'}} animationDuration="0.8s" size="sm" /> Waiting</Text>
                   :'Confirm'}
                 </Button>
                 <Button onClick={()=>closePinModal()}>Cancel</Button>
@@ -333,7 +333,7 @@ import { updateBalance } from "storeMtg/authSlice";
                 </ModalBody>
 
                 <ModalFooter>
-                  <Button mr={3} bg={'#1D2667'} color='#fff' _hover={{ bg: "#5363CE", color: "#fff" }}
+                  <Button mr={3} bg={'#5464c4'} color='#fff' _hover={{ bg: "#5363CE", color: "#fff" }}
                   onClick={()=> goBack()}>
                    Okay
                   </Button>
