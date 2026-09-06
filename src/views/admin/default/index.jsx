@@ -167,6 +167,7 @@ export default function Dashboard() {
     { icon: FiWifi, label: 'Data', color: '#3B82F6', iconBg: '#DBEAFE', path: '/user/bills/data' },
     { icon: FiZap, label: 'Electricity', color: '#F59E0B', iconBg: '#FEF3C7', path: '/user/bills/electricity' },
     { icon: FiTv, label: 'TV Sub', color: '#10B981', iconBg: '#D1FAE5', path: '/user/bills/tv' },
+    { icon: FiFileText, label: 'Exam Cards', color: '#8B5CF6', iconBg: '#EDE9FE', path: '/user/bills/exam-cards' },
   ];
 
   return (

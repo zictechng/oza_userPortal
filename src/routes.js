@@ -13,6 +13,11 @@ import {
 
 // Page imports
 import MainDashboard from 'views/admin/default';
+import BuyAirtime from 'views/admin/bills/airtime';
+import BuyData from 'views/admin/bills/data';
+import BuyElectricity from 'views/admin/bills/electricity';
+import BuyTv from 'views/admin/bills/tv';
+import BuyExamCards from 'views/admin/bills/examCards';
 import History from 'views/admin/history';
 import Profile from 'views/admin/profile';
 import Support from 'views/admin/support';
@@ -179,10 +184,41 @@ const routes = [
     component: <SignupProcess />,
     visible: false,
   },
-  {
+    {
     layout: '/user',
     path: '/success',
     component: <SuccessTransactions />,
+    visible: false,
+  },
+  {
+    layout: '/user',
+    path: '/bills/airtime',
+    component: <BuyAirtime />,
+    visible: false,
+  },
+  {
+    layout: '/user',
+    path: '/bills/data',
+    component: <BuyData />,
+    visible: false,
+  },
+  {
+    layout: '/user',
+    path: '/bills/electricity',
+    component: <BuyElectricity />,
+    visible: false,
+  },
+  {
+    layout: '/user',
+    path: '/bills/tv',
+    component: <BuyTv />,
+    visible: false,
+  },
+
+  {
+    layout: '/user',
+    path: '/bills/exam-cards',
+    component: <BuyExamCards />,
     visible: false,
   },
 
