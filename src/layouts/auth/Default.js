@@ -1,60 +1,59 @@
-// Chakra imports
-import { Box, Flex, Icon, Link, Text } from "@chakra-ui/react";
-import PropTypes from "prop-types";
-import React from "react";
-import Footer from "components/footer/FooterAuth";
-import { GlobeIcon } from "components/icons/Icons";
+import { Box, Flex, Icon, Text, Image } from '@chakra-ui/react';
+import PropTypes from 'prop-types';
+import React from 'react';
+import Footer from 'components/footer/FooterAuth';
+import { useAppContext } from 'contexts/AppContext';
 
 function AuthIllustration(props) {
   const { children, illustrationBackground } = props;
-  // Chakra color mode
+  const { appName, appLogo } = useAppContext();
+
   return (
     <Flex position='relative' h='max-content'>
       <Flex
-        h={{
-          sm: "initial",
-          md: "unset",
-          lg: "100vh",
-          xl: "97vh",
-        }}
+        h={{ sm: 'initial', md: 'unset', lg: '100vh', xl: '97vh' }}
         w='100%'
-        maxW={{ md: "66%", lg: "1313px" }}
+        maxW={{ md: '66%', lg: '1313px' }}
         mx='auto'
-        pt={{ sm: "10px", md: "0px" }}
-        px={{ lg: "30px", xl: "0px" }}
-        ps={{ xl: "70px" }}
+        pt={{ sm: '10px', md: '0px' }}
+        px={{ lg: '30px', xl: '0px' }}
+        ps={{ xl: '70px' }}
         justifyContent='start'
         direction='column'>
-          <Link 
-           href='https://ozaapp.com/' target='_blank'
-          style={{
-            width: "fit-content",
-            marginTop: "40px",
-          }}>
-          <Flex
-            align='center'
-            ps={{ base: "25px", lg: "0px" }}
-            pt={{ lg: "0px", xl: "0px", sm: "0px" }}
-            w='fit-content'>
-            <Icon
-              as={GlobeIcon}
-              me='12px'
-              h='30px'
-              w='30px'
-              color='secondaryGray.600'
-            />
-            <Text ms='0px' fontSize='sm' color='secondaryGray.600'>
-              Visit Site
-            </Text>
-          </Flex>
-          </Link>
-        
+
+        {/* Top Logo */}
+        <Flex
+          align='center'
+          gap='10px'
+          ps={{ base: '25px', lg: '0px' }}
+          pt={{ lg: '30px', xl: '30px', sm: '20px' }}
+          w='fit-content'
+          mb='10px'>
+          {appLogo ? (
+            <Image src={appLogo} alt={appName} h='32px' objectFit='contain' />
+          ) : (
+            <Box
+              w='32px' h='32px' borderRadius='8px'
+              bg='brand.500'
+              display='flex' alignItems='center' justifyContent='center'>
+              <Text color='white' fontWeight='800' fontSize='16px'>
+                {appName?.charAt(0) || 'A'}
+              </Text>
+            </Box>
+          )}
+          <Text fontSize='20px' fontWeight='800' color='brand.500' letterSpacing='-0.5px'>
+            {appName || ''}
+          </Text>
+        </Flex>
+
         {children}
+
+        {/* Right illustration panel */}
         <Box
-          display={{ base: "none", md: "block" }}
+          display={{ base: 'none', md: 'block' }}
           h='100%'
           minH='100vh'
-          w={{ lg: "50vw", "2xl": "44vw" }}
+          w={{ lg: '50vw', '2xl': '44vw' }}
           position='absolute'
           right='0px'>
           <Flex
@@ -66,16 +65,14 @@ function AuthIllustration(props) {
             bgSize='cover'
             bgPosition='50%'
             position='absolute'
-            borderBottomLeftRadius={{ lg: "120px", xl: "200px" }}></Flex>
+            borderBottomLeftRadius={{ lg: '120px', xl: '200px' }}>
+          </Flex>
         </Box>
         <Footer />
       </Flex>
-      {/* function component that change light and dark theme */}
-      {/* <FixedPlugin /> */}
     </Flex>
   );
 }
-// PROPS
 
 AuthIllustration.propTypes = {
   illustrationBackground: PropTypes.string,
