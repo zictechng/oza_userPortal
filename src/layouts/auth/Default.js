@@ -36,29 +36,29 @@ function AuthIllustration(props) {
         {/* Header — Logo + Dark Mode */}
         <Flex justify='space-between' align='center' mb='48px'>
           <Flex align='center' gap='10px'>
-            {appLogo ? (
-              <Image src={appLogo} alt={appName} h='32px' objectFit='contain' />
-            ) : appName ? (
-              <Flex align='center' gap='8px'>
-                <Box
-                  w='36px' h='36px' borderRadius='10px'
-                  bg='brand.500'
-                  display='flex' alignItems='center' justifyContent='center'
-                  shadow='md'>
-                  <Text color='white' fontWeight='800' fontSize='18px'>
-                    {appName.charAt(0)}
-                  </Text>
-                </Box>
+          {appLogo ? (
+            <Image src={appLogo} alt={appName} h='32px' objectFit='contain' />
+          ) : (
+            <Flex align='center' gap='8px'>
+              <Box
+                w='36px' h='36px' borderRadius='10px'
+                bg='brand.500'
+                display='flex' alignItems='center' justifyContent='center'
+                shadow='md'>
+                <Text color='white' fontWeight='800' fontSize='18px'>
+                  {appName ? appName.charAt(0) : '•'}
+                </Text>
+              </Box>
+              {appName && (
                 <Text
                   fontSize='20px' fontWeight='800'
                   color={textColor}
                   letterSpacing='-0.5px'>
                   {appName}
                 </Text>
-              </Flex>
-            ) : (
-              <Box w='36px' h='36px' borderRadius='10px' bg='brand.500' />
-            )}
+              )}
+            </Flex>
+          )}
           </Flex>
 
           <Tooltip label={colorMode === 'light' ? 'Dark mode' : 'Light mode'}>
@@ -121,12 +121,12 @@ function AuthIllustration(props) {
               <Image src={appLogo} alt={appName} h='48px' objectFit='contain' />
             ) : (
               <Text fontSize='40px' fontWeight='800'>
-                {appName?.charAt(0) || ''}
+                {appName?.charAt(0) || '✦'}
               </Text>
             )}
           </Box>
           <Text fontSize='32px' fontWeight='800' textAlign='center' mb='16px' lineHeight='1.2'>
-            {appName ? `Welcome to ${appName}` : ''}
+            {appName ? `Welcome to ${appName}` : 'Welcome'}
           </Text>
           <Text fontSize='16px' textAlign='center' opacity={0.8} maxW='340px' lineHeight='1.6'>
             The secure and profitable way to manage your virtual funds
@@ -134,7 +134,7 @@ function AuthIllustration(props) {
 
           {/* Feature dots */}
           <Flex gap='12px' mt='48px'>
-            {['Buy & Sell', 'Bills Payment', 'Earn Rewards'].map((item, i) => (
+            {['Buy & Sell Virtual Funds', 'Bills Payment', 'Earn Rewards'].map((item, i) => (
               <Box
                 key={i}
                 px='16px' py='8px'

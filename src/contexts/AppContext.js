@@ -1,45 +1,54 @@
-
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import client from 'components/client';
 
 const AppContext = createContext({});
 
+// Read from localStorage synchronously on module load
+// This ensures values are available on first render
+const getStoredValue = (key, fallback = '') => {
+  try {
+    return localStorage.getItem(key) || fallback;
+  } catch {
+    return fallback;
+  }
+};
+
 export const AppProvider = ({ children }) => {
-  const [appName, setAppName] = useState('');
-  const [appLogo, setAppLogo] = useState('');
-  const [appShortName, setAppShortName] = useState('');
+  // Initialize from localStorage immediately — no empty flash
+  const [appName, setAppName] = useState(() => getStoredValue('app_name'));
+  const [appLogo, setAppLogo] = useState(() => getStoredValue('app_logo'));
+  const [appShortName, setAppShortName] = useState(() => getStoredValue('app_short_name'));
   const [appLoading, setAppLoading] = useState(true);
 
   const fetchAppSettings = async () => {
     try {
-      const res = await client.get('/api/app_setting');
+      const res = await client.get('/api/app_settingPage');
       if (res.data.msg === '201' && res.data.feedAll?.[0]) {
         const d = res.data.feedAll[0];
-        setAppName(d.app_name || '');
-        setAppLogo(d.app_logo || '');
-        setAppShortName(d.app_short_name || '');
-        // Store in localStorage for offline access
-        localStorage.setItem('app_name', d.app_name || '');
-        localStorage.setItem('app_logo', d.app_logo || '');
-        localStorage.setItem('app_short_name', d.app_short_name || '');
+        const name = d.app_name || '';
+        const logo = d.app_logo || '';
+        const shortName = d.app_short_name || '';
+
+        setAppName(name);
+        setAppLogo(logo);
+        setAppShortName(shortName);
+
+        // Persist for next load
+        localStorage.setItem('app_name', name);
+        localStorage.setItem('app_logo', logo);
+        localStorage.setItem('app_short_name', shortName);
       }
     } catch (e) {
-      // Fallback to localStorage if API fails
-      setAppName(localStorage.getItem('app_name') || '');
-      setAppLogo(localStorage.getItem('app_logo') || '');
-      setAppShortName(localStorage.getItem('app_short_name') || '');
+      // Keep existing localStorage values — already loaded in useState initializer
+      console.log('AppContext fetch error:', e.message);
     } finally {
       setAppLoading(false);
     }
   };
 
   useEffect(() => {
-    // Load from localStorage immediately for instant display
-    setAppName(localStorage.getItem('app_name') || '');
-    setAppLogo(localStorage.getItem('app_logo') || '');
-    setAppShortName(localStorage.getItem('app_short_name') || '');
-    // Then fetch fresh from API
     fetchAppSettings();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   return (

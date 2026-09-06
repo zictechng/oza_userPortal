@@ -1,7 +1,6 @@
-
 import React from 'react';
 import {
-  Alert, AlertDescription, AlertIcon, CloseButton,
+  Alert, AlertDescription, AlertIcon, CloseButton, Box,
 } from '@chakra-ui/react';
 
 // Reusable error alert for auth pages
@@ -12,9 +11,12 @@ export const AuthAlert = ({ message, onClose }) => {
       status='error'
       mb='20px'
       borderRadius='12px'
-      fontSize='sm'>
-      <AlertIcon />
-      <AlertDescription flex='1'>{message}</AlertDescription>
+      fontSize='sm'
+      alignItems='flex-start'>
+      <AlertIcon mt='2px' />
+      <Box flex='1'>
+        <AlertDescription display='block'>{message}</AlertDescription>
+      </Box>
       <CloseButton
         position='absolute'
         right='8px'
@@ -34,9 +36,12 @@ export const AuthSuccess = ({ message, onClose }) => {
       status='success'
       mb='20px'
       borderRadius='12px'
-      fontSize='sm'>
-      <AlertIcon />
-      <AlertDescription flex='1'>{message}</AlertDescription>
+      fontSize='sm'
+      alignItems='flex-start'>
+      <AlertIcon mt='2px' />
+      <Box flex='1'>
+        <AlertDescription display='block'>{message}</AlertDescription>
+      </Box>
       {onClose && (
         <CloseButton
           position='absolute'
