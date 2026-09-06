@@ -38,6 +38,8 @@ import SuccessTransactions from 'views/admin/successPage'
 import SignInCentered from 'views/auth/signIn';
 import SignUpPage from 'views/auth/signUp';
 
+import ForgotPasswordPage from 'views/auth/forgotPassword';
+
 const routes = [
   {
     name: 'Dashboard',
@@ -201,6 +203,12 @@ const routes = [
     layout: '/auth',
     path: '/sign-up',
     component: <SignUpPage />,
+  },
+  {
+    name: 'Forgot Password',
+    layout: '/auth',
+    path: '/forgot-password',
+    component: <ForgotPasswordPage />,
   },
 ];
 

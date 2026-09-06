@@ -1,33 +1,47 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   Box, Button, Flex, FormControl, FormLabel,
-  Heading, Icon, Input, InputGroup, InputRightElement,
-  Text, useColorModeValue, Alert, AlertIcon,
-  AlertDescription, CloseButton, SimpleGrid, Select,
-  Progress,
+  Heading, Input, InputGroup, InputRightElement,
+  Text, useColorModeValue, SimpleGrid, Select,
+  Progress, Stepper, Step, StepIndicator,
+  StepStatus, StepIcon, StepNumber, StepTitle,
+  StepSeparator, useSteps,
 } from '@chakra-ui/react';
 import DefaultAuth from 'layouts/auth/Default';
 import illustration from 'assets/img/auth/auth.png';
-import { MdOutlineRemoveRedEye } from 'react-icons/md';
-import { RiEyeCloseLine } from 'react-icons/ri';
-import IsValidEmail from 'components/EmailValidation';
 import client from 'components/client';
 import { useAppContext } from 'contexts/AppContext';
+import { AuthAlert, AuthSuccess } from 'components/auth/AuthCard';
+import { usePasswordToggle } from 'hooks/usePasswordToggle';
+import { useFormValidation } from 'hooks/useFormValidation';
+
+const STEPS = [
+  { title: 'Account' },
+  { title: 'Personal' },
+];
 
 function SignUp() {
   const navigate = useNavigate();
   const { appName } = useAppContext();
+  const { show, ToggleIcon } = usePasswordToggle();
+  const { show: showConfirm, ToggleIcon: ToggleConfirmIcon } = usePasswordToggle();
+  const {
+    error, setError, clearError,
+    validateEmail, validatePassword,
+    validatePasswordMatch, validateRequired,
+  } = useFormValidation();
+
+  const [success, setSuccess] = useState('');
+  const [loading, setLoading] = useState(false);
+  const { activeStep, setActiveStep } = useSteps({ index: 0, count: STEPS.length });
 
   const textColor = useColorModeValue('navy.700', 'white');
-  const textColorSecondary = 'gray.400';
-  const brandColor = useColorModeValue('brand.500', 'white');
-
-  const [show, setShow] = useState(false);
-  const [loading, setLoading] = useState(false);
-  const [errors, setErrors] = useState(false);
-  const [errorMessages, setErrorMessages] = useState('');
-  const [step, setStep] = useState(1); // Multi-step form
+  const textColorSecondary = useColorModeValue('gray.500', 'gray.400');
+  const brandColor = 'brand.500';
+  const inputBg = useColorModeValue('white', 'navy.800');
+  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
+  const stepBg = useColorModeValue('gray.50', 'navy.800');
 
   const [form, setForm] = useState({
     display_name: '',
@@ -43,291 +57,339 @@ function SignUp() {
     user_country: 'Nigeria',
     currency_type: 'NGN',
     acct_type: 'User',
-    share_code: '', // referral tag ID
-    username: '',
+    share_code: '',
   });
 
   const handleChange = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
-    setErrors(false);
+    clearError();
+  };
+
+  const inputProps = {
+    size: 'lg',
+    fontSize: 'sm',
+    borderRadius: '12px',
+    bg: inputBg,
+    borderColor: borderColor,
+    _hover: { borderColor: 'brand.500' },
+    _focus: { borderColor: 'brand.500', boxShadow: '0 0 0 1px #4C5FD5' },
   };
 
   const validateStep1 = () => {
-    if (!form.display_name) { setErrors(true); setErrorMessages('Full name is required'); return false; }
-    if (!form.email) { setErrors(true); setErrorMessages('Email is required'); return false; }
-    if (!IsValidEmail(form.email)) { setErrors(true); setErrorMessages('Invalid email format'); return false; }
-    if (!form.phone) { setErrors(true); setErrorMessages('Phone number is required'); return false; }
-    if (!form.password) { setErrors(true); setErrorMessages('Password is required'); return false; }
-    if (form.password.length < 8) { setErrors(true); setErrorMessages('Password must be at least 8 characters'); return false; }
-    if (form.password !== form.confirmPassword) { setErrors(true); setErrorMessages('Passwords do not match'); return false; }
+    clearError();
+    if (!validateRequired(form.display_name, 'Full name')) return false;
+    if (!validateEmail(form.email)) return false;
+    if (!validateRequired(form.phone, 'Phone number')) return false;
+    if (!validatePassword(form.password)) return false;
+    if (!validatePasswordMatch(form.password, form.confirmPassword)) return false;
     return true;
   };
 
   const validateStep2 = () => {
-    if (!form.gender) { setErrors(true); setErrorMessages('Please select gender'); return false; }
-    if (!form.dob) { setErrors(true); setErrorMessages('Date of birth is required'); return false; }
-    if (!form.state) { setErrors(true); setErrorMessages('State is required'); return false; }
+    clearError();
+    if (!validateRequired(form.gender, 'Gender')) return false;
+    if (!validateRequired(form.dob, 'Date of birth')) return false;
+    if (!validateRequired(form.state, 'State')) return false;
     return true;
   };
 
   const handleNext = () => {
-    if (step === 1 && validateStep1()) setStep(2);
+    if (validateStep1()) setActiveStep(1);
   };
 
   const handleSubmit = async () => {
     if (!validateStep2()) return;
     setLoading(true);
     try {
-      const payload = {
+      const res = await client.post('/api/register', {
         ...form,
         username: form.email,
-      };
-      const res = await client.post('/api/register', payload);
+      });
       if (res.data.msg === '200' || res.data.status === 200) {
-        navigate('/auth/sign-in');
+        setSuccess('Account created successfully! Please sign in.');
+        setTimeout(() => navigate('/auth/sign-in'), 2000);
       } else if (res.data.status === 409) {
-        setErrors(true); setErrorMessages('Email already exists. Please sign in.');
-        setStep(1);
+        setError('This email is already registered. Please sign in.');
+        setActiveStep(0);
       } else if (res.data.status === 403) {
-        setErrors(true); setErrorMessages('Phone number already exists.');
+        setError('This phone number is already registered.');
+        setActiveStep(0);
       } else {
-        setErrors(true); setErrorMessages(res.data.message || 'Registration failed. Try again.');
+        setError(res.data.message || 'Registration failed. Please try again.');
       }
     } catch (e) {
-      setErrors(true); setErrorMessages('Something went wrong. Please try again.');
+      setError('Connection error. Please check your internet and try again.');
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <DefaultAuth illustrationBackground={illustration} image={illustration}>
-      <Flex
-        maxW={{ base: '100%', md: 'max-content' }}
-        w='100%'
-        mx={{ base: 'auto', lg: '0px' }}
-        me='auto'
-        h='100%'
-        alignItems='start'
-        justifyContent='center'
-        mb={{ base: '30px', md: '60px' }}
-        px={{ base: '25px', md: '0px' }}
-        mt={{ base: '40px', md: '8vh' }}
-        flexDirection='column'>
-
-        <Box me='auto' mb='24px'>
-          <Heading color={textColor} fontSize='28px' mb='8px' fontWeight='700'>
+    <DefaultAuth illustrationBackground={illustration}>
+      <Box maxW='440px' w='100%' mx='auto'>
+        {/* Heading */}
+        <Box mb='28px'>
+          <Heading
+            color={textColor}
+            fontSize={{ base: '26px', md: '30px' }}
+            fontWeight='800'
+            mb='8px'
+            lineHeight='1.2'>
             Create your account 🚀
           </Heading>
-          <Text color={textColorSecondary} fontWeight='400' fontSize='md'>
-            Join {appName || ''} today. Step {step} of 2
+          <Text color={textColorSecondary} fontSize='sm' lineHeight='1.6'>
+            Join {appName || 'us'} today and start earning rewards
           </Text>
+        </Box>
+
+        {/* Stepper */}
+        <Box
+          bg={stepBg}
+          borderRadius='12px'
+          p='16px'
+          mb='24px'>
+          <Stepper index={activeStep} colorScheme='brand' size='sm'>
+            {STEPS.map((step, index) => (
+              <Step key={index}>
+                <StepIndicator>
+                  <StepStatus
+                    complete={<StepIcon />}
+                    incomplete={<StepNumber />}
+                    active={<StepNumber />}
+                  />
+                </StepIndicator>
+                <Box flexShrink='0'>
+                  <StepTitle fontSize='xs' fontWeight='600'>
+                    {step.title}
+                  </StepTitle>
+                </Box>
+                <StepSeparator />
+              </Step>
+            ))}
+          </Stepper>
           <Progress
-            value={step === 1 ? 50 : 100}
-            size='sm'
+            value={activeStep === 0 ? 50 : 100}
+            size='xs'
             colorScheme='brand'
             borderRadius='full'
             mt='12px'
-            w={{ base: '100%', md: '420px' }}
+            bg={useColorModeValue('gray.200', 'navy.700')}
           />
         </Box>
 
-        {errors && (
-          <Alert status='error' mb='16px' borderRadius='12px' w={{ base: '100%', md: '420px' }}>
-            <AlertIcon />
-            <AlertDescription>{errorMessages}</AlertDescription>
-            <CloseButton position='absolute' right='8px' top='8px' onClick={() => setErrors(false)} />
-          </Alert>
+        {/* Alerts */}
+        <AuthAlert message={error} onClose={clearError} />
+        <AuthSuccess message={success} />
+
+        {/* Step 1 — Account Info */}
+        {activeStep === 0 && (
+          <FormControl>
+            <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='6px'>
+              Full Name *
+            </FormLabel>
+            <Input
+              {...inputProps}
+              placeholder='John Doe'
+              mb='16px'
+              value={form.display_name}
+              onChange={e => handleChange('display_name', e.target.value)}
+            />
+
+            <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='6px'>
+              Email Address *
+            </FormLabel>
+            <Input
+              {...inputProps}
+              type='email'
+              placeholder='your@email.com'
+              mb='16px'
+              value={form.email}
+              onChange={e => handleChange('email', e.target.value)}
+            />
+
+            <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='6px'>
+              Phone Number *
+            </FormLabel>
+            <Input
+              {...inputProps}
+              placeholder='+2348012345678'
+              mb='16px'
+              value={form.phone}
+              onChange={e => handleChange('phone', e.target.value)}
+            />
+
+            <SimpleGrid columns={2} gap='16px' mb='16px'>
+              <Box>
+                <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='6px'>
+                  Password *
+                </FormLabel>
+                <InputGroup size='lg'>
+                  <Input
+                    {...inputProps}
+                    type={show ? 'text' : 'password'}
+                    placeholder='Min 8 chars'
+                    value={form.password}
+                    onChange={e => handleChange('password', e.target.value)}
+                  />
+                  <InputRightElement display='flex' alignItems='center' mt='4px'>
+                    {ToggleIcon}
+                  </InputRightElement>
+                </InputGroup>
+              </Box>
+              <Box>
+                <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='6px'>
+                  Confirm *
+                </FormLabel>
+                <InputGroup size='lg'>
+                  <Input
+                    {...inputProps}
+                    type={showConfirm ? 'text' : 'password'}
+                    placeholder='Repeat password'
+                    value={form.confirmPassword}
+                    onChange={e => handleChange('confirmPassword', e.target.value)}
+                  />
+                  <InputRightElement display='flex' alignItems='center' mt='4px'>
+                    {ToggleConfirmIcon}
+                  </InputRightElement>
+                </InputGroup>
+              </Box>
+            </SimpleGrid>
+
+            <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='6px'>
+              Referral Tag ID
+              <Text as='span' color='gray.400' fontWeight='400' ms='4px'>(optional)</Text>
+            </FormLabel>
+            <Input
+              {...inputProps}
+              placeholder='Enter referral tag ID if any'
+              mb='28px'
+              value={form.share_code}
+              onChange={e => handleChange('share_code', e.target.value)}
+            />
+
+            <Button
+              bg='brand.500' color='white'
+              fontWeight='700' w='100%' h='52px'
+              borderRadius='12px' fontSize='sm'
+              _hover={{ bg: 'brand.600', transform: 'translateY(-1px)', shadow: 'lg' }}
+              _active={{ bg: 'brand.700', transform: 'translateY(0)' }}
+              transition='all 0.2s ease'
+              onClick={handleNext}>
+              Continue →
+            </Button>
+          </FormControl>
         )}
 
-        <Flex
-          zIndex='2'
-          direction='column'
-          w={{ base: '100%', md: '420px' }}
-          maxW='100%'
-          background='transparent'
-          borderRadius='15px'
-          mx={{ base: 'auto', lg: 'unset' }}
-          me='auto'>
-
-          {step === 1 && (
-            <FormControl>
-              <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='8px'>
-                Full Name *
-              </FormLabel>
-              <Input
-                variant='auth' fontSize='sm' placeholder='John Doe'
-                mb='16px' size='lg' borderRadius='12px'
-                value={form.display_name}
-                onChange={e => handleChange('display_name', e.target.value)}
-              />
-
-              <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='8px'>
-                Email Address *
-              </FormLabel>
-              <Input
-                variant='auth' fontSize='sm' type='email' placeholder='your@email.com'
-                mb='16px' size='lg' borderRadius='12px'
-                value={form.email}
-                onChange={e => handleChange('email', e.target.value)}
-              />
-
-              <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='8px'>
-                Phone Number *
-              </FormLabel>
-              <Input
-                variant='auth' fontSize='sm' placeholder='+234...'
-                mb='16px' size='lg' borderRadius='12px'
-                value={form.phone}
-                onChange={e => handleChange('phone', e.target.value)}
-              />
-
-              <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='8px'>
-                Password *
-              </FormLabel>
-              <InputGroup size='md' mb='16px'>
+        {/* Step 2 — Personal Info */}
+        {activeStep === 1 && (
+          <FormControl>
+            <SimpleGrid columns={2} gap='16px' mb='16px'>
+              <Box>
+                <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='6px'>
+                  Gender *
+                </FormLabel>
+                <Select
+                  {...inputProps}
+                  placeholder='Select'
+                  value={form.gender}
+                  onChange={e => handleChange('gender', e.target.value)}>
+                  <option value='Male'>Male</option>
+                  <option value='Female'>Female</option>
+                </Select>
+              </Box>
+              <Box>
+                <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='6px'>
+                  Date of Birth *
+                </FormLabel>
                 <Input
-                  fontSize='sm' placeholder='Min. 8 characters'
-                  size='lg' type={show ? 'text' : 'password'}
-                  variant='auth' borderRadius='12px'
-                  value={form.password}
-                  onChange={e => handleChange('password', e.target.value)}
+                  {...inputProps}
+                  type='date'
+                  value={form.dob}
+                  onChange={e => handleChange('dob', e.target.value)}
                 />
-                <InputRightElement display='flex' alignItems='center' mt='4px'>
-                  <Icon
-                    color={textColorSecondary}
-                    _hover={{ cursor: 'pointer' }}
-                    as={show ? RiEyeCloseLine : MdOutlineRemoveRedEye}
-                    onClick={() => setShow(!show)}
-                  />
-                </InputRightElement>
-              </InputGroup>
+              </Box>
+            </SimpleGrid>
 
-              <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='8px'>
-                Confirm Password *
-              </FormLabel>
-              <Input
-                variant='auth' fontSize='sm' placeholder='Repeat password'
-                mb='16px' size='lg' type='password' borderRadius='12px'
-                value={form.confirmPassword}
-                onChange={e => handleChange('confirmPassword', e.target.value)}
-              />
+            <SimpleGrid columns={2} gap='16px' mb='16px'>
+              <Box>
+                <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='6px'>
+                  State *
+                </FormLabel>
+                <Input
+                  {...inputProps}
+                  placeholder='Your state'
+                  value={form.state}
+                  onChange={e => handleChange('state', e.target.value)}
+                />
+              </Box>
+              <Box>
+                <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='6px'>
+                  City
+                </FormLabel>
+                <Input
+                  {...inputProps}
+                  placeholder='Your city'
+                  value={form.city}
+                  onChange={e => handleChange('city', e.target.value)}
+                />
+              </Box>
+            </SimpleGrid>
 
-              <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='8px'>
-                Referral Tag ID (optional)
-              </FormLabel>
-              <Input
-                variant='auth' fontSize='sm' placeholder='Enter referral tag ID'
-                mb='24px' size='lg' borderRadius='12px'
-                value={form.share_code}
-                onChange={e => handleChange('share_code', e.target.value)}
-              />
+            <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='6px'>
+              Address
+            </FormLabel>
+            <Input
+              {...inputProps}
+              placeholder='Your full address'
+              mb='28px'
+              value={form.address}
+              onChange={e => handleChange('address', e.target.value)}
+            />
 
+            <Flex gap='12px'>
               <Button
-                fontSize='sm' bg='brand.500' color='white'
-                fontWeight='600' w='100%' h='50px' mb='16px'
+                variant='outline'
+                borderColor='brand.500'
+                color='brand.500'
+                fontWeight='700'
+                w='50%' h='52px'
                 borderRadius='12px'
-                _hover={{ bg: 'brand.600', transform: 'translateY(-1px)', shadow: 'md' }}
-                transition='all 0.2s'
-                onClick={handleNext}>
-                Continue →
+                fontSize='sm'
+                _hover={{ bg: 'brand.50' }}
+                onClick={() => { setActiveStep(0); clearError(); }}>
+                ← Back
               </Button>
-            </FormControl>
-          )}
+              <Button
+                bg='brand.500' color='white'
+                fontWeight='700' w='50%' h='52px'
+                borderRadius='12px' fontSize='sm'
+                _hover={{ bg: 'brand.600', transform: 'translateY(-1px)', shadow: 'lg' }}
+                _active={{ bg: 'brand.700', transform: 'translateY(0)' }}
+                transition='all 0.2s ease'
+                isLoading={loading}
+                loadingText='Creating account...'
+                onClick={handleSubmit}>
+                Create Account
+              </Button>
+            </Flex>
+          </FormControl>
+        )}
 
-          {step === 2 && (
-            <FormControl>
-              <SimpleGrid columns={2} gap='16px' mb='16px'>
-                <Box>
-                  <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='8px'>
-                    Gender *
-                  </FormLabel>
-                  <Select
-                    placeholder='Select gender'
-                    size='lg' borderRadius='12px' fontSize='sm'
-                    value={form.gender}
-                    onChange={e => handleChange('gender', e.target.value)}>
-                    <option value='Male'>Male</option>
-                    <option value='Female'>Female</option>
-                  </Select>
-                </Box>
-                <Box>
-                  <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='8px'>
-                    Date of Birth *
-                  </FormLabel>
-                  <Input
-                    type='date' size='lg' borderRadius='12px' fontSize='sm'
-                    value={form.dob}
-                    onChange={e => handleChange('dob', e.target.value)}
-                  />
-                </Box>
-              </SimpleGrid>
-
-              <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='8px'>
-                State *
-              </FormLabel>
-              <Input
-                variant='auth' fontSize='sm' placeholder='Your state'
-                mb='16px' size='lg' borderRadius='12px'
-                value={form.state}
-                onChange={e => handleChange('state', e.target.value)}
-              />
-
-              <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='8px'>
-                City
-              </FormLabel>
-              <Input
-                variant='auth' fontSize='sm' placeholder='Your city'
-                mb='16px' size='lg' borderRadius='12px'
-                value={form.city}
-                onChange={e => handleChange('city', e.target.value)}
-              />
-
-              <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='8px'>
-                Address
-              </FormLabel>
-              <Input
-                variant='auth' fontSize='sm' placeholder='Your address'
-                mb='24px' size='lg' borderRadius='12px'
-                value={form.address}
-                onChange={e => handleChange('address', e.target.value)}
-              />
-
-              <Flex gap='12px' mb='16px'>
-                <Button
-                  fontSize='sm' variant='outline' color='brand.500'
-                  fontWeight='600' w='50%' h='50px'
-                  borderRadius='12px'
-                  onClick={() => setStep(1)}>
-                  ← Back
-                </Button>
-                <Button
-                  fontSize='sm' bg='brand.500' color='white'
-                  fontWeight='600' w='50%' h='50px'
-                  borderRadius='12px'
-                  _hover={{ bg: 'brand.600', transform: 'translateY(-1px)', shadow: 'md' }}
-                  transition='all 0.2s'
-                  isLoading={loading}
-                  loadingText='Creating account...'
-                  onClick={handleSubmit}>
-                  Create Account
-                </Button>
-              </Flex>
-            </FormControl>
-          )}
-
-          <Flex justifyContent='center' alignItems='center' mt='8px'>
-            <Text color={textColorSecondary} fontWeight='400' fontSize='sm'>
-              Already have an account?{' '}
-              <NavLink to='/auth/sign-in'>
-                <Text color={brandColor} as='span' ms='5px' fontWeight='600'>
-                  Sign In
-                </Text>
-              </NavLink>
-            </Text>
-          </Flex>
+        {/* Sign in link */}
+        <Flex justify='center' align='center' mt='24px'>
+          <Text color={textColorSecondary} fontSize='sm'>
+            Already have an account?{' '}
+            <NavLink to='/auth/sign-in'>
+              <Text
+                as='span' color={brandColor}
+                fontWeight='700'
+                _hover={{ textDecoration: 'underline' }}>
+                Sign In
+              </Text>
+            </NavLink>
+          </Text>
         </Flex>
-      </Flex>
+      </Box>
     </DefaultAuth>
   );
 }

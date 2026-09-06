@@ -1,50 +1,36 @@
-/*eslint-disable*/
-import React from "react";
-import {
-  Flex,
-  Link,
-  Text,
-  useColorModeValue,
-} from "@chakra-ui/react";
+import React from 'react';
+import { Flex, Text, Link, useColorModeValue } from '@chakra-ui/react';
+import { useAppContext } from 'contexts/AppContext';
 
-export default function Footer() {
-  let textColor = useColorModeValue("gray.400", "white");
-  let linkColor = useColorModeValue({ base: "gray.400", lg: "white" }, "white");
+export default function FooterAuth() {
+  const textColor = useColorModeValue('gray.400', 'whiteAlpha.600');
+  const { appName } = useAppContext();
+  const year = new Date().getFullYear();
+
   return (
     <Flex
-      zIndex='3'
-      flexDirection={{
-        base: "column",
-        lg: "row",
-      }}
-      alignItems={{
-        base: "center",
-        xl: "start",
-      }}
-      justifyContent='space-between'
-      px={{ base: "30px", md: "0px" }}
-      pb='30px'>
-      <Text
-        color={textColor}
-        textAlign={{
-          base: "center",
-          xl: "start",
-        }}
-        mb={{ base: "20px", lg: "0px" }}>
-        {" "}
-        &copy; {1900 + new Date().getYear()}
-        <Text as='span' fontWeight='500' ms='4px'>
-          Oza. All Rights Reserved. Product of
-          <Link
-            mx='3px'
-            color={textColor}
-            href='https://www.zictech-ng.com'
-            target='_blank'
-            fontWeight='700'>
-            Zictech Technologies
-          </Link>
-        </Text>
+      justify='space-between'
+      align='center'
+      pt='24px'
+      mt='24px'
+      borderTop='1px solid'
+      borderColor={useColorModeValue('gray.100', 'whiteAlpha.200')}
+      flexWrap='wrap'
+      gap='8px'>
+      <Text color={textColor} fontSize='xs'>
+        &copy; {year} {appName || ''}. All rights reserved.
       </Text>
+      <Flex gap='16px'>
+        <Link href='/terms' color={textColor} fontSize='xs' _hover={{ color: 'brand.500' }}>
+          Terms
+        </Link>
+        <Link href='/privacy' color={textColor} fontSize='xs' _hover={{ color: 'brand.500' }}>
+          Privacy
+        </Link>
+        <Link href='/user/support' color={textColor} fontSize='xs' _hover={{ color: 'brand.500' }}>
+          Support
+        </Link>
+      </Flex>
     </Flex>
   );
 }
