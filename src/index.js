@@ -7,6 +7,7 @@ import store from 'storeMtg/store';
 import { PersistGate } from 'redux-persist/integration/react';
 import { persistStore } from 'redux-persist';
 import App from './App';
+import { AppProvider } from 'contexts/AppContext';
 
 let persister = persistStore(store);
 
@@ -14,10 +15,12 @@ const root = ReactDOM.createRoot(document.getElementById('root'));
 
 root.render(
   <Provider store={store}>
-    <PersistGate loading={null} persistor={persister}>  {/* this line is added because of persist value */}
+    <PersistGate loading={null} persistor={persister}>
       <BrowserRouter>
-        <App />
+        <AppProvider>
+          <App />
+        </AppProvider>
       </BrowserRouter>
-      </PersistGate>
+    </PersistGate>
   </Provider>,
 );
