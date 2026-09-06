@@ -19,7 +19,12 @@ export function SidebarLinks(props) {
   const { routes } = props;
 
   // verifies if routeName is the one active (in browser input)
+    // verifies if routeName is the one active (in browser input)
   const activeRoute = (routeName) => {
+    if (routeName === '/') {
+      // Dashboard — only active on exact /user or /user/
+      return location.pathname === '/user' || location.pathname === '/user/';
+    }
     return location.pathname.includes(routeName);
   };
   const [items, setItems] = React.useState(routes);

@@ -1,11 +1,11 @@
 // Chakra Imports
+// Chakra Imports
 import { Box, Flex, Link, Text, useColorModeValue } from '@chakra-ui/react';
 import PropTypes from 'prop-types';
 import React, { useState, useEffect } from 'react';
 import AdminNavbarLinks from 'components/navbar/NavbarLinksAdmin';
-
 import { BrowserRouter as Router, Route, Routes, useLocation } from "react-router-dom";
-
+import { useAppContext } from 'contexts/AppContext';
 
 export default function AdminNavbar(props) {
 	const [ scrolled, setScrolled ] = useState(false);
@@ -102,9 +102,46 @@ export default function AdminNavbar(props) {
 		{
 			pageName='Notifications'
 		}
-		else{
-			pageName='Oza App'
+				else if(routeName === '/user/wallet') {
+			pageName='Wallet'
 		}
+		else if(routeName === '/user/data-tables') {
+			pageName='Transactions'
+		}
+		else if(routeName === '/user/exchange-rate') {
+			pageName='Exchange Rates'
+		}
+		else if(routeName === '/user/fund-account') {
+			pageName='Fund Account'
+		}
+		else if(routeName === '/user/withdraw') {
+			pageName='Withdraw Funds'
+		}
+		else if(routeName === '/user/send-fund') {
+			pageName='Send Funds'
+		}
+		else if(routeName === '/user/manual-payment') {
+			pageName='Manual Payment'
+		}
+		else if(routeName === '/user/bills/airtime') {
+			pageName='Buy Airtime'
+		}
+		else if(routeName === '/user/bills/data') {
+			pageName='Buy Data'
+		}
+		else if(routeName === '/user/bills/electricity') {
+			pageName='Electricity'
+		}
+		else if(routeName === '/user/bills/tv') {
+			pageName='TV Subscription'
+		}
+		else{
+			pageName=''
+		}
+
+		// eslint-disable-next-line react-hooks/rules-of-hooks
+		const { appName } = useAppContext();
+		if (!pageName) pageName = appName || '';
 
 	const { secondary, message, brandText } = props;
 
