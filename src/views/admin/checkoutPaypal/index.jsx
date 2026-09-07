@@ -1,167 +1,187 @@
-import React, {useState, useEffect} from "react";
-
-// Chakra imports
+import React, { useState } from 'react';
 import {
-  Box,
-  Flex,
-  Grid,
-  Heading, 
-  Text,
-  useToast,
-} from "@chakra-ui/react";
+  Box, Flex, Text, Icon, Button,
+  useColorModeValue, Spinner, SimpleGrid,
+} from '@chakra-ui/react';
+import { MdPayment, MdLock, MdCheckCircle } from 'react-icons/md';
+import { useNavigate, useLocation } from 'react-router-dom';
+import { useSelector, useDispatch } from 'react-redux';
+import { capturePaypalPayment } from 'storeMtg/paypalCheckoutSlice';
+import { useToast } from '@chakra-ui/react';
+import { PageLayout, PageCard } from 'layouts/PageLayout';
+import { PayPalButton } from 'react-paypal-button-v2';
 
-// Custom components
-import Card from "components/card/Card.js";
-import { PayPalButton } from "react-paypal-button-v2";
-import { useNavigate, useLocation } from "react-router-dom";
-import { capturePaypalPayment } from "storeMtg/paypalCheckoutSlice";
-import { useSelector, useDispatch } from "react-redux";
-import { DollarValueFormat } from "components/DollarFormat";
-import { NairaValueFormat } from "components/NairaFormat";
-
-// Assets
 export default function CheckoutPaypal() {
   const location = useLocation();
   const toast = useToast();
-  // Chakra Color Mode
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const [paymentCompleted, setPaymentCompleted] = useState(false);
+  const [loading, setLoading] = useState(false);
   const PaypalDemoKey = process.env.REACT_APP_PAYPAL_DEMO_KEY;
   const dataInfo = location.state || {};
-  const { paymentData = {}, approvalUrl, success, error } = useSelector((state) => state.paypalPayment);
-  const {user} = useSelector((state) => state.authUser)
+  const { paymentData = {} } = useSelector(state => state.paypalPayment);
+  const { user } = useSelector(state => state.authUser);
 
-      useEffect(() => {
-      
-      }, [approvalUrl]);
+  const textColor = useColorModeValue('navy.700', 'white');
+  const subColor = useColorModeValue('gray.500', 'gray.400');
+  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
+  const bannerGrad = useColorModeValue(
+    'linear-gradient(135deg, #003087 0%, #009cde 100%)',
+    'linear-gradient(135deg, #001A4D 0%, #003D6B 100%)'
+  );
 
-    // Handle success response
-    const handlePaymentSuccess = (details, data) => {
-      console.log("Payment details ", details, data);
-      setPaymentCompleted(true);
-      
-      const captureData = {
-        payerId: data.payerID, 
-        orderID: data.orderID,  // ✅ Use orderID instead of paymentID
-        amount: paymentData.amount || details.purchase_units?.[0]?.amount?.value,
-        'serviceName':dataInfo.serviceName,
-        'serviceCategory':'Exchange',
-        'sell_note':dataInfo.sell_note,
-        'method': dataInfo.method,
-        'myId': user.userData._id,
-        'total_money': dataInfo.total_money,
-        'serviceType':dataInfo.serviceType,
-      };
-        dispatch(capturePaypalPayment(captureData)).then((res) => {
-          if (res.payload.msg ==='201') {
-            setPaymentCompleted(true);
-            console.log("Payment Captured Successfully", res.payload);
-            toast({
-              title: "Congratulations",
-              description: 'Your transaction was successfully done! ',
-              status: "success",
-              duration: 5000,
-              isClosable: true,
-              position: "top",
-              });
-          navigate('/user/success')
-          }
-        })
-        .catch((error) => {
-          console.error("Error capturing payment:", error);
+  const handlePaymentSuccess = (details, data) => {
+    setLoading(true);
+    const captureData = {
+      payerId: data.payerID,
+      orderID: data.orderID,
+      amount: paymentData.amount || details.purchase_units?.[0]?.amount?.value,
+      serviceName: dataInfo.serviceName,
+      serviceCategory: 'Exchange',
+      sell_note: dataInfo.sell_note,
+      method: dataInfo.method,
+      myId: user?.userData?._id,
+      total_money: dataInfo.total_money,
+      serviceType: dataInfo.serviceType,
+    };
+    dispatch(capturePaypalPayment(captureData)).then(res => {
+      setLoading(false);
+      if (res.payload?.msg === '201') {
+        setPaymentCompleted(true);
+        toast({
+          title: 'Payment Successful!',
+          description: 'Your transaction has been processed.',
+          status: 'success',
+          duration: 5000,
+          position: 'top',
         });
-    };
-  
-    // Handle error response
-    const handlePaymentError = (error) => {
-      console.error("Payment error", error);
-    };
-  return (
-    <Box pt={{ base: "80px", md: "80px", xl: "80px" }}>
-      {/* Main Fields */}
-      <Grid
-        mb='20px'
-        gridTemplateColumns={{ xl: "repeat(3, 1fr)", "2xl": "1fr 0.46fr" }}
-        gap={{ base: "20px", xl: "20px" }}
-        display={{ base: "block", xl: "grid" }}>
-        <Flex
-          flexDirection='column'>
-          
-          <Flex direction='column'>
-          <Box p={5} shadow='md' borderWidth='1px' mb={10} ml={2} mr={2} bg='white' borderRadius='15'>
-            <Heading fontSize='xl' color={'#aaa'}>{'Paypal Checkout'}</Heading>
-              <Text mt={4} fontSize="18px" fontWeight={900}>
-                {`Processing payment for ${dataInfo.email || "user"}`}
-              </Text>
-            <Text mt={4} fontSize='18px'>Please continue with Paypal to authorized your transaction and do not close the window while processing your transaction. </Text>
+        setTimeout(() => navigate('/user/success'), 2000);
+      } else {
+        toast({
+          title: 'Payment Failed',
+          description: res.payload?.message || 'Please try again.',
+          status: 'error',
+          duration: 5000,
+        });
+      }
+    });
+  };
+
+  const handlePaymentError = () => {
+    toast({
+      title: 'Payment Error',
+      description: 'PayPal payment failed. Please try again.',
+      status: 'error',
+      duration: 5000,
+    });
+  };
+
+  if (paymentCompleted) {
+    return (
+      <PageLayout>
+        <Flex justify='center' align='center' minH='60vh'>
+          <PageCard p='40px' maxW='440px' w='100%' textAlign='center'>
+            <Box w='80px' h='80px' borderRadius='full' bg='green.50'
+              display='flex' alignItems='center' justifyContent='center'
+              mx='auto' mb='24px'>
+              <Icon as={MdCheckCircle} color='green.500' w='48px' h='48px' />
             </Box>
-          </Flex>
-
-          <Flex
-            direction="column"
-            align="center"
-            justify="center"
-            minHeight="20vh" // Make sure the content is centered vertically
-            padding="20px" >
-      <Card p="20px" shadow="md" borderWidth="1px" width="100%" maxWidth={{base: '100%', lg:"700px"}} borderRadius="15" bg="white">
-          
-          <Flex
-            fontSize={{ base: "20px", md: "18px" }} // Adjusts font size for responsiveness
-            color="#aaa"
-            direction="row"
-            alignItems="center"
-            flexWrap="wrap"
-          >
-            <Heading color="inherit" fontSize='xl'>
-              Send Amount{' '}
-            </Heading>
-            <Text fontSize='30px' ml='10px' fontWeight={700}>
-            {dataInfo.serviceType === 'Funding' ? (
-              <NairaValueFormat value={dataInfo.amt} />
-            ) : (
-              <DollarValueFormat value={dataInfo.amt} />
-            )}
+            <Text color={textColor} fontSize='xl' fontWeight='800' mb='8px'>
+              Payment Successful!
             </Text>
-            
+            <Text color={subColor} fontSize='sm' mb='24px'>
+              Redirecting to success page...
+            </Text>
+            <Spinner color='brand.500' />
+          </PageCard>
         </Flex>
-        <Text textAlign="center" mb={4}>
-          Paying with Paypal is safe, fast and secure! <br/>Please click on the PayPal button below, enter your login detail and complete the transaction. 
-        </Text>
-        
-        {/* Flex container to center the PayPal button */}
-        <Flex justify="center" align="center">
-          <Box px={5} width="100%">
-            {!paymentCompleted ? (
-              <PayPalButton
-                amount={dataInfo.amount} // Amount you want to charge
-                currency="USD"
-                onSuccess={handlePaymentSuccess} // Success handler
-                onError={handlePaymentError} // Error handler
-                options={{
-                  clientId: PaypalDemoKey, // Replace with your actual PayPal client ID
-                }}
-              />
-              
-            ) : (
-              <Text fontSize="18px" color="red.500" textAlign="center">
-                Something went wrong processing your payment or payment already processed! If your account was debited, please contact support.
-              </Text>
-            )}
-           
-          </Box>
-        </Flex>
-      </Card>
-    </Flex>
-        </Flex>
+      </PageLayout>
+    );
+  }
 
-        <Flex
-          flexDirection='column'
-          gridArea={{ xl: "1 / 3 / 2 / 4", "2xl": "1 / 2 / 2 / 3" }}>
-        </Flex>
-      </Grid>
-      {/* Delete Product */}
-      
-    </Box>
+  return (
+    <PageLayout>
+      <Flex justify='center'>
+        <Box maxW='480px' w='100%'>
+          {/* Banner */}
+          <Box bg={bannerGrad} borderRadius='20px' p='24px' mb='24px'
+            position='relative' overflow='hidden'>
+            <Box position='absolute' top='-30px' right='-30px'
+              w='100px' h='100px' borderRadius='full' bg='whiteAlpha.100' />
+            <Flex align='center' gap='12px' position='relative' zIndex='1'>
+              <Box w='44px' h='44px' borderRadius='12px' bg='whiteAlpha.200'
+                display='flex' alignItems='center' justifyContent='center'>
+                <Icon as={MdPayment} color='white' w='22px' h='22px' />
+              </Box>
+              <Box>
+                <Text color='white' fontSize='lg' fontWeight='800'>
+                  Complete PayPal Payment
+                </Text>
+                <Text color='whiteAlpha.700' fontSize='sm'>Secured by PayPal</Text>
+              </Box>
+            </Flex>
+          </Box>
+
+          <PageCard p='28px'>
+            {/* Order Summary */}
+            <Text color={textColor} fontWeight='700' fontSize='md' mb='16px'>
+              Order Summary
+            </Text>
+            {[
+              { label: 'Service', value: dataInfo.serviceName || '—' },
+              { label: 'Amount', value: dataInfo.total_money ? `$${Number(dataInfo.total_money).toLocaleString()}` : '—' },
+              { label: 'Method', value: 'PayPal' },
+            ].map((item, i) => (
+              <Flex key={i} justify='space-between' py='12px'
+                borderBottom='1px solid' borderColor={borderColor}>
+                <Text color={subColor} fontSize='sm'>{item.label}</Text>
+                <Text color={textColor} fontSize='sm' fontWeight='600'>{item.value}</Text>
+              </Flex>
+            ))}
+
+            <Flex justify='space-between' align='center' py='16px' mb='24px'>
+              <Text color={textColor} fontSize='sm' fontWeight='700'>Total Amount</Text>
+              <Text color='brand.500' fontSize='xl' fontWeight='800'>
+                ${Number(dataInfo.total_money || 0).toLocaleString()}
+              </Text>
+            </Flex>
+
+            {/* PayPal Button */}
+            {loading ? (
+              <Flex justify='center' py='20px'><Spinner color='brand.500' /></Flex>
+            ) : PaypalDemoKey ? (
+              <Box borderRadius='12px' overflow='hidden'>
+                <PayPalButton
+                  amount={dataInfo.total_money}
+                  currency='USD'
+                  onSuccess={handlePaymentSuccess}
+                  onError={handlePaymentError}
+                  options={{ clientId: PaypalDemoKey }}
+                />
+              </Box>
+            ) : (
+              <Box p='16px' bg='orange.50' borderRadius='12px' textAlign='center'>
+                <Text color='orange.700' fontSize='sm'>
+                  PayPal is not configured. Please use manual payment.
+                </Text>
+                <Button mt='12px' size='sm' colorScheme='orange'
+                  onClick={() => navigate(-1)}>
+                  Go Back
+                </Button>
+              </Box>
+            )}
+
+            {/* Security note */}
+            <Flex align='center' justify='center' gap='8px' mt='16px'>
+              <Icon as={MdLock} color={subColor} w='14px' h='14px' />
+              <Text color={subColor} fontSize='xs'>
+                Your payment is secured by PayPal
+              </Text>
+            </Flex>
+          </PageCard>
+        </Box>
+      </Flex>
+    </PageLayout>
   );
 }

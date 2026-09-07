@@ -40,7 +40,7 @@ const RateRow = ({ label, buyRate, sellRate, icon, color, borderColor, textColor
 
 export default function ExchangeRate() {
   const dispatch = useDispatch();
-  const { currentRate, dataLoading } = useSelector(state => state.exchangeRate);
+  const { data: currentRate, dataLoading } = useSelector(state => state.exchangeRate);
 
   const textColor = useColorModeValue('navy.700', 'white');
   const subColor = useColorModeValue('gray.500', 'gray.400');

@@ -6,6 +6,7 @@ import {
   Input, Select, FormControl, FormLabel,
   Divider, Spinner,
 } from '@chakra-ui/react';
+
 import {
   MdPerson, MdEdit, MdVerified, MdStar,
   MdOutlineAccountBalanceWallet,
@@ -17,6 +18,64 @@ import { AuthAlert } from 'components/auth/AuthCard';
 import { AuthSuccess } from 'components/auth/AuthCard';
 import { useFormValidation } from 'hooks/useFormValidation';
 import { updateUserDetails } from 'storeMtg/authSlice';
+import { fetchDocument, clearDocument, setDocPage } from 'storeMtg/getDocumentUploadSlice';
+import { PageLayout, PageCard } from 'layouts/PageLayout';
+
+
+const KycDocuments = ({ userId, userToken }) => {
+  const dispatch = useDispatch();
+  const {
+    documentData, docInitialLoading, totalPages, currentPage: docPage,
+  } = useSelector(state => state.uploadedDocuments);
+
+  const textColor = useColorModeValue('navy.700', 'white');
+  const subColor = useColorModeValue('gray.500', 'gray.400');
+  const borderColor = useColorModeValue('gray.100', 'whiteAlpha.100');
+
+  useEffect(() => {
+    if (!userId) return;
+    dispatch(fetchDocument({ userID: userId, user_token: userToken, page: 1, pageSize: 10 }));
+    return () => dispatch(clearDocument());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId]);
+
+  const docs = Array.isArray(documentData) ? documentData : [];
+
+  if (docInitialLoading) return <Flex justify='center' py='32px'><Spinner color='brand.500' /></Flex>;
+
+  if (docs.length === 0) return (
+    <Flex direction='column' align='center' py='32px' color={subColor}>
+      <Text fontSize='sm' fontWeight='500'>No documents uploaded yet</Text>
+      <Text fontSize='xs' mt='4px'>Complete your profile to upload KYC documents</Text>
+    </Flex>
+  );
+
+  return (
+    <Box>
+      {docs.map((doc, i) => (
+        <Box key={doc._id || i}>
+          <Flex justify='space-between' align='center' py='14px'>
+            <Box>
+              <Text color={textColor} fontSize='sm' fontWeight='600'>
+                {doc.document_category || 'Document'}
+              </Text>
+              <Text color={subColor} fontSize='xs'>
+                {doc.createdOn ? moment(doc.createdOn).format('DD MMM YYYY') : '—'}
+              </Text>
+            </Box>
+            <Badge
+              colorScheme={doc.doc_status === 'Approved' ? 'green' : doc.doc_status === 'Rejected' ? 'red' : 'orange'}
+              borderRadius='full' px='10px'>
+              {doc.doc_status || 'Pending'}
+            </Badge>
+          </Flex>
+          <Divider borderColor={borderColor} />
+        </Box>
+      ))}
+    </Box>
+  );
+};
+
 
 export default function Profile() {
   const dispatch = useDispatch();
@@ -188,6 +247,7 @@ export default function Profile() {
           <TabList px='20px' borderColor={borderColor}>
             <Tab fontSize='sm' fontWeight='600' py='16px'>Personal Info</Tab>
             <Tab fontSize='sm' fontWeight='600' py='16px'>Account Info</Tab>
+            <Tab fontSize='sm' fontWeight='600' py='16px'>KYC Documents</Tab>
           </TabList>
 
           <TabPanels>
@@ -258,6 +318,8 @@ export default function Profile() {
               </Button>
             </TabPanel>
 
+            
+
             {/* Account Info */}
             <TabPanel p='24px'>
               {[
@@ -281,6 +343,12 @@ export default function Profile() {
                 </Box>
               ))}
             </TabPanel>
+
+            {/* KYC Documents */}
+            <TabPanel p='24px'>
+              <KycDocuments userId={userData?._id} userToken={userToken} />
+            </TabPanel>
+
           </TabPanels>
         </Tabs>
       </Box>

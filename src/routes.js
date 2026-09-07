@@ -4,12 +4,14 @@ import {
   MdHome, MdPerson, MdHistory, MdHelpOutline,
   MdSettings, MdNotifications, MdLock,
   MdCurrencyExchange, MdOutlineAccountBalanceWallet,
-  MdPayment,
+  MdPayment, MdPeople, MdStars,
 } from 'react-icons/md';
 import {
   FiPhone, FiZap, FiTv, FiWifi, FiFileText,
-  FiGift, FiStar, FiSend
+  FiGift, FiStar, FiSend,
 } from 'react-icons/fi';
+import ReferralPage from 'views/admin/referral';
+import RewardsPage from 'views/admin/rewards';
 
 // Page imports
 import MainDashboard from 'views/admin/default';
@@ -100,6 +102,30 @@ const routes = [
     path: '/notifications',
     icon: <Icon as={MdNotifications} width='20px' height='20px' color='inherit' />,
     component: <NotificationComponent />,
+    visible: true,
+  },
+    {
+    name: 'Exchange Rate',
+    layout: '/user',
+    path: '/exchange-rate',
+    icon: <Icon as={MdCurrencyExchange} width='20px' height='20px' color='inherit' />,
+    component: <ExchangeRate />,
+    visible: true,
+  },
+  {
+    name: 'Referrals',
+    layout: '/user',
+    path: '/referral',
+    icon: <Icon as={MdPeople} width='20px' height='20px' color='inherit' />,
+    component: <ReferralPage />,
+    visible: true,
+  },
+  {
+    name: 'Rewards',
+    layout: '/user',
+    path: '/rewards',
+    icon: <Icon as={MdStars} width='20px' height='20px' color='inherit' />,
+    component: <RewardsPage />,
     visible: true,
   },
   {
