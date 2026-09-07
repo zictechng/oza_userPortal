@@ -16,6 +16,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
 import { getPendingBonus, resetState } from 'storeMtg/pendingBonusSlice';
 import { fetchProducts, clearProducts } from 'storeMtg/dashRecentRecordSlice';
+import { PageLayout, PageCard } from 'layouts/PageLayout';
 
 // ── Wallet balance card ───────────────────────────
 const BalanceCard = ({ label, value, subValue, subLabel, icon, color, iconBg, actions }) => {
@@ -28,8 +29,8 @@ const BalanceCard = ({ label, value, subValue, subLabel, icon, color, iconBg, ac
     <Box
       bg={bg} borderRadius='20px' p='24px'
       border='1px solid' borderColor={borderColor}
-      shadow='sm'
-      _hover={{ shadow: 'md' }}
+      boxShadow='0 2px 8px rgba(0,0,0,0.08)'
+      _hover={{ boxShadow: '0 4px 16px rgba(0,0,0,0.12)', transform: 'translateY(-2px)' }}
       transition='all 0.2s'>
       <Flex justify='space-between' align='flex-start' mb='16px'>
         <Box
@@ -106,22 +107,7 @@ export default function Wallet() {
   const totalDebit = txList.filter(t => t.tran_type === 'Debit').reduce((s, t) => s + Number(t.amount || 0), 0);
 
   return (
-    <Box
-      pt={{ base: '100px', md: '80px' }}
-      px={{ base: '16px', md: '24px' }}
-      pb='40px'
-      bg={bg}
-      minH='100vh'>
-
-      {/* Header */}
-      <Flex justify='space-between' align='center' mb='24px'>
-        <Box>
-          <Text color={subColor} fontSize='sm'>My Wallet</Text>
-          <Text color={textColor} fontSize='xl' fontWeight='800'>
-            Account Overview
-          </Text>
-        </Box>
-      </Flex>
+    <PageLayout>
 
       {/* Total Balance Banner */}
       <Box
@@ -228,31 +214,39 @@ export default function Wallet() {
 
       {/* Stats Row */}
       <SimpleGrid columns={{ base: 1, md: 3 }} gap='16px' mb='24px'>
-        <Box bg={cardBg} borderRadius='16px' p='20px' border='1px solid' borderColor={borderColor}>
+        <Box bg={cardBg} borderRadius='16px' p='20px'
+          border='1px solid' borderColor={borderColor}
+          boxShadow='0 2px 8px rgba(0,0,0,0.08)'>
           <Stat>
-            <StatLabel color={subColor} fontSize='xs'>Recent Credits</StatLabel>
-            <StatNumber color='green.500' fontSize='xl'>{formatNaira(totalCredit)}</StatNumber>
-            <StatHelpText color={subColor}>From recent transactions</StatHelpText>
+            <StatLabel color={subColor} fontSize='xs' textTransform='uppercase' letterSpacing='0.5px'>Recent Credits</StatLabel>
+            <StatNumber color='green.500' fontSize='xl' mt='4px'>{formatNaira(totalCredit)}</StatNumber>
+            <StatHelpText color={subColor} fontSize='xs'>From recent transactions</StatHelpText>
           </Stat>
         </Box>
-        <Box bg={cardBg} borderRadius='16px' p='20px' border='1px solid' borderColor={borderColor}>
+        <Box bg={cardBg} borderRadius='16px' p='20px'
+          border='1px solid' borderColor={borderColor}
+          boxShadow='0 2px 8px rgba(0,0,0,0.08)'>
           <Stat>
-            <StatLabel color={subColor} fontSize='xs'>Recent Debits</StatLabel>
-            <StatNumber color='red.500' fontSize='xl'>{formatNaira(totalDebit)}</StatNumber>
-            <StatHelpText color={subColor}>From recent transactions</StatHelpText>
+            <StatLabel color={subColor} fontSize='xs' textTransform='uppercase' letterSpacing='0.5px'>Recent Debits</StatLabel>
+            <StatNumber color='red.500' fontSize='xl' mt='4px'>{formatNaira(totalDebit)}</StatNumber>
+            <StatHelpText color={subColor} fontSize='xs'>From recent transactions</StatHelpText>
           </Stat>
         </Box>
-        <Box bg={cardBg} borderRadius='16px' p='20px' border='1px solid' borderColor={borderColor}>
+        <Box bg={cardBg} borderRadius='16px' p='20px'
+          border='1px solid' borderColor={borderColor}
+          boxShadow='0 2px 8px rgba(0,0,0,0.08)'>
           <Stat>
-            <StatLabel color={subColor} fontSize='xs'>Tag ID</StatLabel>
-            <StatNumber color={textColor} fontSize='xl'>{userData?.tag_id || '—'}</StatNumber>
-            <StatHelpText color={subColor}>Your referral ID</StatHelpText>
+            <StatLabel color={subColor} fontSize='xs' textTransform='uppercase' letterSpacing='0.5px'>Your Tag ID</StatLabel>
+            <StatNumber color={textColor} fontSize='xl' mt='4px' fontFamily='monospace'>{userData?.tag_id || '—'}</StatNumber>
+            <StatHelpText color={subColor} fontSize='xs'>Share to earn referral bonus</StatHelpText>
           </Stat>
         </Box>
       </SimpleGrid>
 
       {/* Recent Transactions */}
-      <Box bg={cardBg} borderRadius='20px' p='20px' border='1px solid' borderColor={borderColor}>
+      <Box bg={cardBg} borderRadius='20px' p='20px'
+        border='1px solid' borderColor={borderColor}
+        boxShadow='0 2px 8px rgba(0,0,0,0.08)'>
         <Flex justify='space-between' align='center' mb='16px'>
           <Text color={textColor} fontWeight='700' fontSize='md'>Recent Transactions</Text>
           <Button size='sm' variant='ghost' color='brand.500' fontWeight='600'
@@ -301,6 +295,6 @@ export default function Wallet() {
           ))
         )}
       </Box>
-    </Box>
+    </PageLayout>
   );
 }

@@ -21,8 +21,9 @@ import moment from 'moment';
 import { useAppContext } from 'contexts/AppContext';
 import { fetchProducts, clearProducts } from 'storeMtg/dashRecentRecordSlice';
 import { getPendingBonus, resetState } from 'storeMtg/pendingBonusSlice';
+import { PageLayout, PageCard } from 'layouts/PageLayout';
 
-// ── Reusable wallet card ──────────────────────────
+// ── Reusable wallet card
 const WalletCard = ({ label, value, icon, color, iconBg, action, actionLabel, onAction }) => {
   const bg = useColorModeValue('white', 'navy.800');
   const textColor = useColorModeValue('navy.700', 'white');
@@ -33,10 +34,8 @@ const WalletCard = ({ label, value, icon, color, iconBg, action, actionLabel, on
       bg={bg}
       borderRadius='20px'
       p='20px'
-      shadow='sm'
-      border='1px solid'
-      borderColor={useColorModeValue('gray.100', 'whiteAlpha.100')}
-      _hover={{ shadow: 'md', transform: 'translateY(-2px)' }}
+      boxShadow='0 2px 8px rgba(0,0,0,0.08)'
+      _hover={{ boxShadow: '0 4px 16px rgba(0,0,0,0.12)', transform: 'translateY(-2px)' }}
       transition='all 0.2s'>
       <Flex justify='space-between' align='flex-start' mb='12px'>
         <Box
@@ -69,7 +68,7 @@ const WalletCard = ({ label, value, icon, color, iconBg, action, actionLabel, on
   );
 };
 
-// ── Quick action button ───────────────────────────
+// ── Quick action button
 const QuickAction = ({ icon, label, color, iconBg, onClick }) => {
   const textColor = useColorModeValue('gray.600', 'gray.300');
   return (
@@ -92,7 +91,7 @@ const QuickAction = ({ icon, label, color, iconBg, onClick }) => {
   );
 };
 
-// ── Transaction status color ──────────────────────
+// ── Transaction status color
 const txStatusColor = (status) => {
   const s = status?.toLowerCase();
   if (s === 'completed' || s === 'successful') return 'green';
@@ -171,12 +170,7 @@ export default function Dashboard() {
   ];
 
   return (
-    <Box
-      pt={{ base: '100px', md: '80px' }}
-      px={{ base: '16px', md: '24px' }}
-      pb='40px'
-      bg={bg}
-      minH='100vh'>
+      <PageLayout>
 
       {/* Header */}
       <Flex justify='space-between' align='center' mb='24px'>
@@ -231,6 +225,7 @@ export default function Dashboard() {
       {/* Hero Banner */}
       <Box
         bg={bannerGrad}
+        shadow='lg'
         borderRadius='24px'
         p={{ base: '24px', md: '32px' }}
         mb='24px'
@@ -320,13 +315,7 @@ export default function Dashboard() {
       </SimpleGrid>
 
       {/* Quick Actions */}
-      <Box
-        bg={cardBg}
-        borderRadius='20px'
-        p='20px'
-        mb='24px'
-        border='1px solid'
-        borderColor={borderColor}>
+      <PageCard p='20px' mb='24px'>
         <Text color={textColor} fontWeight='700' fontSize='md' mb='16px'>
           Quick Actions
         </Text>
@@ -342,15 +331,10 @@ export default function Dashboard() {
             />
           ))}
         </SimpleGrid>
-      </Box>
+      </PageCard>
 
       {/* Recent Transactions */}
-      <Box
-        bg={cardBg}
-        borderRadius='20px'
-        p='20px'
-        border='1px solid'
-        borderColor={borderColor}>
+      <PageCard p='20px'>
         <Flex justify='space-between' align='center' mb='16px'>
           <Text color={textColor} fontWeight='700' fontSize='md'>
             Recent Transactions
@@ -421,7 +405,7 @@ export default function Dashboard() {
             ))}
           </Box>
         )}
-      </Box>
-    </Box>
+      </PageCard>
+    </PageLayout>
   );
 }
