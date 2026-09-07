@@ -312,7 +312,19 @@ import { updateUserDetails } from "storeMtg/authSlice";
           </InputGroup>
         </HStack>
       </Flex>
-        <Text fontSize={'20px'} color={'gray.300'} align='left' mt='-15px' mb='10px' ml='8px'>{newData}</Text>
+        {newData && (
+          <Flex
+            align='center' gap='8px'
+            bg='green.50' border='1px solid' borderColor='green.200'
+            borderRadius='10px' px='12px' py='8px'
+            mt='-10px' mb='12px'>
+            <Box w='8px' h='8px' borderRadius='full' bg='green.400' flexShrink='0' />
+            <Text fontSize='sm' color='green.700' fontWeight='700'>
+              {newData}
+            </Text>
+            <Text fontSize='xs' color='green.500' ml='auto'>✓ Verified</Text>
+          </Flex>
+        )}
 
         <Flex direction={{ base: "column", "2xl": "row" }} mb={5}>
         <Select placeholder="Account Source" color={'gray.500'} width={{base:'100%', lg:'400px', md:'400px'}}

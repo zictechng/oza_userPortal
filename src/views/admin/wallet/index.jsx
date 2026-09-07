@@ -8,7 +8,7 @@ import {
 import {
   MdAdd, MdArrowDownward, MdArrowUpward,
   MdOutlineAccountBalanceWallet, MdCurrencyExchange,
-  MdStar, MdOutlineWarning,
+  MdStar, MdCardGiftcard, MdInfo,
 } from 'react-icons/md';
 import { FiSend } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
@@ -18,7 +18,7 @@ import { getPendingBonus, resetState } from 'storeMtg/pendingBonusSlice';
 import { fetchProducts, clearProducts } from 'storeMtg/dashRecentRecordSlice';
 import { PageLayout, PageCard } from 'layouts/PageLayout';
 
-// ── Wallet balance card ───────────────────────────
+// ── Wallet balance card
 const BalanceCard = ({ label, value, subValue, subLabel, icon, color, iconBg, actions }) => {
   const bg = useColorModeValue('white', 'navy.800');
   const textColor = useColorModeValue('navy.700', 'white');
@@ -103,9 +103,8 @@ export default function Wallet() {
 
   // Calculate tx stats
   const txList = Array.isArray(recentData) ? recentData : [];
-  const totalCredit = txList.filter(t => t.tran_type === 'Credit').reduce((s, t) => s + Number(t.amount || 0), 0);
-  const totalDebit = txList.filter(t => t.tran_type === 'Debit').reduce((s, t) => s + Number(t.amount || 0), 0);
-
+  const lastCredit = txList.find(t => t.tran_type === 'Credit');
+  const lastDebit = txList.find(t => t.tran_type === 'Debit');
   return (
     <PageLayout>
 
@@ -131,7 +130,7 @@ export default function Wallet() {
             <Text color='white' fontSize={{ base: '32px', md: '42px' }} fontWeight='800' mb='8px'>
               {formatNaira(totalBalance)}
             </Text>
-            <Text color='whiteAlpha.600' fontSize='xs'>
+            <Text color='whiteAlpha.600' fontSize='sm'>
               Last updated: {moment().format('DD MMM YYYY, hh:mm A')}
             </Text>
           </Box>
@@ -177,10 +176,7 @@ export default function Wallet() {
               borderRadius='8px' onClick={() => navigate('/user/fund-account')}>
               Fund +
             </Button>,
-            <Button key='withdraw' size='xs' colorScheme='brand' variant='outline'
-              borderRadius='8px' onClick={() => navigate('/user/withdraw')}>
-              Withdraw
-            </Button>,
+            
           ]}
         />
         <BalanceCard
@@ -190,7 +186,7 @@ export default function Wallet() {
           icon={MdStar}
           color='#10B981' iconBg='#D1FAE5'
           actions={[
-            <Button key='w' size='xs' colorScheme='green' variant='solid'
+            <Button key='withdraw' size='xs' colorScheme='brand' variant='outline'
               borderRadius='8px' onClick={() => navigate('/user/withdraw')}>
               Withdraw
             </Button>,
@@ -199,9 +195,10 @@ export default function Wallet() {
         <BalanceCard
           label='Signup Bonus'
           value={bonusLoading ? '...' : formatNaira(bonusData?.feedbackBonus || userData?.signup_account || 0)}
-          subLabel='Pending activation'
-          icon={MdOutlineWarning}
-          color='#F59E0B' iconBg='#FEF3C7'
+          subLabel={userData?.signup_bonus_activated ? 'Activated ✓' : 'Pending — complete a qualifying transaction'}
+          icon={MdCardGiftcard}
+          color='#F59E0B'
+          iconBg='#FEF3C7'
         />
         <BalanceCard
           label='All-time Volume'
@@ -218,27 +215,37 @@ export default function Wallet() {
           border='1px solid' borderColor={borderColor}
           boxShadow='0 2px 8px rgba(0,0,0,0.08)'>
           <Stat>
-            <StatLabel color={subColor} fontSize='xs' textTransform='uppercase' letterSpacing='0.5px'>Recent Credits</StatLabel>
-            <StatNumber color='green.500' fontSize='xl' mt='4px'>{formatNaira(totalCredit)}</StatNumber>
-            <StatHelpText color={subColor} fontSize='xs'>From recent transactions</StatHelpText>
+            <StatLabel color={subColor} fontSize='xs' textTransform='uppercase' letterSpacing='0.5px'>Last Credit</StatLabel>
+            <StatNumber color='green.500' fontSize='xl' mt='4px'>
+              {lastCredit ? formatNaira(lastCredit.amount) : '—'}
+            </StatNumber>
+            <StatHelpText color={subColor} fontSize='sm'>
+              {lastCredit?.transac_nature || 'No recent credit'}
+            </StatHelpText>
           </Stat>
         </Box>
         <Box bg={cardBg} borderRadius='16px' p='20px'
           border='1px solid' borderColor={borderColor}
           boxShadow='0 2px 8px rgba(0,0,0,0.08)'>
           <Stat>
-            <StatLabel color={subColor} fontSize='xs' textTransform='uppercase' letterSpacing='0.5px'>Recent Debits</StatLabel>
-            <StatNumber color='red.500' fontSize='xl' mt='4px'>{formatNaira(totalDebit)}</StatNumber>
-            <StatHelpText color={subColor} fontSize='xs'>From recent transactions</StatHelpText>
+            <StatLabel color={subColor} fontSize='xs' textTransform='uppercase' letterSpacing='0.5px'>Last Debit</StatLabel>
+            <StatNumber color='red.500' fontSize='xl' mt='4px'>
+              {lastDebit ? formatNaira(lastDebit.amount) : '—'}
+            </StatNumber>
+            <StatHelpText color={subColor} fontSize='sm'>
+              {lastDebit?.transac_nature || 'No recent debit'}
+            </StatHelpText>
           </Stat>
         </Box>
         <Box bg={cardBg} borderRadius='16px' p='20px'
           border='1px solid' borderColor={borderColor}
           boxShadow='0 2px 8px rgba(0,0,0,0.08)'>
           <Stat>
-            <StatLabel color={subColor} fontSize='xs' textTransform='uppercase' letterSpacing='0.5px'>Your Tag ID</StatLabel>
-            <StatNumber color={textColor} fontSize='xl' mt='4px' fontFamily='monospace'>{userData?.tag_id || '—'}</StatNumber>
-            <StatHelpText color={subColor} fontSize='xs'>Share to earn referral bonus</StatHelpText>
+            <StatLabel color={subColor} fontSize='xs' textTransform='uppercase' letterSpacing='0.5px'>Coins Balance</StatLabel>
+            <StatNumber color={textColor} fontSize='xl' mt='4px'>
+              {Number(userData?.coins_balance || 0).toLocaleString()} coins
+            </StatNumber>
+            <StatHelpText color={subColor} fontSize='sm'>Earn coins on every transaction</StatHelpText>
           </Stat>
         </Box>
       </SimpleGrid>
@@ -284,11 +291,26 @@ export default function Wallet() {
                     {tx.creditOn ? moment(tx.creditOn).format('DD MMM YYYY, hh:mm A') : '—'}
                   </Text>
                 </Box>
+              <Box textAlign='right'>
                 <Text
-                  fontSize='sm' fontWeight='700'
+                  fontSize='base' fontWeight='700'
                   color={tx.tran_type === 'Credit' ? 'green.500' : 'red.500'}>
-                  {tx.tran_type === 'Credit' ? '+' : '-'}₦{Number(tx.amount || 0).toLocaleString()}
+                  {tx.tran_type === 'Credit' ? '+' : '-'}
+                  {tx.sender_currency_type === '$' ? '$' : '₦'}
+                  {Number(tx.amount || 0).toLocaleString()}
                 </Text>
+                <Badge
+                  colorScheme={
+                    tx.transaction_status?.toLowerCase() === 'completed' || tx.transaction_status?.toLowerCase() === 'successful'
+                      ? 'green'
+                      : tx.transaction_status?.toLowerCase() === 'failed'
+                      ? 'red'
+                      : 'orange'
+                  }
+                  borderRadius='full' fontSize='10px' px='6px' mt='2px'>
+                  {tx.transaction_status || 'Pending'}
+                </Badge>
+              </Box>
               </Flex>
               {i < Math.min(txList.length, 6) - 1 && <Divider borderColor={borderColor} />}
             </Box>

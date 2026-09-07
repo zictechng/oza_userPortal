@@ -387,9 +387,11 @@ export default function Dashboard() {
                   </Box>
                   <Box textAlign='right'>
                     <Text
-                      fontSize='sm' fontWeight='700'
+                      fontSize='base' fontWeight='700'
                       color={tx.tran_type === 'Credit' ? 'green.500' : 'red.500'}>
-                      {tx.tran_type === 'Credit' ? '+' : '-'}₦{Number(tx.amount || 0).toLocaleString()}
+                      {tx.tran_type === 'Credit' ? '+' : '-'}
+                      {tx.sender_currency_type === '$' ? '$' : '₦'}
+                      {Number(tx.amount || 0).toLocaleString()}
                     </Text>
                     <Badge
                       colorScheme={txStatusColor(tx.transaction_status)}

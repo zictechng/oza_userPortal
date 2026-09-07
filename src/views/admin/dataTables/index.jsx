@@ -239,7 +239,7 @@ export default function Transactions() {
                         Ref: {tx.tid || '—'}
                       </Text>
                       {/* Mobile date */}
-                      <Text color={subColor} fontSize='xs'
+                      <Text color={subColor} fontSize='sm'
                         display={{ base: 'block', md: 'none' }}>
                         {tx.creditOn ? moment(tx.creditOn).format('DD MMM YYYY') : '—'}
                       </Text>
@@ -256,7 +256,7 @@ export default function Transactions() {
                   <Box w='100px' display={{ base: 'none', md: 'block' }}>
                     <Badge
                       colorScheme={statusColor(tx.transaction_status)}
-                      borderRadius='full' fontSize='10px' px='8px'
+                      borderRadius='full' fontSize='13px' px='8px'
                       textTransform='capitalize'>
                       {tx.transaction_status || 'Pending'}
                     </Badge>
@@ -264,9 +264,11 @@ export default function Transactions() {
 
                   {/* Amount */}
                   <Text
-                    fontSize='sm' fontWeight='700' w='120px' textAlign='right'
+                    fontSize='base' fontWeight='700' w='120px' textAlign='right'
                     color={tx.tran_type === 'Credit' ? 'green.500' : 'red.500'}>
-                    {tx.tran_type === 'Credit' ? '+' : '-'}₦{Number(tx.amount || 0).toLocaleString()}
+                    {tx.tran_type === 'Credit' ? '+' : '-'}
+                    {tx.sender_currency_type === '$' ? '$' : '₦'}
+                    {Number(tx.amount || 0).toLocaleString()}
                   </Text>
                 </Flex>
                 {i < filtered.length - 1 && <Divider borderColor={borderColor} />}
