@@ -128,7 +128,7 @@ function AuthIllustration(props) {
           <Text fontSize='32px' fontWeight='800' textAlign='center' mb='16px' lineHeight='1.2'>
             {appName ? `Welcome to ${appName}` : 'Welcome'}
           </Text>
-          <Text fontSize='16px' textAlign='center' opacity={0.8} maxW='340px' lineHeight='1.6'>
+          <Text fontSize='18px' textAlign='center' opacity={0.8} maxW='340px' lineHeight='1.6'>
             The secure and profitable way to manage your virtual funds
           </Text>
 
@@ -140,8 +140,8 @@ function AuthIllustration(props) {
                 px='16px' py='8px'
                 bg='whiteAlpha.200'
                 borderRadius='full'
-                fontSize='13px'
-                fontWeight='600'>
+                fontSize='20px'
+                fontWeight='800'>
                 {item}
               </Box>
             ))}

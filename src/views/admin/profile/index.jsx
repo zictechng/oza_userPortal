@@ -146,6 +146,7 @@ export default function Profile() {
   );
   const dashedBorderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
   const rowHoverBg = useColorModeValue('gray.50', 'navy.700');
+  const dividerColor = useColorModeValue('#E2E8F0', 'rgba(255,255,255,0.1)');
 
   const [form, setForm] = useState({
     display_name: '',
@@ -396,6 +397,9 @@ export default function Profile() {
 
             {/* Account Info */}
             <TabPanel p='24px'>
+              {/* Added clean divider line at the top of the Account Info section */}
+              <Divider borderColor={borderColor} mb='8px' />
+
               {[
                 { label: 'Email Address', value: userData?.email },
                 { label: 'Tag ID', value: userData?.tag_id },
@@ -409,23 +413,27 @@ export default function Profile() {
                 { label: 'State', value: userData?.state || '—' },
                 { label: 'City', value: userData?.city || '—' },
               ].map((item, i, arr) => (
-                <Flex
-                  key={i}
-                  justify='space-between'
-                  align='center'
-                  py='14px'
-                  px='4px'
-                  borderBottom={i < arr.length - 1 ? '1px solid' : 'none'}
-                  borderColor={borderColor}
-                  _hover={{ bg: rowHoverBg, borderRadius: '8px', px: '12px' }}
-                  transition='all 0.15s'>
-                  <Text color={subColor} fontSize='sm' fontWeight='500'>
-                    {item.label}
-                  </Text>
-                  <Text color={textColor} fontSize='sm' fontWeight='700'>
-                    {item.value || '—'}
-                  </Text>
-                </Flex>
+                <Box key={i}>
+                  <Flex
+                    justify='space-between'
+                    align='center'
+                    py='16px'
+                    px='8px'
+                    _hover={{ bg: rowHoverBg, borderRadius: '10px' }}
+                    transition='all 0.15s'>
+                    <Text color={subColor} fontSize='sm' fontWeight='500'
+                      minW='140px'>
+                      {item.label}
+                    </Text>
+                    <Text color={textColor} fontSize='sm' fontWeight='700'
+                      textAlign='right'>
+                      {item.value || '—'}
+                    </Text>
+                  </Flex>
+                  {i < arr.length - 1 && (
+                    <Box h='1px' bg={dividerColor} w='100%' />
+                  )}
+                </Box>
               ))}
             </TabPanel>
 
@@ -443,6 +451,6 @@ export default function Profile() {
           </TabPanels>
         </Tabs>
       </Box>
-    </Box>
+  </Box>
   );
 }

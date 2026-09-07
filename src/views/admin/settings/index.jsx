@@ -3,21 +3,24 @@ import {
   Box, Flex, Text, Button, Icon, Switch,
   useColorModeValue, FormControl, FormLabel,
   Input, InputGroup, InputRightElement,
-  SimpleGrid, Divider, Badge,
+  SimpleGrid, Divider, Badge, useToast
 } from '@chakra-ui/react';
 import {
   MdLock, MdNotifications, MdSecurity,
-  MdVisibility, MdVisibilityOff, MdCheckCircle,
+  MdVisibility, MdVisibilityOff, MdCheckCircle, MdWarning,
 } from 'react-icons/md';
 import { useDispatch, useSelector } from 'react-redux';
 import { postSetting } from 'storeMtg/emailSettingSlice';
 import { post2FAMode } from 'storeMtg/f2ASettingSlice';
 import { postInAppNotification } from 'storeMtg/inAppSettingSlice';
 import { passwordUpdateData } from 'storeMtg/passwordUpdateSlice';
-import { updateUserDetails } from 'storeMtg/authSlice';
+import { updateUserDetails, authUserLogout } from 'storeMtg/authSlice';
 import { PageLayout, PageCard, PageSection } from 'layouts/PageLayout';
 import { AuthAlert, AuthSuccess } from 'components/auth/AuthCard';
 import { useFormValidation } from 'hooks/useFormValidation';
+import { useNavigate } from 'react-router-dom';
+import { deactivateAccountData, resetDeactivateState } from 'storeMtg/deactivateAccountSlice';
+
 
 const ToggleRow = ({ label, subtitle, checked, onChange, loading }) => {
   const textColor = useColorModeValue('navy.700', 'white');
@@ -47,14 +50,23 @@ const ToggleRow = ({ label, subtitle, checked, onChange, loading }) => {
 
 export default function Settings() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
+  const toast = useToast();
   const { user, userToken } = useSelector(state => state.authUser);
   const userData = user?.userData;
+  const [showDangerConfirm, setShowDangerConfirm] = useState(false);
+  const [dangerInput, setDangerInput] = useState('');
+  const [deactivating, setDeactivating] = useState(false);
 
   const textColor = useColorModeValue('navy.700', 'white');
   const subColor = useColorModeValue('gray.500', 'gray.400');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
   const inputBg = useColorModeValue('white', 'navy.800');
   const iconBg = useColorModeValue('brand.50', 'navy.700');
+
+  const twoFaBg = useColorModeValue('green.50', 'navy.700');
+  const dangerBg = useColorModeValue('red.50', 'red.900');
+  const dangerBorderColor = useColorModeValue('red.200', 'red.700');
 
   const { error, setError, clearError } = useFormValidation();
   const [success, setSuccess] = useState('');
@@ -104,6 +116,40 @@ export default function Settings() {
     setToggling('');
   };
 
+    const handleDeactivateAccount = async () => {
+    if (dangerInput !== 'DELETE') {
+      return;
+    }
+    setDeactivating(true);
+    try {
+      const res = await dispatch(deactivateAccountData({}));
+      if (res.payload?.msg === '201' || res.payload?.status === 201) {
+        // Log out immediately
+        dispatch(authUserLogout(userData?._id));
+        navigate('/auth/sign-in');
+      } else {
+        toast({
+          title: 'Failed to deactivate',
+          description: res.payload?.message || 'Please contact support.',
+          status: 'error',
+          duration: 5000,
+          position: 'top',
+        });
+      }
+    } catch (e) {
+      toast({
+        title: 'Error',
+        description: 'Something went wrong. Please try again.',
+        status: 'error',
+        duration: 5000,
+      });
+    } finally {
+      setDeactivating(false);
+      setShowDangerConfirm(false);
+    }
+  };
+
+  
   const handlePasswordChange = async () => {
     setPwError(''); setPwSuccess('');
     if (!currentPw) { setPwError('Current password is required'); return; }
@@ -138,7 +184,7 @@ export default function Settings() {
 
   return (
     <PageLayout>
-      <SimpleGrid columns={{ base: 1, lg: 2 }} gap='20px'>
+      <SimpleGrid columns={{ base: 1, lg: 2 }} gap='20px' alignItems='start'>
 
         {/* Notifications Card */}
         <PageCard p='24px'>
@@ -294,38 +340,73 @@ export default function Settings() {
         </PageCard>
 
         {/* Account Info Card */}
-        <PageCard p='24px'>
-          <Text color={textColor} fontSize='md' fontWeight='700' mb='16px'>
-            Account Information
-          </Text>
-          {[
-            { label: 'Full Name', value: userData?.display_name },
-            { label: 'Email', value: userData?.email },
-            { label: 'Phone', value: userData?.phone },
-            { label: 'Tag ID', value: userData?.tag_id },
-            { label: 'Account Type', value: userData?.acct_type },
-            { label: 'KYC Status', value: userData?.acct_approved_status },
-          ].map((item, i) => (
-            <Box key={i}>
-              <Flex justify='space-between' align='center' py='12px'>
-                <Text color={subColor} fontSize='sm'>{item.label}</Text>
-                <Flex align='center' gap='8px'>
-                  <Text color={textColor} fontSize='sm' fontWeight='600'>
-                    {item.value || '—'}
-                  </Text>
-                  {item.label === 'KYC Status' && (
-                    <Badge
-                      colorScheme={item.value === 'Approved' ? 'green' : 'orange'}
-                      borderRadius='full' fontSize='10px' px='8px'>
-                      {item.value === 'Approved' ? '✓' : '⚠'}
-                    </Badge>
-                  )}
-                </Flex>
-              </Flex>
-              {i < 5 && <Divider borderColor={borderColor} />}
+       <PageCard p='24px' border='1px solid' borderColor={dangerBorderColor}
+          bg={dangerBg}>
+          <Flex align='center' gap='12px' mb='16px'>
+            <Box w='44px' h='44px' borderRadius='12px'
+              bg='red.100' display='flex' alignItems='center' justifyContent='center'>
+              <Icon as={MdWarning} color='red.500' w='24px' h='24px' />
             </Box>
-          ))}
+            <Box>
+              <Text color='red.600' fontSize='md' fontWeight='800'>
+                Danger Zone
+              </Text>
+              <Text color='red.400' fontSize='sm'>
+                Irreversible actions — proceed with caution
+              </Text>
+            </Box>
+          </Flex>
+
+          <Box bg='white' borderRadius='12px' p='16px' mb='16px'
+            border='1px solid' borderColor={dangerBorderColor}>
+            <Text color={textColor} fontSize='sm' fontWeight='700' mb='6px'>
+              Deactivate Account
+            </Text>
+            <Text color={subColor} fontSize='base' mb='12px' lineHeight='1.6'>
+              Deactivating your account will immediately suspend access to all services.
+              Your funds will remain safe. Contact support to claim any unpaid and funds in your account.
+              <Text as='span' color='red.500' fontWeight='700'> This action cannot be undone.</Text>
+            </Text>
+
+            {!showDangerConfirm ? (
+              <Button
+                size='sm' colorScheme='red' variant='outline'
+                borderRadius='10px' fontWeight='700'
+                onClick={() => setShowDangerConfirm(true)}>
+                Deactivate My Account
+              </Button>
+            ) : (
+              <Box>
+                <Text color={textColor} fontSize='sm' fontWeight='600' mb='8px'>
+                  Type <Text as='span' color='red.500' fontFamily='monospace'>DELETE</Text> to confirm:
+                </Text>
+                <Input
+                  size='sm' borderRadius='10px' mb='12px'
+                  placeholder='Type DELETE to confirm'
+                  value={dangerInput}
+                  onChange={e => setDangerInput(e.target.value)}
+                  borderColor={dangerInput === 'DELETE' ? 'red.500' : borderColor}
+                  _focus={{ borderColor: 'red.500', boxShadow: '0 0 0 1px #E53E3E' }}
+                />
+                <Flex gap='8px'>
+                  <Button size='sm' variant='outline' borderRadius='10px'
+                    onClick={() => { setShowDangerConfirm(false); setDangerInput(''); }}>
+                    Cancel
+                  </Button>
+                  <Button
+                    size='sm' colorScheme='red' borderRadius='10px' fontWeight='700'
+                    isDisabled={dangerInput !== 'DELETE'}
+                    isLoading={deactivating}
+                    loadingText='Deactivating...'
+                    onClick={handleDeactivateAccount}>
+                    Yes, Deactivate Account
+                  </Button>
+                </Flex>
+              </Box>
+            )}
+          </Box>
         </PageCard>
+
       </SimpleGrid>
     </PageLayout>
   );

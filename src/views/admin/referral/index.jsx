@@ -34,10 +34,11 @@ export default function Referral() {
   const shareText = `Join ${user?.appData?.app_name || ''} and earn rewards! Use my referral ID: ${userData?.tag_id}`;
   const { onCopy, hasCopied } = useClipboard(shareText);
 
-  const textColor = useColorModeValue('navy.700', 'white');
+    const textColor = useColorModeValue('navy.700', 'white');
   const subColor = useColorModeValue('gray.500', 'gray.400');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
   const tagBg = useColorModeValue('brand.50', 'navy.700');
+  const statCardBg = useColorModeValue('white', 'navy.800');
   const bannerGrad = useColorModeValue(
     'linear-gradient(135deg, #4C5FD5 0%, #6C5CE7 100%)',
     'linear-gradient(135deg, #1E2C5A 0%, #2D3A6A 100%)'
@@ -107,13 +108,13 @@ export default function Referral() {
 
       {/* Stats */}
       <SimpleGrid columns={{ base: 2, md: 4 }} gap='16px' mb='24px'>
-        {[
+                {[
           { label: 'Total Referrals', value: referrals.length, color: 'brand.500', bg: 'brand.50' },
           { label: 'Approved', value: approvedCount, color: 'green.500', bg: 'green.50' },
           { label: 'Pending', value: referrals.length - approvedCount, color: 'orange.500', bg: 'orange.50' },
           { label: 'Total Earned', value: `₦${totalEarned.toLocaleString()}`, color: 'purple.500', bg: 'purple.50' },
         ].map((stat, i) => (
-          <Box key={i} bg={textColor}
+          <Box key={i} bg={statCardBg}
             borderRadius='16px' p='20px'
             border='1px solid' borderColor={borderColor}
             boxShadow='0 2px 8px rgba(0,0,0,0.06)'>
