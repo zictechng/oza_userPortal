@@ -61,7 +61,7 @@ export default function Buy() {
               'Select the service you want to buy',
               'Enter the dollar amount you need',
               'We show the Naira cost at current rates',
-              'Fund your wallet and place the order',
+              'Submit and select payment method and place the order',
               'Admin processes and delivers your funds',
             ].map((step, i) => (
               <Flex key={i} align='flex-start' gap='10px' mb='12px'>

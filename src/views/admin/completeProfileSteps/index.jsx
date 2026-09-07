@@ -1,273 +1,224 @@
-import React, {useState } from 'react';
-
-// Chakra imports
+import React, { useState } from 'react';
 import {
-  Box,
-  Flex,
-  Grid,
-  Alert,
-  AlertIcon,
-  AccordionItem,
-  AccordionPanel,
-  Accordion,
-  AccordionButton,
-  AlertTitle,
-  AlertDescription,
-  CloseButton,
-  useDisclosure
+  Box, Flex, Text, Icon, Button,
+  useColorModeValue, SimpleGrid, Badge,
+  Accordion, AccordionItem, AccordionButton,
+  AccordionPanel, AccordionIcon,
 } from '@chakra-ui/react';
-import { CheckIcon, CheckCircleIcon, WarningIcon } from "@chakra-ui/icons";
+import {
+  MdCheckCircle, MdRadioButtonUnchecked,
+  MdPerson, MdImage, MdAssignment, MdVerified,
+} from 'react-icons/md';
+import { useSelector } from 'react-redux';
+import { PageLayout, PageCard } from 'layouts/PageLayout';
+import ProfileDetailsForm from 'views/admin/completeProfile/CompleteProfileForm';
+import ProfileImageUpload from './ProfileImageUploadCard';
+import DocumentUpload from './DocumentUploadCard';
+import AccountOwnerShip from './AccountOwnershipCard';
+import AddressProof from './AddressProofCard';
 
-// Custom components
-import ProfileDetailsForm from 'views/admin/completeProfile/CompleteProfileForm'
-import ProfileImageUpload from './ProfileImageUploadCard'
-import DocumentUpload from './DocumentUploadCard'
-import AccountOwnerShip from './AccountOwnershipCard'
-import AddressProof from './AddressProofCard'
-import {useSelector } from 'react-redux';
+const StepIndicator = ({ done, label, icon, textColor, subColor, borderColor }) => (
+  <Flex align='center' gap='12px'>
+    <Box
+      w='40px' h='40px' borderRadius='12px'
+      bg={done ? 'green.50' : 'gray.50'}
+      border='2px solid'
+      borderColor={done ? 'green.400' : borderColor}
+      display='flex' alignItems='center' justifyContent='center'
+      flexShrink='0'>
+      <Icon
+        as={done ? MdCheckCircle : icon}
+        color={done ? 'green.500' : 'gray.400'}
+        w='20px' h='20px'
+      />
+    </Box>
+    <Box>
+      <Text color={textColor} fontSize='sm' fontWeight='600'>{label}</Text>
+      <Badge
+        colorScheme={done ? 'green' : 'gray'}
+        borderRadius='full' fontSize='10px' px='8px'>
+        {done ? 'Completed' : 'Pending'}
+      </Badge>
+    </Box>
+  </Flex>
+);
 
-// Assets
 export default function CompleteProfileSteps() {
-  // Chakra Color Mode
+  const { user } = useSelector(state => state.authUser);
+  const userData = user?.userData;
 
-  const {user} = useSelector((state) => state.authUser)
+  const textColor = useColorModeValue('navy.700', 'white');
+  const subColor = useColorModeValue('gray.500', 'gray.400');
+  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
+  const bannerGrad = useColorModeValue(
+    'linear-gradient(135deg, #4C5FD5 0%, #6C5CE7 100%)',
+    'linear-gradient(135deg, #1E2C5A 0%, #2D3A6A 100%)'
+  );
 
-  const [isExpanded, setIsExpanded] = useState(false);
-  const [isExpanded2, setIsExpanded2] = useState(false);
-  const [isExpanded3, setIsExpanded3] = useState(false);
-  const [isExpanded4, setIsExpanded4] = useState(false);
-  const [isExpanded5, setIsExpanded5] = useState(false);
-  const [isExpanded6, setIsExpanded6] = useState(false);
+  const steps = [
+    { label: 'Personal Details', done: userData?.reg_stage2 === 'Yes', icon: MdPerson },
+    { label: 'Profile Photo', done: userData?.reg_stage3 === 'Yes', icon: MdImage },
+    { label: 'ID Document', done: userData?.reg_stage4 === 'Yes', icon: MdAssignment },
+    { label: 'KYC Approval', done: userData?.acct_approved_status === 'Approved', icon: MdVerified },
+  ];
 
-  const {
-    isOpen: isVisible,
-    onClose,
-    onOpen,
-  } = useDisclosure({ defaultIsOpen: true })
-
-    //console.log('User data ', user.userData)
+  const completedCount = steps.filter(s => s.done).length;
+  const progress = Math.round((completedCount / steps.length) * 100);
 
   return (
-    <Box pt={{ base: '80px', md: '80px', xl: '80px' }}>
-      {/* Main Fields */}
-      <Grid
-        mb="20px"
-        gridTemplateColumns={{ xl: 'repeat(3, 1fr)', '2xl': '1fr 0.46fr' }}
-        gap={{ base: '20px', xl: '20px' }}
-        display={{ base: 'block', xl: 'grid', lg:'grid', sm:'block', md:'grid' }}
-      >
-        <Flex flexDirection="column">
-          <Flex>
-            {isVisible ? ( <Alert status="info" mb={4} fontSize={20} borderRadius={15}>
-            <AlertIcon />
-            <Box>
-                <AlertTitle mt={4} mb={1} fontSize='22px'>Signup Process</AlertTitle>
-                <AlertDescription fontSize={'18px'}>
-                Complete your account signup process to enjoy the amazing offers we have for you. It takes less than five minutes to complete.
-                </AlertDescription>
-            </Box>
-                <CloseButton
-                alignSelf='flex-start'
-                position='relative'
-                right={-1}
-                top={-1}
-                onClick={onClose}/>
-            </Alert>
-            ):('')}
-            
-           </Flex>
-
-          <Flex direction="column">
-            <Box
-              p={5}
-              shadow="md"
-              borderWidth="1px"
-              mb={10}
-              ml={2}
-              mr={2}
-              bg="white"
-              borderRadius="15">
-              <Box width={{ base: "100%", lg: "100%" }}>
-                    <Accordion allowToggle>
-                                <AccordionItem>
-                                    <AccordionButton
-                                    onClick={() => setIsExpanded(!isExpanded)}>
-                                    <Box flex="1" textAlign="left" fontSize={{ base: "20px", lg: "18px" }} color={'#aaa'}>
-                                        Account Opening
-                                    </Box>
-                                    {isExpanded ? <CheckIcon color={'#aaa'} /> : <CheckCircleIcon color={'#aaa'} />}
-                                    </AccordionButton>
-                                    
-                                </AccordionItem>
-                    </Accordion>
-            </Box>
-            </Box>
-            
-          </Flex>
-            {/* profile form */}
-          <Flex direction="column">
-            <Box
-              p={5}
-              shadow="md"
-              borderWidth="1px"
-              mb={10}
-              ml={2}
-              mr={2}
-              bg="white"
-              borderRadius="15">
-              <Box width={{ base: "100%"}}>
-                    <Accordion allowToggle>
-                                <AccordionItem>
-                                    <AccordionButton _expanded={{ bg: "#5464c4", color: "white" }}
-                                    onClick={() => setIsExpanded2(!isExpanded2)}>
-                                    <Box flex="1" textAlign="left" fontSize={{ base: "20px", lg: "18px" }}>
-                                        Complete Profile Details
-                                    </Box>
-                                    {isExpanded2 && user.userData.reg_stage2 ==='Yes'? <CheckCircleIcon color={'#FFF'} /> : isExpanded2 && user.userData.reg_stage2 ===''? <WarningIcon color={'orange'} />: user.userData.reg_stage2 ==='Yes'? <CheckCircleIcon color={'#aaa'} />: user.userData.reg_stage2 ==='' && <WarningIcon color={'orange'} />}
-                                    </AccordionButton>
-                                    <AccordionPanel>
-                                       <ProfileDetailsForm />
-                            </AccordionPanel>
-                            </AccordionItem>
-                    </Accordion>
-            </Box>
-            </Box>
-            
-          </Flex>
-
-          {/* upload profile photo */}
-          <Flex direction="column">
-            <Box
-              p={5}
-              shadow="md"
-              borderWidth="1px"
-              mb={10}
-              ml={2}
-              mr={2}
-              bg="white"
-              borderRadius="15">
-              <Box width={{ base: "100%", lg: "100%" }}>
-                    <Accordion allowToggle>
-                                <AccordionItem>
-                                    <AccordionButton _expanded={{ bg: "#5464c4", color: "white" }}
-                                    onClick={() =>setIsExpanded3(!isExpanded3)}>
-                                    <Box flex="1" textAlign="left" fontSize={{ base: "20px", lg: "18px" }}>
-                                        Upload Profile Photo
-                                    </Box>
-                                    {isExpanded3 && user.userData.reg_stage3 ==='Yes'? <CheckCircleIcon color={'#FFF'} /> : isExpanded3 && user.userData.reg_stage3 ===''? <WarningIcon color={'orange'} />: user.userData.reg_stage3 ==='Yes'? <CheckCircleIcon color={'#aaa'} />: user.userData.reg_stage3 ==='' && <WarningIcon color={'orange'} />}
-                                    </AccordionButton>
-                                    <AccordionPanel>
-                                       <ProfileImageUpload />
-                            </AccordionPanel>
-                            </AccordionItem>
-                    </Accordion>
-            </Box>
-            </Box>
-            
-          </Flex>
-
-          {/* Document ID Upload */}
-          <Flex direction="column">
-            <Box
-              p={5}
-              shadow="md"
-              borderWidth="1px"
-              mb={10}
-              ml={2}
-              mr={2}
-              bg="white"
-              borderRadius="15">
-              <Box width={{ base: "100%", lg: "100%" }}>
-                    <Accordion allowToggle>
-                                <AccordionItem>
-                                    <AccordionButton _expanded={{ bg: "#5464c4", color: "white" }}
-                                    onClick={()=>setIsExpanded4(isExpanded4)}>
-                                    <Box flex="1" textAlign="left" fontSize={{ base: "20px", lg: "18px" }}>
-                                        Upload Document ID
-                                    </Box>
-                                    {isExpanded4 && user.userData?.reg_stage4 ==='Yes'? <CheckCircleIcon color={'#FFF'} /> : isExpanded4 && user.userData?.reg_stage4 ===''? <WarningIcon color={'orange'} />: user.userData?.reg_stage4 ==='Yes'? <CheckCircleIcon color={'#aaa'} />: user.userData?.reg_stage4 ==='' && <WarningIcon color={'orange'} />}
-                                    </AccordionButton>
-                                    <AccordionPanel>
-                                       <DocumentUpload/>
-                            </AccordionPanel>
-                            </AccordionItem>
-                    </Accordion>
-            </Box>
-            </Box>
-            
-          </Flex>
-
-          {/* Proof account ownership */}
-          <Flex direction="column">
-            <Box
-              p={5}
-              shadow="md"
-              borderWidth="1px"
-              mb={10}
-              ml={2}
-              mr={2}
-              bg="white"
-              borderRadius="15">
-                <Box width={{ base: "100%", lg: "100%" }}>
-                    <Accordion allowToggle>
-                                <AccordionItem>
-                                    <AccordionButton _expanded={{ bg: "#5464c4", color: "white" }}
-                                    onClick={()=>setIsExpanded5(isExpanded5)}>
-                                    <Box flex="1" textAlign="left" fontSize={{ base: "20px", lg: "18px" }}>
-                                        Proof Account Ownership
-                                    </Box>
-                                    {isExpanded5 && user.userData?.reg_stage5 ==='Yes'? <CheckCircleIcon color={'#FFF'} /> : isExpanded5 && user.userData?.reg_stage5 ===''? <WarningIcon color={'orange'} />: user.userData?.reg_stage5 ==='Yes'? <CheckCircleIcon color={'#aaa'} />: user.userData?.reg_stage5 ==='' && <WarningIcon color={'orange'} />}
-                                    </AccordionButton>
-                                    <AccordionPanel>
-                                       <AccountOwnerShip/>
-                            </AccordionPanel>
-                            </AccordionItem>
-                    </Accordion>
-                </Box>
-            </Box>
-            
-          </Flex>
-
-            {/* Proof of address */}
-
-            <Flex direction="column">
-            <Box
-              p={5}
-              shadow="md"
-              borderWidth="1px"
-              mb={10}
-              ml={2}
-              mr={2}
-              bg="white"
-              borderRadius="15">
-                <Box width={{ base: "100%", lg: "100%" }}>
-                    <Accordion allowToggle>
-                                <AccordionItem>
-                                    <AccordionButton _expanded={{ bg: "#5464c4", color: "white" }}
-                                    onClick={()=>setIsExpanded6(isExpanded6)}>
-                                    <Box flex="1" textAlign="left" fontSize={{ base: "20px", lg: "18px" }}>
-                                        Proof of Address
-                                    </Box>
-                                    {isExpanded6 && user.userData?.reg_stage6 ==='Yes'? <CheckCircleIcon color={'#FFF'} /> : isExpanded6 && user.userData?.reg_stage6 ===''? <WarningIcon color={'orange'} />: user.userData?.reg_stage6 ==='Yes'? <CheckCircleIcon color={'#aaa'} />: user.userData?.reg_stage6 ==='' && <WarningIcon color={'orange'} />}
-                                    </AccordionButton>
-                                    <AccordionPanel>
-                                       <AddressProof/>
-                            </AccordionPanel>
-                            </AccordionItem>
-                    </Accordion>
-                </Box>
-            </Box>
-            
-          </Flex>
-
+    <PageLayout>
+      {/* Banner */}
+      <Box bg={bannerGrad} borderRadius='20px' p='28px' mb='24px'
+        position='relative' overflow='hidden'>
+        <Box position='absolute' top='-30px' right='-30px'
+          w='120px' h='120px' borderRadius='full' bg='whiteAlpha.100' />
+        <Flex justify='space-between' align='center' position='relative' zIndex='1' flexWrap='wrap' gap='16px'>
+          <Box>
+            <Text color='white' fontSize='xl' fontWeight='800' mb='4px'>
+              Complete Your Profile
+            </Text>
+            <Text color='whiteAlpha.700' fontSize='sm'>
+              {completedCount} of {steps.length} steps completed
+            </Text>
+          </Box>
+          <Box
+            w='64px' h='64px' borderRadius='full'
+            bg='whiteAlpha.200'
+            display='flex' alignItems='center' justifyContent='center'>
+            <Text color='white' fontSize='lg' fontWeight='800'>{progress}%</Text>
+          </Box>
         </Flex>
 
-        <Flex
-          flexDirection="column"
-          gridArea={{ xl: '1 / 3 / 2 / 4', '2xl': '1 / 2 / 2 / 3' }}
-        ></Flex>
-      </Grid>
-      {/* Delete Product */}
-    </Box>
+        {/* Progress bar */}
+        <Box mt='16px' bg='whiteAlpha.300' borderRadius='full' h='6px' position='relative' zIndex='1'>
+          <Box
+            bg='white' borderRadius='full' h='6px'
+            w={`${progress}%`}
+            transition='width 0.5s ease'
+          />
+        </Box>
+      </Box>
+
+      <SimpleGrid columns={{ base: 1, lg: 3 }} gap='20px'>
+        {/* Steps Overview */}
+        <PageCard p='24px'>
+          <Text color={textColor} fontWeight='700' fontSize='md' mb='20px'>
+            Verification Steps
+          </Text>
+          <Flex direction='column' gap='16px'>
+            {steps.map((step, i) => (
+              <StepIndicator
+                key={i}
+                done={step.done}
+                label={step.label}
+                icon={step.icon}
+                textColor={textColor}
+                subColor={subColor}
+                borderColor={borderColor}
+              />
+            ))}
+          </Flex>
+
+          {userData?.acct_approved_status === 'Approved' && (
+            <Box mt='20px' p='16px' bg='green.50' borderRadius='12px'
+              border='1px solid' borderColor='green.200'>
+              <Flex align='center' gap='8px'>
+                <Icon as={MdCheckCircle} color='green.500' w='20px' h='20px' />
+                <Text color='green.700' fontSize='sm' fontWeight='700'>
+                  Account Fully Verified!
+                </Text>
+              </Flex>
+            </Box>
+          )}
+        </PageCard>
+
+        {/* Forms */}
+        <Box gridColumn={{ lg: 'span 2' }}>
+          <Accordion allowMultiple defaultIndex={[0]}>
+            {/* Step 1 — Personal Details */}
+            {userData?.reg_stage2 !== 'Yes' && (
+              <Box mb='16px'>
+                <PageCard p='0' overflow='hidden'>
+                  <AccordionItem border='none'>
+                    <AccordionButton p='20px'>
+                      <Flex flex='1' align='center' gap='12px'>
+                        <Icon as={MdPerson} color='brand.500' w='20px' h='20px' />
+                        <Text color={textColor} fontWeight='700' fontSize='sm'>
+                          Step 1 — Personal Details
+                        </Text>
+                      </Flex>
+                      <AccordionIcon />
+                    </AccordionButton>
+                    <AccordionPanel px='20px' pb='20px'>
+                      <ProfileDetailsForm />
+                    </AccordionPanel>
+                  </AccordionItem>
+                </PageCard>
+              </Box>
+            )}
+
+            {/* Step 2 — Profile Photo */}
+            {userData?.reg_stage3 !== 'Yes' && (
+              <Box mb='16px'>
+                <PageCard p='0' overflow='hidden'>
+                  <AccordionItem border='none'>
+                    <AccordionButton p='20px'>
+                      <Flex flex='1' align='center' gap='12px'>
+                        <Icon as={MdImage} color='brand.500' w='20px' h='20px' />
+                        <Text color={textColor} fontWeight='700' fontSize='sm'>
+                          Step 2 — Profile Photo
+                        </Text>
+                      </Flex>
+                      <AccordionIcon />
+                    </AccordionButton>
+                    <AccordionPanel px='20px' pb='20px'>
+                      <ProfileImageUpload />
+                    </AccordionPanel>
+                  </AccordionItem>
+                </PageCard>
+              </Box>
+            )}
+
+            {/* Step 3 — Document Upload */}
+            {userData?.reg_stage4 !== 'Yes' && (
+              <Box mb='16px'>
+                <PageCard p='0' overflow='hidden'>
+                  <AccordionItem border='none'>
+                    <AccordionButton p='20px'>
+                      <Flex flex='1' align='center' gap='12px'>
+                        <Icon as={MdAssignment} color='brand.500' w='20px' h='20px' />
+                        <Text color={textColor} fontWeight='700' fontSize='sm'>
+                          Step 3 — Upload ID Document
+                        </Text>
+                      </Flex>
+                      <AccordionIcon />
+                    </AccordionButton>
+                    <AccordionPanel px='20px' pb='20px'>
+                      <DocumentUpload />
+                    </AccordionPanel>
+                  </AccordionItem>
+                </PageCard>
+              </Box>
+            )}
+          </Accordion>
+
+          {completedCount >= 3 && userData?.acct_approved_status !== 'Approved' && (
+            <PageCard p='24px'>
+              <Flex align='center' gap='12px'>
+                <Icon as={MdVerified} color='orange.400' w='24px' h='24px' />
+                <Box>
+                  <Text color={textColor} fontSize='sm' fontWeight='700'>
+                    Awaiting Admin Approval
+                  </Text>
+                  <Text color={subColor} fontSize='xs'>
+                    Your documents are under review. This usually takes 1-24 hours.
+                  </Text>
+                </Box>
+              </Flex>
+            </PageCard>
+          )}
+        </Box>
+      </SimpleGrid>
+    </PageLayout>
   );
 }

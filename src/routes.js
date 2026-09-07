@@ -8,7 +8,7 @@ import {
 } from 'react-icons/md';
 import {
   FiPhone, FiZap, FiTv, FiWifi, FiFileText,
-  FiGift, FiStar,
+  FiGift, FiStar, FiSend
 } from 'react-icons/fi';
 
 // Page imports
@@ -60,6 +60,14 @@ const routes = [
     path: '/data-tables',
     icon: <Icon as={MdCurrencyExchange} width='20px' height='20px' color='inherit' />,
     component: <DataTables />,
+    visible: true,
+  },
+  {
+    name: 'Send Fund',
+    layout: '/user',
+    path: '/send-fund',
+    icon: <Icon as={FiSend} width='20px' height='20px' color='inherit' />,
+    component: <SendFundComponent />,
     visible: true,
   },
   {
@@ -140,12 +148,6 @@ const routes = [
     layout: '/user',
     path: '/withdraw',
     component: <WithdrawComponent />,
-    visible: false,
-  },
-  {
-    layout: '/user',
-    path: '/send-fund',
-    component: <SendFundComponent />,
     visible: false,
   },
   {

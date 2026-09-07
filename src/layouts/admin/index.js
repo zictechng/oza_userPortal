@@ -1,5 +1,5 @@
 // Chakra imports
-import { Portal, Box, useDisclosure } from '@chakra-ui/react';
+import { Portal, Box, useDisclosure, useColorModeValue } from '@chakra-ui/react';
 import Footer from 'components/footer/FooterAdmin.js';
 // Layout components
 import Navbar from 'components/navbar/NavbarAdmin.js';
@@ -104,9 +104,10 @@ export default function Dashboard(props) {
   };
   document.documentElement.dir = 'ltr';
   const { onOpen } = useDisclosure();
+  const pageBg = useColorModeValue('gray.100', 'navy.900');
   document.documentElement.dir = 'ltr';
   return (
-    <Box>
+    <Box bg={pageBg} minH='100vh'>
       <Box>
         <SidebarContext.Provider
           value={{
@@ -133,7 +134,7 @@ export default function Dashboard(props) {
               <Box>
                 <Navbar
                   onOpen={onOpen}
-                  logoText={'Oza App'}
+                  logoText={''}
                   brandText={getActiveRoute(routes)}
                   secondary={getActiveNavbar(routes)}
                   message={getActiveNavbarText(routes)}
@@ -149,7 +150,7 @@ export default function Dashboard(props) {
                 p={{ base: '20px', md: '30px' }}
                 pe="20px"
                 minH="100vh"
-                pt="50px"
+                bg={pageBg}
               >
                 <Routes>
                   {getRoutes(routes)}

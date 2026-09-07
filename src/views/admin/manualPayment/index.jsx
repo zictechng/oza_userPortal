@@ -1,406 +1,206 @@
-import React , {useState, useEffect} from "react";
-
-// Chakra imports
+import React, { useState, useEffect } from 'react';
 import {
-  Box,
-  Flex,
-  Grid,
-  Button,
-  Heading, 
-  Text,
-  AccordionItem,
-  AccordionIcon,
-  AccordionPanel,
-  Accordion,
-  AccordionButton,
-  useColorModeValue,
-  Table,
-  Tbody,
-  Td,
-  Th,
-  Thead,
-  Tr,
-  useClipboard 
-} from "@chakra-ui/react";
-
-// Custom components
-import Card from "components/card/Card.js";
-import PaymentSection from "views/admin/manualPayment/PaymentSection"
+  Box, Flex, Text, Button, Icon, SimpleGrid,
+  useColorModeValue, Divider, useClipboard,
+  Badge, Spinner,
+} from '@chakra-ui/react';
+import { MdContentCopy, MdCheck, MdAccountBalance, MdInfo } from 'react-icons/md';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { getExchangeRate } from "storeMtg/exchangeRateSlice";
-import { getCompanyBankInfo } from "storeMtg/getCompanyBankInfoSlice";
-import { DollarValueFormat } from "components/DollarFormat";
-import { NairaValueFormat } from "components/NairaFormat";
-import { CopyIcon } from "@chakra-ui/icons";
+import { getCompanyBankInfo } from 'storeMtg/getCompanyBankInfoSlice';
+import { getExchangeRate } from 'storeMtg/exchangeRateSlice';
+import { PageLayout, PageCard } from 'layouts/PageLayout';
 
-// Assets
+const BankCard = ({ bank, acctName, acctNumber, textColor, subColor, borderColor }) => {
+  const { onCopy, hasCopied } = useClipboard(acctNumber || '');
+  if (!bank) return null;
+  return (
+    <Box border='1px solid' borderColor={borderColor}
+      borderRadius='16px' p='20px' mb='16px'>
+      <Flex justify='space-between' align='center' mb='12px'>
+        <Text color={textColor} fontSize='sm' fontWeight='700'>{bank}</Text>
+        <Badge colorScheme='green' borderRadius='full' fontSize='10px'>Active</Badge>
+      </Flex>
+      <Divider borderColor={borderColor} mb='12px' />
+      <Flex justify='space-between' py='6px'>
+        <Text color={subColor} fontSize='xs'>Account Name</Text>
+        <Text color={textColor} fontSize='xs' fontWeight='600'>{acctName}</Text>
+      </Flex>
+      <Flex justify='space-between' align='center' py='6px'>
+        <Text color={subColor} fontSize='xs'>Account Number</Text>
+        <Flex align='center' gap='8px'>
+          <Text color={textColor} fontSize='sm' fontWeight='800' letterSpacing='1px'>
+            {acctNumber}
+          </Text>
+          <Button size='xs' variant='ghost' color='brand.500'
+            onClick={onCopy} leftIcon={<Icon as={hasCopied ? MdCheck : MdContentCopy} />}>
+            {hasCopied ? 'Copied' : 'Copy'}
+          </Button>
+        </Flex>
+      </Flex>
+    </Box>
+  );
+};
+
 export default function ManualPayment() {
-  const location = useLocation();
   const navigate = useNavigate();
-  
-  const dispatch = useDispatch()
-  const { payment, track_id, type, serviceCategory } = location.state || {};
+  const location = useLocation();
+  const dispatch = useDispatch();
+  const { companyBank, dLoading } = useSelector(state => state.companyBankInfo);
+  const { currentRate } = useSelector(state => state.exchangeRate);
+  const { user } = useSelector(state => state.authUser);
 
-  const [currentRate, setCurrentRate] = useState();
-  const [saleRate, setSaleRate] = useState();
-  const [buyRate, setBuyRate] = useState();
-  const [companyBank, setCompanyBank] = useState({});
-  const {user} = useSelector((state) => state.authUser)
-  const textColor = useColorModeValue('secondaryGray.900', 'white');
-  const textColorSecondary = useColorModeValue('secondaryGray.600', 'white');
-  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
+  const textColor = useColorModeValue('navy.700', 'white');
+  const subColor = useColorModeValue('gray.500', 'gray.400');
+  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
+  const infoBg = useColorModeValue('orange.50', 'navy.700');
+  const bannerGrad = useColorModeValue(
+    'linear-gradient(135deg, #4C5FD5 0%, #3D4EAA 100%)',
+    'linear-gradient(135deg, #1E2C5A 0%, #111c44 100%)'
+  );
 
-  const [value, setValue] = React.useState("");
-  const [fidelityValue, setFidelityValue] = React.useState("");
-  const { onCopy, hasCopied } = useClipboard(value);
-
-  const [paypalValue, setPaypalValue] = React.useState("");
-  const [payoneerValue, setPayoneerValue] = React.useState("");
-  const [bitcoinValue, setBitcoinValue] = React.useState("");
-
-  const { onCopy: fidelityCopy, hasCopied: fidelityCopied } = useClipboard(fidelityValue);
-  const { onCopy: copyPaypal, hasCopied: paypalCopied } = useClipboard(paypalValue);
-  const { onCopy: copyPayoneer, hasCopied: payoneerCopied } = useClipboard(payoneerValue);
-  const { onCopy: copyBitcoin, hasCopied: bitcoinCopied } = useClipboard(bitcoinValue);
-
-      //console.log("data: ", companyBank)
-
-   useEffect(() => {
-
-          const getCompanyBank = () =>{
-            dispatch(getCompanyBankInfo()).then((resData) =>{
-              //console.log("After Payment Status ", resData.payload)
-              if(resData.payload.msg ==='200')
-              {
-                const userDetails = resData.payload.bankData; 
-                setCompanyBank(userDetails)
-              }
-              }).catch((error) => {
-                console.error('Unexpected error:', error);
-              })
-          }
-          const getCurrentRate = () => {
-              dispatch(getExchangeRate()).then((successData) =>{
-            //console.log("After Payment Status ", successData.payload)
-            if(successData?.payload)
-            {
-              setCurrentRate(successData.payload)
-             }
-            }).catch((error) => {
-              console.error('Unexpected error:', error);
-            })
-          }
-      getCurrentRate()
-      getCompanyBank();
-    // appDetails()
-    }, [dispatch])
+  // Get amount from navigation state
+  const amount = location.state?.amount || '';
+  const serviceType = location.state?.serviceCategory || '';
 
   useEffect(() => {
+    dispatch(getCompanyBankInfo());
+    dispatch(getExchangeRate());
+  }, [dispatch]);
 
-    if(serviceCategory  === 'Payoneer')
-      {
-        const sell_rate = (payment * currentRate?.payoneer_selling)
-        const buy_rate = (payment * currentRate?.payoneer_buying)
-        setBuyRate(buy_rate)
-        setSaleRate(sell_rate)
-      }
-      else if(serviceCategory === 'Paypal')
-      {
-        const sell_rate = (payment * currentRate?.paypal_selling)
-        const buy_rate = (payment * currentRate?.paypal_buying)
-        setSaleRate(sell_rate)
-        setBuyRate(buy_rate)
-      }
-      else if(serviceCategory === 'Bitcoin')
-      {
-        const sell_rate = (payment * currentRate?.btc_selling)
-        const buy_rate = (payment * currentRate?.btc_buying)
-        setSaleRate(sell_rate)
-        setBuyRate(buy_rate)
-      }
-      else{
-        
-      }
-      // Zenith Bank Details
-      setValue(`
-        Bank Name: ${companyBank?.company_bank1 } \n
-        Account Name: ${companyBank?.company_acct_name1 } \n
-        Account Number: ${companyBank?.company_acct_number1 } \n
-        Use the following details for payment! For more information, contact support@ozaapp.com
-        `)
+  const nairaAmount = amount && currentRate?.paypal_buying
+    ? Number(amount) * Number(currentRate.paypal_buying)
+    : 0;
 
-        // Fidelity Bank Details
-        setFidelityValue(`
-        Bank Name: ${companyBank?.company_bank2 } \n
-        Account Name: ${companyBank?.company_acct_name2 } \n
-        Account Number: ${companyBank?.company_acct_number2 } \n
-        Use the following details for payment! For more information, contact support@ozaapp.com
-        `)
-
-        // Copy Paypal Details
-        setPaypalValue(`
-          Paypal Address: ${companyBank?.company_paypal_address } \n
-          Use the following details for payment! For more information please, contact support@ozaapp.com
-          `)
-
-          // Copy Payoneer Details
-        setPayoneerValue(`
-          Payoneer Address: ${companyBank?.company_payoneer_address } \n
-           Use the following details for payment! For more information please, contact support@ozaapp.com
-          `)
-
-          // Copy Bitcoin Details
-        setBitcoinValue(`
-          Bitcoin Address: ${companyBank?.company_btc_address } \n
-          Use the following details for payment! For more information please, contact support@ozaapp.com
-          `)
-   
-  }, [currentRate?.btc_selling, currentRate?.paypal_selling, currentRate?.payoneer_selling, payment, serviceCategory])
-
-  
-// Fidelity Bank Details
-  // set user share ID for copying here
-   // console.log('buy rate', currentRate)
-
-  // Chakra Color Mode
   return (
-    <Box pt={{ base: "80px", md: "80px", xl: "80px" }}>
-      {/* Main Fields */}
-      <Grid
-        mb='20px'
-        gridTemplateColumns={{ xl: "repeat(3, 1fr)", "2xl": "1fr 0.46fr" }}
-        gap={{ base: "20px", xl: "20px" }}
-        display={{ base: "block", xl: "grid" }}>
-        <Flex
-          flexDirection='column'
-          >
-          
-          <Flex direction='column'>
-          <Box p={5} shadow='md' borderWidth='1px' mb={10} ml={2} mr={2} borderRadius={15}>
-            <Heading fontSize='xl'>{'Payment Pending'}</Heading>
-            <Text mt={4} fontSize='16px'>Your request to {type ==='Funding'? 'fund your account': 'exchange'} <b>{type !=='Funding' && serviceCategory}</b> is currently pending! Once payment is received, your account will be credited immediately.</Text>
-            </Box>
-          </Flex>
-
-          <Flex direction='column'>
-             <Card px='0px' mb='20px'>
-            <PaymentSection data={track_id}
-            companyName={user.appData.app_name}/>
-          </Card>
-          </Flex>
+    <PageLayout>
+      {/* Banner */}
+      <Box bg={bannerGrad} borderRadius='20px' p='24px' mb='24px'
+        position='relative' overflow='hidden'>
+        <Box position='absolute' top='-30px' right='-30px'
+          w='120px' h='120px' borderRadius='full' bg='whiteAlpha.100' />
+        <Flex align='center' gap='12px' position='relative' zIndex='1'>
+          <Box w='44px' h='44px' borderRadius='12px' bg='whiteAlpha.200'
+            display='flex' alignItems='center' justifyContent='center'>
+            <Icon as={MdAccountBalance} color='white' w='22px' h='22px' />
+          </Box>
+          <Box>
+            <Text color='white' fontSize='lg' fontWeight='800'>Manual Bank Transfer</Text>
+            <Text color='whiteAlpha.700' fontSize='sm'>
+              Transfer to any of our accounts below
+            </Text>
+          </Box>
         </Flex>
-
-        <Flex direction='column'>
-             <Card px='0px' mb='20px'>
-             <Flex
-                direction="column"
-                w="100%"
-                overflowX={{ lg: 'hidden' }} >
-            <Flex
-                align={{ sm: 'flex-start', lg: 'center' }}
-                justify="space-between"
-                w="100%"
-                px="22px"
-                pb="20px"
-                mb="10px"
-                boxShadow="0px 40px 58px -20px rgba(112, 144, 176, 0.26)"
-            >
-                <Text color={'#aaa'} fontSize="xl" fontWeight="600">
-                    {type ==='Funding'? 'Amount Funding ':'Amount Exchanging'}
-                </Text>
-                {/* <Button variant="action">See all</Button> */}
-            </Flex>
-            <Box ml={5}>
-                <Flex direction={{ base: "column", "2xl": "row" }} mb={5} justifyContent='space-between' mr={5}>
-                  <Text mt={4} fontSize={type ==='Funding'? { base: "25px", lg:'20px' } : { base: "40px", lg:'35px' }} fontWeight='300'>{type ==='Funding'? 'In Naira' : (<DollarValueFormat value={payment}/>)}</Text>
-                  <Flex mt={4} fontSize={{ base: "40px", lg: '30px' }} fontWeight='300' alignItems="baseline">
-                  <Text mr={2}> Due</Text>{type === 'Funding' ? <NairaValueFormat value={payment} /> : type==='Sales'? <NairaValueFormat value={buyRate} /> : <NairaValueFormat value={saleRate} /> } </Flex>
-            
-                </Flex>
-            </Box>
-      {/* <Stack isInline>
-        <Avatar name="Dan Abrahmov" src="https://bit.ly/dan-abramov" />
-        <Avatar name="Kola Tioluwani" src="https://bit.ly/tioluwani-kolawole" />
-        <Avatar name="Kent Dodds" src="https://bit.ly/kent-c-dodds" />
-        <Avatar name="Ryan Florence" src="https://bit.ly/ryan-florence" />
-        <Avatar name="Prosper Otemuyiwa" src="https://bit.ly/prosper-baba" />
-        <Avatar name="Christian Nwamba" src="https://bit.ly/code-beast" />
-        <Avatar name="Segun Adebayo" src="https://bit.ly/sage-adebayo" />
-    </Stack> */}
-    
-        </Flex>
-          </Card>
-        </Flex>
-        
-        <Flex
-          flexDirection='column'
-          gridArea={{ xl: "1 / 3 / 2 / 4", "2xl": "1 / 2 / 2 / 3" }}>
-        </Flex>
-      </Grid>
-      {/* Delete Product */}
-      <Box width={{ base: "100%", lg: "68%" }}>
-        <Accordion allowToggle>
-                    <AccordionItem>
-                        <AccordionButton _expanded={{ bg: "#5464c4", color: "white" }}>
-                        <Box flex="1" textAlign="left" fontSize={{ base: "25px", lg: "22px" }}>
-                            View Company Payment Details
-                        </Box>
-                        <AccordionIcon />
-                        </AccordionButton>
-                        <AccordionPanel>
-                        <Box mt="20px" backgroundColor='#FFF' width={{ base: "100%", lg: "60%", md:'60%' }}>
-                          {/* Pagination overlay loader */}
-                          <Table variant="simple" color="gray.100" mt="12px">
-                            <Tbody>
-                              {(type ==='Funding' || type==='Buy') && type !=='Sales' ?
-                              <p>
-                              <Td width="100%">
-                                  <Flex justifyContent="space-between" alignItems="center">
-                                    <Text fontSize="20px" color="#222" fontWeight="bold">
-                                      {companyBank.company_bank1}
-                                    </Text>
-                                    <Text fontSize="20px" color="#222" fontWeight="bold"
-                                      onClick={onCopy} cursor='pointer'>
-                                      {hasCopied ? "Copied" : <CopyIcon />}
-                                    </Text>
-                                  </Flex>
-                                </Td>
-                                <Tr>
-                                <Th borderColor={borderColor}>Account Name</Th>
-                                  <Td fontSize="sm" color={textColor} borderColor={borderColor}>
-                                    {companyBank?.company_acct_name1}
-                                </Td>
-                                </Tr>
-                                <Tr>
-                                <Th borderColor={borderColor}>Account Number</Th>
-                                  <Td fontSize="sm" color={textColor} borderColor={borderColor}>
-                                    {companyBank.company_acct_number1}
-                                </Td>
-                                </Tr>
-                                <Tr>
-                                <Th borderColor={borderColor}>Bank Name</Th>
-                                  <Td fontSize="sm" color={textColor} borderColor={borderColor}>
-                                    {companyBank.company_bank1}
-                                </Td>
-                                </Tr>
-                                
-                                <Td width="100%">
-                                  <Flex justifyContent="space-between" alignItems="center">
-                                    <Text fontSize="20px" color="#222" fontWeight="bold">
-                                      {companyBank.company_bank2}
-                                    </Text>
-                                    <Text fontSize="20px" color="#222" fontWeight="bold"
-                                    onClick={fidelityCopy} cursor='pointer'>
-                                      {fidelityCopied ? "Copied" : <CopyIcon />}
-                                    </Text>
-                                  </Flex>
-                                
-                              </Td>
-                              <Tr>
-                                <Th borderColor={borderColor}>Account Name</Th>
-                                  <Td fontSize="sm" color={textColor} borderColor={borderColor}>
-                                    {companyBank.company_acct_name2}
-                                </Td>
-                                </Tr>
-                                <Tr>
-                                <Th borderColor={borderColor}>Account Number</Th>
-                                  <Td fontSize="sm" color={textColor} borderColor={borderColor}>
-                                  {companyBank.company_acct_number2}
-                                </Td>
-                                </Tr>
-                                <Tr>
-                                <Th borderColor={borderColor}>Bank Name</Th>
-                                  <Td fontSize="sm" color={textColor} borderColor={borderColor}>
-                                  {companyBank.company_bank2}
-                                </Td>
-                                </Tr>
-                              </p> :''
-                              }
-                                {type !=='Funding' && type !=='Buy' && type ==='Sales'?
-                                <p>
-                                {serviceCategory ==='Paypal' &&
-                                <Tr>
-                                <Th borderColor={borderColor} width="100%" fontSize="18px"
-                                  fontWeight="700">Paypal Address</Th>
-                                  <Td fontSize="sm" color={textColor} borderColor={borderColor}>
-                                  <Flex justifyContent="space-between" alignItems="center">
-                                    <Text> {companyBank?.company_paypal_address} </Text>
-                                   <Text  onClick={copyPaypal} cursor='pointer' ml={6}>
-                                  {paypalCopied ? "Copied" : <CopyIcon />}</Text>
-                                  </Flex>
-                                </Td>
-                                </Tr>
-                                }
-                                {serviceCategory ==='Payoneer' &&
-                                <Tr>
-                                <Th borderColor={borderColor} fontSize="18px"
-                                  fontWeight="700">Payoneer Address</Th>
-                                  <Td fontSize="sm" color={textColor} borderColor={borderColor}>
-                                  <Flex justifyContent="space-between" alignItems="center">
-                                    <Text> {companyBank?.company_payoneer_address} </Text>
-                                   <Text  onClick={copyPayoneer} cursor='pointer' ml={6}>
-                                  {payoneerCopied ? "Copied" : <CopyIcon />}</Text>
-                                  </Flex>
-                                </Td>
-                                </Tr>
-                                }
-                                {serviceCategory==='Bitcoin' &&
-                                <Tr>
-                                <Th borderColor={borderColor} fontSize="18px"
-                                  fontWeight="700">Bitcoin Address</Th>
-                                  <Td fontSize="sm" color={textColor} borderColor={borderColor}>
-                                  <Flex justifyContent="space-between" alignItems="center">
-                                    <Text> {companyBank?.company_btc_address} </Text>
-                                   <Text  onClick={copyBitcoin} cursor='pointer' ml={6}>
-                                  {bitcoinCopied ? "Copied" : <CopyIcon />}</Text>
-                                  </Flex>
-                                   
-                                </Td>
-                                  
-                                </Tr>
-                                }
-                                </p>:''
-                                }
-                                
-                            </Tbody>
-                          </Table>
-                  
-                          {/* Pagination controls */}
-                          
-                  </Box>
-                </AccordionPanel>
-                </AccordionItem>
-        </Accordion>
       </Box>
-       <Flex direction={{ base: "column", "2xl": "row" }} alignItems="center" justifyContent='center' mr={{ base: "column", lg: "400px" }} mb='20px'>
-                          <Button
-                              bg={'#5464c4'}
-                              color='white'
-                              width={{ base: "80%", lg: "30%" }}
-                              height='50px'
-                              border="2px"
-                              borderWidth={2}
-                              borderColor="#FFF"
-                              _hover={{ bg: "#5363CE", color: "#fff" }}
-                                _active={{ bg: "white" }}
-                                _focus={{ bg: "#5464c4" }}
-                              fontWeight='500'
-                                fontSize='14px'
-                                 mt={20}
-                                 onClick={() => navigate('/user/payment-proof', {
-                                  state: {
-                                    amt:payment,
-                                    track_id: track_id,
-                                    serviceType: type,
-                                    serviceCategory: '',
-                                  }
-                                 }) }>
-                              I'v made payment
-                            </Button>
-                            
+
+      <SimpleGrid columns={{ base: 1, lg: 2 }} gap='20px'>
+        {/* Bank Details */}
+        <PageCard p='24px'>
+          <Text color={textColor} fontWeight='700' fontSize='md' mb='4px'>
+            Our Bank Accounts
+          </Text>
+          <Text color={subColor} fontSize='xs' mb='20px'>
+            Transfer to any of the accounts below and upload your proof of payment
+          </Text>
+
+          {dLoading ? (
+            <Flex justify='center' py='24px'><Spinner color='brand.500' /></Flex>
+          ) : (
+            <>
+              <BankCard
+                bank={companyBank?.company_bank1}
+                acctName={companyBank?.company_acct_name1}
+                acctNumber={companyBank?.company_acct_number1}
+                textColor={textColor} subColor={subColor} borderColor={borderColor}
+              />
+              <BankCard
+                bank={companyBank?.company_bank2}
+                acctName={companyBank?.company_acct_name2}
+                acctNumber={companyBank?.company_acct_number2}
+                textColor={textColor} subColor={subColor} borderColor={borderColor}
+              />
+              <BankCard
+                bank={companyBank?.company_bank3}
+                acctName={companyBank?.company_acct_name3}
+                acctNumber={companyBank?.company_acct_number3}
+                textColor={textColor} subColor={subColor} borderColor={borderColor}
+              />
+            </>
+          )}
+
+          <Button
+            w='100%' h='50px' mt='8px'
+            bg='brand.500' color='white'
+            borderRadius='12px' fontWeight='700'
+            _hover={{ bg: 'brand.600' }}
+            onClick={() => navigate('/user/payment-proof', { state: location.state })}>
+            I Have Made Payment →
+          </Button>
+        </PageCard>
+
+        {/* Info */}
+        <Flex direction='column' gap='16px'>
+          {/* Transaction Summary */}
+          {amount && (
+            <PageCard p='24px'>
+              <Text color={textColor} fontWeight='700' fontSize='sm' mb='16px'>
+                Transaction Summary
+              </Text>
+              {[
+                { label: 'Service', value: serviceType || '—' },
+                { label: 'Amount (USD)', value: `$${Number(amount).toLocaleString()}` },
+                { label: 'Exchange Rate', value: `₦${Number(currentRate?.paypal_buying || 0).toLocaleString()}/$` },
+                { label: 'You Pay (NGN)', value: `₦${nairaAmount.toLocaleString()}` },
+              ].map((item, i) => (
+                <Flex key={i} justify='space-between' py='10px'
+                  borderBottom={i < 3 ? '1px solid' : 'none'} borderColor={borderColor}>
+                  <Text color={subColor} fontSize='sm'>{item.label}</Text>
+                  <Text color={i === 3 ? 'brand.500' : textColor}
+                    fontSize='sm' fontWeight={i === 3 ? '800' : '600'}>
+                    {item.value}
+                  </Text>
+                </Flex>
+              ))}
+            </PageCard>
+          )}
+
+          {/* Instructions */}
+          <PageCard p='24px'>
+            <Flex align='center' gap='8px' mb='12px'>
+              <Icon as={MdInfo} color='orange.400' w='18px' h='18px' />
+              <Text color={textColor} fontWeight='700' fontSize='sm'>
+                Payment Instructions
+              </Text>
+            </Flex>
+            {[
+              'Transfer exact amount to any account above',
+              'Use your Tag ID as payment narration',
+              'Take a screenshot of your transfer receipt',
+              'Click "I Have Made Payment" to upload proof',
+              'Admin will verify and process within 1-24 hours',
+            ].map((step, i) => (
+              <Flex key={i} align='flex-start' gap='10px' mb='10px'>
+                <Box w='20px' h='20px' borderRadius='full'
+                  bg='brand.500' display='flex' alignItems='center'
+                  justifyContent='center' flexShrink='0'>
+                  <Text color='white' fontSize='10px' fontWeight='800'>{i + 1}</Text>
+                </Box>
+                <Text color={subColor} fontSize='sm'>{step}</Text>
+              </Flex>
+            ))}
+          </PageCard>
+
+          {/* Tag ID reminder */}
+          <Box bg={infoBg} borderRadius='16px' p='16px'>
+            <Text color={textColor} fontSize='xs' fontWeight='700' mb='4px'>
+              Your Tag ID (Use as narration)
+            </Text>
+            <Text color='brand.500' fontSize='xl' fontWeight='800' letterSpacing='2px'>
+              {user?.userData?.tag_id || '—'}
+            </Text>
+          </Box>
         </Flex>
-            
-        </Box>
+      </SimpleGrid>
+    </PageLayout>
   );
 }

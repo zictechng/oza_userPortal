@@ -1,11 +1,7 @@
-
 import React from 'react';
-import {
-  Box, Flex, Text, useColorModeValue,
-} from '@chakra-ui/react';
+import { Box, Flex, Text, useColorModeValue } from '@chakra-ui/react';
 
-// Reusable page wrapper — consistent layout across all pages
-// Removes need for each page to define its own header
+// Reusable page wrapper
 export const PageLayout = ({ children, noPadding = false }) => {
   const bg = useColorModeValue('gray.100', 'navy.900');
   return (
@@ -20,17 +16,17 @@ export const PageLayout = ({ children, noPadding = false }) => {
   );
 };
 
-// Reusable card with proper shadow and border
+// Reusable card with clear shadow and border
 export const PageCard = ({ children, p = '24px', ...rest }) => {
   const cardBg = useColorModeValue('white', 'navy.800');
-  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.100');
+  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
   return (
     <Box
       bg={cardBg}
       borderRadius='20px'
       border='1px solid'
       borderColor={borderColor}
-      boxShadow='0 1px 4px rgba(0,0,0,0.07), 0 4px 16px rgba(0,0,0,0.05)'
+      boxShadow='0 2px 12px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.06)'
       p={p}
       {...rest}>
       {children}
@@ -38,7 +34,7 @@ export const PageCard = ({ children, p = '24px', ...rest }) => {
   );
 };
 
-// Section header inside a page — no duplicate with navbar
+// Section title
 export const PageSection = ({ title, subtitle, action }) => {
   const textColor = useColorModeValue('navy.700', 'white');
   const subColor = useColorModeValue('gray.500', 'gray.400');
