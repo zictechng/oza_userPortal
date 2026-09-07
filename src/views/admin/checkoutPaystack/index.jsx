@@ -1,324 +1,182 @@
-import React, {useState, useEffect, useRef} from "react";
-
-// Chakra imports
+import React, { useState, useEffect, useRef } from 'react';
 import {
-  Box,
-  Flex,
-  Grid,
-  Heading, 
-  Text,
-  useToast,
-  Spinner,
-  Button,
-  VStack
-} from "@chakra-ui/react";
-
-// Custom components
-import Card from "components/card/Card.js";
+  Box, Flex, Text, Button, Icon,
+  useColorModeValue, Spinner, SimpleGrid,
+  Badge,
+} from '@chakra-ui/react';
+import { MdPayment, MdCheckCircle, MdLock } from 'react-icons/md';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
-import { PaystackButton } from 'react-paystack'
-import { paystackFundData , resetPaystackState} from "storeMtg/fundAccountPaysackSlice";
-import { getPaymentGateStatus, resetPaymentGatewayState } from "storeMtg/checkPaymentGatewayStatusSlice";
-import { buyFundData, resetBuyState } from "storeMtg/fundBuySlice";
-// Assets
+import { PaystackButton } from 'react-paystack';
+import { paystackFundData, resetPaystackState } from 'storeMtg/fundAccountPaysackSlice';
+import { getPaymentGateStatus, resetPaymentGatewayState } from 'storeMtg/checkPaymentGatewayStatusSlice';
+import { buyFundData, resetBuyState } from 'storeMtg/fundBuySlice';
+import { useToast } from '@chakra-ui/react';
+import { PageLayout, PageCard } from 'layouts/PageLayout';
+
 export default function CheckoutPaystack() {
-  // Chakra Color Mode
   const location = useLocation();
   const navigate = useNavigate();
-  const dispatch = useDispatch()
+  const dispatch = useDispatch();
   const toast = useToast();
-  const {user} = useSelector((state) => state.authUser)
-  const { reference, email, amount, note, actualPayment, serviceType, serviceCategory } = location.state || {};
+  const { user } = useSelector(state => state.authUser);
+
+  const {
+    reference, email, amount, note,
+    actualPayment, serviceType, serviceCategory,
+  } = location.state || {};
 
   const PaystackDemoKey = process.env.REACT_APP_PAYSTACK_DEMO_KEY;
   const paystackButtonRef = useRef(null);
-  const autoPaystackButtonRef = useRef(null);
   const [btnLoader, setBtnLoader] = useState(false);
   const [pageLoader, setPageLoader] = useState(false);
   const [isPaymentTriggered, setIsPaymentTriggered] = useState(false);
-  
 
-      // close paystack payment modal here
-      const handlePaystackClose = () => {
-        console.log('closed')
-        toast({
-          title: "error!",
-          description: "Transaction has been cancelled",
-          status: "warning",
-          duration: 5000,
-          isClosable: true,
-          position: "top",
-        });
-        setBtnLoader(false)
-        setIsPaymentTriggered(false)
-        setPageLoader(false)
-      return false;
-      }
+  const textColor = useColorModeValue('navy.700', 'white');
+  const subColor = useColorModeValue('gray.500', 'gray.400');
+  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
+  const successBg = useColorModeValue('green.50', 'navy.700');
+  const bannerGrad = useColorModeValue(
+    'linear-gradient(135deg, #4C5FD5 0%, #6C5CE7 100%)',
+    'linear-gradient(135deg, #1E2C5A 0%, #2D3A6A 100%)'
+  );
 
-        useEffect(() => {
-          setPageLoader(true);
-          setTimeout(() => {
-            if (!isPaymentTriggered) {
-              callPaystack(); // Try automatic payment
-            }
-          }, 1000);
-        }, []);
-        
-        const handlePaystackClick = () => {
-          setBtnLoader(true); 
-          paystackButtonRef.current.querySelector("button").click();
-        };
+  useEffect(() => {
+    dispatch(getPaymentGateStatus());
+    return () => dispatch(resetPaymentGatewayState());
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
-        const callPaystack = () => {
-          
-          if (autoPaystackButtonRef.current) {
-            const paystackBtn = autoPaystackButtonRef.current.querySelector("button");
-            if (paystackBtn) {
-              paystackBtn.click();
-              setIsPaymentTriggered(true);
-            }
-          }
-        };
+  const handleSuccess = (res) => {
+    setBtnLoader(true);
+    if (serviceType === 'Buy') {
+      const buyData = {
+        buy_service: serviceCategory,
+        buy_amount: actualPayment,
+        buy_nairaTotal: amount / 100,
+        user_id: user?.userData?._id,
+        tag_id: user?.userData?.tag_id,
+        paystack_reference: res.reference,
+      };
+      dispatch(buyFundData(buyData)).then(result => {
+        dispatch(resetBuyState());
+        navigate('/user/success', { state: { reference: res.reference } });
+      });
+    } else {
+      const fundData = {
+        amt: amount / 100,
+        user_id: user?.userData?._id,
+        paystack_reference: res.reference,
+      };
+      dispatch(paystackFundData(fundData)).then(result => {
+        dispatch(resetPaystackState());
+        navigate('/user/success', { state: { reference: res.reference } });
+      });
+    }
+  };
 
-          const config = {
-            reference: reference,
-            email: email,
-            amount: amount, 
-            publicKey: PaystackDemoKey,
-          };
+  const handleClose = () => {
+    toast({
+      title: 'Payment cancelled',
+      description: 'You closed the payment window.',
+      status: 'warning',
+      duration: 3000,
+    });
+  };
 
-        const componentProps = {
-          ...config,
-          text: 'Pay Now',
-            onSuccess: (reference) => handlePaystackSuccess(reference),
-            onClose: handlePaystackClose,
-          };
-
-        const handlePaystackSuccess = (reference) => {
-            //console.log("Pay Success", reference);
-            setBtnLoader(false);
-                  if(serviceType ==='Funding')
-                  {
-                    const userData ={
-                      tag_id: user.userData?.tag_id,
-                      serviceName: 'Account Funding',
-                      serviceCategory: 'Exchange',
-                      method: 'Paystack Checkout',
-                      total_money: actualPayment,
-                      payId: reference.reference,
-                      amt: actualPayment,
-                      note: note
-                    };
-                    //navigate('/user/success')
-                      dispatch(paystackFundData(userData))
-                      .then((successData) =>{
-                        if(successData.payload.msg ==='200')
-                            {
-                              // toast({
-                              //   title: "Success!",
-                              //   description: "Transaction was successful.",
-                              //   status: "success",
-                              //   duration: 5000,
-                              //   isClosable: true,
-                              //   position: "top",
-                              // });
-                              dispatch(resetPaymentGatewayState())
-                              dispatch(resetPaystackState())
-                              setPageLoader(false);
-                             navigate('/user/success')
-                            }
-                          else if (successData.payload.status ==='401')
-                              {
-                                toast({
-                                  title: "Error!",
-                                  description: "Failed to authenticate.",
-                                  status: "warning",
-                                  duration: 5000,
-                                  isClosable: true,
-                                  position: "top",
-                                });
-                                dispatch(resetPaymentGatewayState())
-                                dispatch(resetPaystackState())
-                                dispatch(resetPaymentGatewayState())
-                              }
-                            else if (successData.payload.status === 403)
-                                {
-                                  toast({
-                                    title: "Error! Payment Failed",
-                                    description: successData.payload.message,
-                                    status: "warning",
-                                    duration: 5000,
-                                    isClosable: true,
-                                    position: "top",
-                                  });
-                                  dispatch(resetPaymentGatewayState())
-                                  dispatch(resetPaystackState())
-                                  dispatch(resetPaymentGatewayState())
-                                  return
-                                }
-                              else if (successData.payload.status ==='500')
-                                {
-                                toast({
-                                  title: "Error!",
-                                  description: successData.payload.message,
-                                  status: "warning",
-                                  duration: 5000,
-                                  isClosable: true,
-                                  position: "top",
-                                });
-                                dispatch(resetPaymentGatewayState())
-                                dispatch(resetPaystackState())
-                                dispatch(resetPaymentGatewayState())
-                                }
-                              }).catch((error) => {
-                                console.error('Unexpected error:', error);
-                                setPageLoader(false);
-                                setBtnLoader(false);
-                            });
-                        }
-
-                    else if (serviceType ==='Buy')
-                        {
-                        const userData ={
-                          tag_id: user.userData?.tag_id,
-                          serviceName: serviceCategory,
-                          serviceCategory: `Exchange`,
-                          method: 'Paystack Checkout',
-                          total_money: actualPayment,
-                          buy_amt: actualPayment,
-                          payId: reference.reference,
-                          buy_note: note,
-                          serviceType:'Buy'
-                        };
-                        dispatch(buyFundData(userData))
-                        .then((successData) =>{
-                          //console.log("After Payment Status ", successData.payload)
-                          if(successData.payload.msg ==='200')
-                          {
-                            dispatch(resetPaymentGatewayState())
-                            dispatch(resetBuyState())
-                            navigate("/user/success")
-                            }
-                            else if (successData.payload.msg !=='200')
-                                {
-                                toast({
-                                  title: "Error!",
-                                  description: successData.payload.message,
-                                  status: "warning",
-                                  duration: 5000,
-                                  isClosable: true,
-                                  position: "top",
-                                  });
-                                return false
-                                }
-                          }).catch((error) => {
-                            console.error('Unexpected error:', error);
-                          })
-                        }
-                    else{
-                      toast({
-                        title: "Error!",
-                        description: 'Transaction not recognized',
-                        status: "warning",
-                        duration: 5000,
-                        isClosable: true,
-                        position: "top",
-                      });
-                      navigate('/user')
-                    }
-                  }
+  const paystackConfig = {
+    email: email || user?.userData?.email || '',
+    amount: Number(amount) || 0,
+    publicKey: PaystackDemoKey || '',
+    reference: reference || '',
+    onSuccess: handleSuccess,
+    onClose: handleClose,
+  };
 
   return (
-    <Box pt={{ base: "80px", md: "80px", xl: "80px" }}>
-      {/* Main Fields */}
-      <Grid
-        mb='20px'
-        gridTemplateColumns={{ xl: "repeat(3, 1fr)", "2xl": "1fr 0.46fr" }}
-        gap={{ base: "20px", xl: "20px" }}
-        display={{ base: "block", xl: "grid" }}>
-        <Flex
-          flexDirection='column'
-          >
-          
-          <Flex direction='column'>
-          <Box p={5} shadow='md' borderWidth='1px' mb={10} ml={2} mr={2} bg='white' borderRadius='15'>
-            <Heading fontSize='xl' color={'#aaa'}>{'Paystack Checkout'}</Heading>
-            <Text mt={4} fontSize='18px'>Please wait as Paystack authorized your transaction and do not close this window. <br/>
-            If the payment page didn't display please, click the button continue with Paystack and re-try</Text>
-            </Box>
-          </Flex>
+    <PageLayout>
+      <Flex justify='center'>
+        <Box maxW='480px' w='100%'>
+          {/* Banner */}
+          <Box bg={bannerGrad} borderRadius='20px' p='24px' mb='24px'
+            position='relative' overflow='hidden'>
+            <Box position='absolute' top='-30px' right='-30px'
+              w='100px' h='100px' borderRadius='full' bg='whiteAlpha.100' />
+            <Flex align='center' gap='12px' position='relative' zIndex='1'>
+              <Box w='44px' h='44px' borderRadius='12px' bg='whiteAlpha.200'
+                display='flex' alignItems='center' justifyContent='center'>
+                <Icon as={MdPayment} color='white' w='22px' h='22px' />
+              </Box>
+              <Box>
+                <Text color='white' fontSize='lg' fontWeight='800'>Complete Payment</Text>
+                <Text color='whiteAlpha.700' fontSize='sm'>Secured by PayStack</Text>
+              </Box>
+            </Flex>
+          </Box>
 
-          <Flex alignItems="center" justifyContent='center' mb='20px'>
-             <Card px='0px' mb='20px'>
-                
-                <Box position="relative" mt="20px">
-                  {pageLoader && (
-                    <Flex
-                      position="absolute"
-                      top={5}
-                      left={0}
-                      width="100%"
-                      height="100%"
-                      bg="rgba(255, 255, 255, 0.8)"
-                      justify="center"
-                      align="center"
-                      zIndex={10}>
-                        
-                      <VStack spacing={3}> {/* Stack for vertical alignment */}
-                        <Spinner size="lg" />
-                        <Text mb={8}>Waiting...</Text>
-                      </VStack>
-                    </Flex>
-                  )}
-                </Box>
-                
-            <Flex direction={{ base: "column", "2xl": "row" }} alignItems="center" justifyContent='center' mr={{ base: "column", lg: "400px" }} mb='20px'>
-                  {!isPaymentTriggered && !pageLoader &&
-                  <Box
-                    as="button"
-                    bg="transparent"
-                    color="#000"
-                    fontWeight="500"
-                    fontSize="14px"
-                    py="10px"
-                    px="27px"
-                    me="38px"
-                    borderRadius="15px"
-                    borderColor="#5464c4"
-                    borderWidth="2px" /* Adjusted for a more subtle border */
-                    transition="background-color 0.3s"
-                    _hover={{ bg: "#5464c4", color: "#FFFFFF"}}
-                    _active={{ bg: "#5464c4" }}
-                    _focus={{ bg: "#5363CE", outline: "none" }} /* Corrected outline styling */
-                    width={{ md: "40%", lg: "40%", base: "80%", sm:'80%', '': '80%' }}
-                    disabled={btnLoader} // Disable button when loading
-                    onClick={handlePaystackClick}>
-                    {btnLoader ? <Text><Spinner _hover={btnLoader ? {color: "#FFF"} : {color:'#5464c4'}} animationDuration="0.8s" size="sm" /> Waiting</Text>
-                    : 'Continue with Paystack' } 
-                    
-                    {/* Hidden PaystackButton */}
-                      <Box ref={paystackButtonRef} style={{ display: "none" }}>
-                        <PaystackButton {...componentProps} />
-                      </Box>
-                </Box>
-                }     
-                <Box ref={autoPaystackButtonRef} style={{ display: "none" }}>
-                    <PaystackButton {...componentProps} />
-                </Box>
-                             
-              </Flex> 
-          </Card>
-          </Flex>
-        </Flex>
+          <PageCard p='28px'>
+            {/* Order Summary */}
+            <Text color={textColor} fontWeight='700' fontSize='md' mb='16px'>
+              Order Summary
+            </Text>
+            {[
+              { label: 'Service', value: serviceCategory || serviceType || '—' },
+              { label: 'Amount', value: actualPayment ? `$${Number(actualPayment).toLocaleString()}` : '—' },
+              { label: 'Reference', value: reference || '—' },
+            ].map((item, i) => (
+              <Flex key={i} justify='space-between' py='12px'
+                borderBottom='1px solid' borderColor={borderColor}>
+                <Text color={subColor} fontSize='sm'>{item.label}</Text>
+                <Text color={textColor} fontSize='sm' fontWeight='600'>{item.value}</Text>
+              </Flex>
+            ))}
 
-        <Flex
-          flexDirection='column'
-          gridArea={{ xl: "1 / 3 / 2 / 4", "2xl": "1 / 2 / 2 / 3" }}>
-        </Flex>
-      </Grid>
-      {/* Delete Product */}
-      
-    </Box>
+            {/* Total */}
+            <Flex justify='space-between' align='center' py='16px' mb='24px'>
+              <Text color={textColor} fontSize='sm' fontWeight='700'>Total (NGN)</Text>
+              <Text color='brand.500' fontSize='xl' fontWeight='800'>
+                ₦{Number((amount || 0) / 100).toLocaleString()}
+              </Text>
+            </Flex>
+
+            {/* PayStack Button */}
+            {pageLoader ? (
+              <Flex justify='center' py='20px'><Spinner color='brand.500' /></Flex>
+            ) : (
+              <Box>
+                <PaystackButton
+                  {...paystackConfig}
+                  className='paystack-button'
+                  style={{
+                    width: '100%',
+                    height: '52px',
+                    backgroundColor: '#4C5FD5',
+                    color: 'white',
+                    borderRadius: '12px',
+                    fontWeight: '700',
+                    fontSize: '16px',
+                    border: 'none',
+                    cursor: 'pointer',
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'center',
+                    gap: '8px',
+                  }}
+                  text={btnLoader ? 'Processing...' : '🔒 Pay Now with PayStack'}
+                />
+              </Box>
+            )}
+
+            {/* Security note */}
+            <Flex align='center' justify='center' gap='8px' mt='16px'>
+              <Icon as={MdLock} color={subColor} w='14px' h='14px' />
+              <Text color={subColor} fontSize='xs'>
+                Your payment is secured and encrypted by PayStack
+              </Text>
+            </Flex>
+          </PageCard>
+        </Box>
+      </Flex>
+    </PageLayout>
   );
 }

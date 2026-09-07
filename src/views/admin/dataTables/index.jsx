@@ -1,9 +1,8 @@
 import React from 'react';
-import { Box } from '@chakra-ui/react';
-import { PageLayout } from 'layouts/PageLayout';
 import HistoryContent from 'views/admin/history/index';
 
-// Transactions page reuses History with full data
+// Transactions page — uses same component as History
+// Shows full paginated transaction list
 export default function Transactions() {
   return <HistoryContent />;
 }
