@@ -57,13 +57,15 @@ export default function Withdraw() {
             <Flex align='center' gap='8px' mb='8px'>
               <Icon as={MdArrowDownward} color='red.500' w='18px' h='18px' />
               <Text color={textColor} fontSize='sm' fontWeight='700'>
-                Available Balance
+                Bonus Wallet Balance
               </Text>
             </Flex>
             <Text color='red.500' fontSize='xl' fontWeight='800'>
-              ₦{Number(user?.userData?.amount || 0).toLocaleString()}
+              ₦{Number(user?.userData?.all_bonus_acct || 0).toLocaleString()}
             </Text>
-            <Text color={subColor} fontSize='xs' mt='4px'>Main wallet balance</Text>
+            <Text color={subColor} fontSize='sm' mt='4px'>
+              Withdrawals are processed from your bonus wallet
+            </Text>
           </Box>
 
           <PageCard p='24px'>

@@ -1,15 +1,17 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box, Flex, Text, Button, Icon, SimpleGrid,
   useColorModeValue, Divider, useClipboard,
-  Badge, Spinner,
+  Badge, Spinner, CircularProgress, CircularProgressLabel,
 } from '@chakra-ui/react';
-import { MdContentCopy, MdCheck, MdAccountBalance, MdInfo } from 'react-icons/md';
+import { MdContentCopy, MdCheck, MdAccountBalance, MdInfo, MdWarning } from 'react-icons/md';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { getCompanyBankInfo } from 'storeMtg/getCompanyBankInfoSlice';
 import { getExchangeRate } from 'storeMtg/exchangeRateSlice';
 import { PageLayout, PageCard } from 'layouts/PageLayout';
+
+const COUNTDOWN_MINUTES = 30;
 
 const BankCard = ({ bank, acctName, acctNumber, textColor, subColor, borderColor }) => {
   const { onCopy, hasCopied } = useClipboard(acctNumber || '');
@@ -46,31 +48,79 @@ export default function ManualPayment() {
   const navigate = useNavigate();
   const location = useLocation();
   const dispatch = useDispatch();
-  const { companyBank, dLoading } = useSelector(state => state.companyBankInfo);
-  const { currentRate } = useSelector(state => state.exchangeRate);
+  const { data: bankInfo, cLoading: dLoading } = useSelector(state => state.companyBankInfo);
+  const { data: currentRate } = useSelector(state => state.exchangeRate);
   const { user } = useSelector(state => state.authUser);
+
+  const companyBank = bankInfo?.bankData;
 
   const textColor = useColorModeValue('navy.700', 'white');
   const subColor = useColorModeValue('gray.500', 'gray.400');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
   const infoBg = useColorModeValue('orange.50', 'navy.700');
+  const timerBg = useColorModeValue('red.50', 'navy.700');
+  const timerTrackColor = useColorModeValue('gray.100', 'navy.700');
   const bannerGrad = useColorModeValue(
     'linear-gradient(135deg, #4C5FD5 0%, #3D4EAA 100%)',
     'linear-gradient(135deg, #1E2C5A 0%, #111c44 100%)'
   );
 
-  // Get amount from navigation state
-  const amount = location.state?.amount || '';
-  const serviceType = location.state?.serviceCategory || '';
+  
+
+  // Read state from navigation
+  const {
+    payment: amount,
+    track_id: reference,
+    type: serviceType,
+    serviceCategory,
+  } = location.state || {};
+
+  const hasTransactionInfo = Boolean(amount);
+
+  // Countdown timer — 30 minutes
+  const [timeLeft, setTimeLeft] = useState(COUNTDOWN_MINUTES * 60);
+  const [timerExpired, setTimerExpired] = useState(false);
+
+
+  // Timer color — declared after state so timerExpired is accessible
+  const timerColor = timerExpired
+    ? 'red.500'
+    : timeLeft < 120
+    ? 'red.400'
+    : timeLeft < 300
+    ? 'orange.400'
+    : 'green.400';
+
+  useEffect(() => {
+    if (!hasTransactionInfo) return;
+    const timer = setInterval(() => {
+      setTimeLeft(prev => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          setTimerExpired(true);
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+    return () => clearInterval(timer);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [hasTransactionInfo]);
+
+  const minutes = Math.floor(timeLeft / 60);
+  const seconds = timeLeft % 60;
+  const timerPercent = (timeLeft / (COUNTDOWN_MINUTES * 60)) * 100;
+
+  const nairaAmount = Number(amount || 0);
+  const dollarEquivalent = currentRate?.paypal_buying && nairaAmount > 0
+    ? (nairaAmount / Number(currentRate.paypal_buying)).toFixed(2)
+    : 0;
 
   useEffect(() => {
     dispatch(getCompanyBankInfo());
     dispatch(getExchangeRate());
-  }, [dispatch]);
-
-  const nairaAmount = amount && currentRate?.paypal_buying
-    ? Number(amount) * Number(currentRate.paypal_buying)
-    : 0;
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   return (
     <PageLayout>
@@ -125,6 +175,30 @@ export default function ManualPayment() {
                 acctNumber={companyBank?.company_acct_number3}
                 textColor={textColor} subColor={subColor} borderColor={borderColor}
               />
+              {companyBank?.company_momoAccount && (
+                <Box border='1px solid' borderColor={borderColor}
+                  borderRadius='16px' p='20px' mb='16px'>
+                  <Flex justify='space-between' align='center' mb='12px'>
+                    <Text color={textColor} fontSize='sm' fontWeight='700'>
+                      Mobile Money (MoMo)
+                    </Text>
+                    <Badge colorScheme='green' borderRadius='full' fontSize='10px'>Active</Badge>
+                  </Flex>
+                  <Divider borderColor={borderColor} mb='12px' />
+                  <Flex justify='space-between' align='center' py='6px'>
+                    <Text color={subColor} fontSize='xs'>MoMo Number</Text>
+                    <Flex align='center' gap='8px'>
+                      <Text color={textColor} fontSize='sm' fontWeight='800' letterSpacing='1px'>
+                        {companyBank?.company_momoAccount}
+                      </Text>
+                      <Button size='xs' variant='ghost' color='brand.500'
+                        onClick={() => navigator.clipboard.writeText(companyBank?.company_momoAccount)}>
+                        Copy
+                      </Button>
+                    </Flex>
+                  </Flex>
+                </Box>
+              )}
             </>
           )}
 
@@ -138,29 +212,91 @@ export default function ManualPayment() {
           </Button>
         </PageCard>
 
-        {/* Info */}
+        {/* Right Panel */}
         <Flex direction='column' gap='16px'>
+
+          {/* Countdown Timer */}
+          {hasTransactionInfo && (
+            <PageCard p='24px' border='2px solid'
+              borderColor={timerExpired ? 'red.400' : timeLeft < 300 ? 'orange.400' : borderColor}>
+              <Flex align='center' gap='16px'>
+                <CircularProgress
+                  value={timerPercent}
+                  color={timerColor}
+                  trackColor={timerTrackColor}
+                  size='100px'
+                  thickness='10px'>
+                  <CircularProgressLabel>
+                    <Text fontSize='sm' fontWeight='800' color={textColor}>
+                      {String(minutes).padStart(2, '0')}:{String(seconds).padStart(2, '0')}
+                    </Text>
+                    <Text fontSize='8px' color={subColor}>min:sec</Text>
+                  </CircularProgressLabel>
+                </CircularProgress>
+                <Box>
+                  {timerExpired ? (
+                    <>
+                      <Text color='red.500' fontSize='sm' fontWeight='800'>
+                        ⚠️ Payment Time Expired!
+                      </Text>
+                      <Text color={subColor} fontSize='xs' mt='4px'>
+                        Please start a new transaction or contact support.
+                      </Text>
+                    </>
+                  ) : (
+                    <>
+                      <Text color={textColor} fontSize='sm' fontWeight='700'>
+                        Time Remaining
+                      </Text>
+                      <Text color={subColor} fontSize='sm' mt='4px'>
+                        Complete your transfer within this time to avoid cancellation.
+                      </Text>
+                      {timeLeft < 300 && (
+                        <Badge colorScheme='orange' borderRadius='full' mt='4px' fontSize='10px'>
+                          Hurry! Less than 5 minutes left
+                        </Badge>
+                      )}
+                    </>
+                  )}
+                </Box>
+              </Flex>
+            </PageCard>
+          )}
+
           {/* Transaction Summary */}
-          {amount && (
+          {hasTransactionInfo ? (
             <PageCard p='24px'>
               <Text color={textColor} fontWeight='700' fontSize='sm' mb='16px'>
                 Transaction Summary
               </Text>
               {[
-                { label: 'Service', value: serviceType || '—' },
-                { label: 'Amount (USD)', value: `$${Number(amount).toLocaleString()}` },
-                { label: 'Exchange Rate', value: `₦${Number(currentRate?.paypal_buying || 0).toLocaleString()}/$` },
-                { label: 'You Pay (NGN)', value: `₦${nairaAmount.toLocaleString()}` },
-              ].map((item, i) => (
-                <Flex key={i} justify='space-between' py='10px'
-                  borderBottom={i < 3 ? '1px solid' : 'none'} borderColor={borderColor}>
+                { label: 'Type', value: serviceType || 'Account Funding' },
+                { label: 'Service', value: serviceCategory || 'Manual Transfer' },
+                { label: 'Amount to Transfer', value: `₦${nairaAmount.toLocaleString()}`, highlight: true },
+                { label: 'Dollar Equivalent', value: dollarEquivalent > 0 ? `≈ $${dollarEquivalent}` : '—' },
+                { label: 'Reference', value: reference || '—' },
+              ].map((item, i, arr) => (
+                <Flex key={i} justify='space-between' py='12px'
+                  borderBottom={i < arr.length - 1 ? '1px solid' : 'none'}
+                  borderColor={borderColor}>
                   <Text color={subColor} fontSize='sm'>{item.label}</Text>
-                  <Text color={i === 3 ? 'brand.500' : textColor}
-                    fontSize='sm' fontWeight={i === 3 ? '800' : '600'}>
+                  <Text
+                    color={item.highlight ? 'brand.500' : textColor}
+                    fontSize={item.highlight ? 'md' : 'sm'}
+                    fontWeight={item.highlight ? '800' : '600'}>
                     {item.value}
                   </Text>
                 </Flex>
               ))}
+            </PageCard>
+          ) : (
+            <PageCard p='20px'>
+              <Flex align='center' gap='8px'>
+                <Icon as={MdInfo} color='blue.400' w='18px' h='18px' />
+                <Text color={subColor} fontSize='sm'>
+                  Transaction details will appear here when you arrive from a payment flow.
+                </Text>
+              </Flex>
             </PageCard>
           )}
 
@@ -173,7 +309,7 @@ export default function ManualPayment() {
               </Text>
             </Flex>
             {[
-              'Transfer exact amount to any account above',
+              'Transfer exact amount to any account on the left',
               'Use your Tag ID as payment narration',
               'Take a screenshot of your transfer receipt',
               'Click "I Have Made Payment" to upload proof',
