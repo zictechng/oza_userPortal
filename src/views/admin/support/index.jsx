@@ -1,90 +1,149 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box, Flex, Text, Button, Icon,
   useColorModeValue, FormControl, FormLabel,
-  Input, Textarea, Select, SimpleGrid,
-  Badge, Divider, Spinner,
+  Textarea, Select, SimpleGrid,
+  Divider, Spinner, Badge, useToast,
 } from '@chakra-ui/react';
 import {
   MdHelpOutline, MdSend, MdCheckCircle,
-  MdHistory, MdAdd,
+  MdHistory, MdAdd, MdSearch,
 } from 'react-icons/md';
 import { useDispatch, useSelector } from 'react-redux';
 import moment from 'moment';
 import { postSupport } from 'storeMtg/supportSlice';
+import client from 'components/client';
 import { PageLayout, PageCard, PageSection } from 'layouts/PageLayout';
-import { AuthAlert, AuthSuccess } from 'components/auth/AuthCard';
-import { useFormValidation } from 'hooks/useFormValidation';
+import { AuthAlert } from 'components/auth/AuthCard';
 
-const CATEGORIES = [
-  'Account Issue',
-  'Transaction Problem',
-  'Bills Payment',
-  'Withdrawal Issue',
-  'KYC Verification',
-  'Bonus & Rewards',
-  'Other',
+const TICKET_SUBJECTS = [
+  'Account Funding',
+  'Account Profile Update',
+  'Account Approval',
+  'Bounces Issues',
+  'Closing Account',
+  'Document Upload',
+  'Funds Sending',
+  'Funds Withdrawal',
+  'Payment Issues',
+  'Paypal Account Opening',
+  'Transactions Issues',
+  '2FA Issues',
+  'Others',
 ];
+
+const statusColor = (status) => {
+  if (status === 'Open') return 'green';
+  if (status === 'Closed') return 'red';
+  return 'orange';
+};
 
 export default function Support() {
   const dispatch = useDispatch();
+  const toast = useToast();
   const { user, userToken } = useSelector(state => state.authUser);
+  const { dataLoading } = useSelector(state => state.support);
   const userData = user?.userData;
-  const { error, setError, clearError } = useFormValidation();
+  const headers = { Authorization: `Bearer ${userToken}` };
 
   const textColor = useColorModeValue('navy.700', 'white');
   const subColor = useColorModeValue('gray.500', 'gray.400');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
   const inputBg = useColorModeValue('white', 'navy.800');
   const iconBg = useColorModeValue('brand.50', 'navy.700');
-  const tabActiveBg = useColorModeValue('brand.500', 'brand.500');
+  const tabActiveBg = 'brand.500';
   const tabInactiveBg = useColorModeValue('white', 'navy.800');
   const tabHoverBg = useColorModeValue('gray.50', 'navy.700');
+  const ticketBg = useColorModeValue('gray.50', 'navy.700');
 
-  const [tab, setTab] = useState('new'); // 'new' or 'history'
-  const [subject, setSubject] = useState('');
-  const [category, setCategory] = useState('');
-  const [message, setMessage] = useState('');
-  const [loading, setLoading] = useState(false);
-  const [success, setSuccess] = useState('');
+  const [tab, setTab] = useState('new');
+  const [supportSubject, setSupportSubject] = useState('');
+  const [supportMessage, setSupportMessage] = useState('');
+  const [error, setError] = useState('');
 
-  
+  // Ticket history
+    // Ticket history
+  const [tickets, setTickets] = useState([]);
+  const [ticketsLoading, setTicketsLoading] = useState(false);
+  const [ticketPage, setTicketPage] = useState(1);
+  const [ticketTotalPages, setTicketTotalPages] = useState(1);
+  const [ticketTotal, setTicketTotal] = useState(0);
+  const PAGE_SIZE = 10;
 
-  const inputProps = {
-    size: 'lg', fontSize: 'sm', borderRadius: '12px',
-    bg: inputBg, borderColor,
-    _hover: { borderColor: 'brand.500' },
-    _focus: { borderColor: 'brand.500', boxShadow: '0 0 0 1px #4C5FD5' },
+  const fetchTickets = async (page = 1) => {
+    if (!userData?._id) return;
+    setTicketsLoading(true);
+    try {
+      const res = await client.get(
+        `/api/user_tickets/${userData._id}?page=${page}&pageSize=${PAGE_SIZE}`,
+        { headers }
+      );
+      if (res.data?.msg === '201') {
+        setTickets(res.data.feedAll || []);
+        setTicketTotalPages(res.data.totalPage || 1);
+        setTicketTotal(res.data.totalRecord || 0);
+        setTicketPage(page);
+      } else {
+        setTickets([]);
+      }
+    } catch (e) {
+      setTickets([]);
+    } finally {
+      setTicketsLoading(false);
+    }
   };
 
-  const handleSubmit = async () => {
-    clearError(); setSuccess('');
-    if (!category) { setError('Please select a category'); return; }
-    if (!subject.trim()) { setError('Subject is required'); return; }
-    if (!message.trim() || message.length < 20) {
-      setError('Please describe your issue (at least 20 characters)');
+  useEffect(() => {
+    if (tab === 'history') fetchTickets();
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [tab]);
+
+  const handleSubmit = () => {
+    setError('');
+    if (!supportSubject) { setError('Please select a subject'); return; }
+    if (!supportMessage || supportMessage.length < 10) {
+      setError('Please enter a message (at least 10 characters)');
       return;
     }
 
-    setLoading(true);
-    try {
-      const postData = {
-        ticket_message: `[${category}] ${subject}\n\n${message}`,
-        ticket_type: subject,
-        createdBy: userData?._id,
-      };
-      const res = await dispatch(postSupport(postData));
-      if (res.payload?.msg === '200' || res.payload?.msg === '201') {
-        setSuccess('Ticket submitted successfully! Our team will respond within 24 hours.');
-        setSubject(''); setCategory(''); setMessage('');
+    const postData = {
+      ticket_message: supportMessage,
+      ticket_type: supportSubject,
+      createdBy: userData?._id,
+    };
+
+    dispatch(postSupport(postData)).then(response => {
+      if (response.payload?.status === 401) {
+        setError('Access denied. Please log in again.');
+      } else if (response.payload?.msg === '200') {
+        setSupportSubject('');
+        setSupportMessage('');
+        toast({
+          title: 'Ticket submitted!',
+          description: 'Our support team will respond within 24 hours.',
+          status: 'success',
+          duration: 5000,
+          isClosable: true,
+          position: 'top',
+        });
       } else {
-        setError(res.payload?.message || 'Failed to submit ticket. Please try again.');
+        setError(response.payload?.message || 'Failed to submit. Please try again.');
+        toast({
+          title: 'Submission failed',
+          description: response.payload?.message || 'Please try again.',
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+        });
       }
-    } catch (e) {
-      setError('Connection error. Please try again.');
-    } finally {
-      setLoading(false);
-    }
+    });
+  };
+
+  const inputProps = {
+    fontSize: 'sm', borderRadius: '12px',
+    bg: inputBg, borderColor,
+    _hover: { borderColor: 'brand.500' },
+    _focus: { borderColor: 'brand.500', boxShadow: '0 0 0 1px #4C5FD5' },
   };
 
   return (
@@ -105,7 +164,7 @@ export default function Support() {
             border='1px solid'
             borderColor={tab === t ? 'brand.500' : borderColor}
             _hover={{ bg: tab === t ? 'brand.600' : tabHoverBg }}
-            leftIcon={<Icon as={tab === 'new' && t === 'new' ? MdAdd : MdHistory} />}
+            leftIcon={<Icon as={t === 'new' ? MdAdd : MdHistory} />}
             onClick={() => setTab(t)}>
             {t === 'new' ? 'New Ticket' : 'My Tickets'}
           </Button>
@@ -114,31 +173,31 @@ export default function Support() {
 
       {tab === 'new' ? (
         <SimpleGrid columns={{ base: 1, lg: 2 }} gap='20px'>
-          {/* Left — Form */}
+          {/* Form */}
           <PageCard p='28px'>
-            <PageSection title='Submit a Support Ticket' subtitle='We typically respond within 24 hours' />
+            <PageSection
+              title='Submit a Support Ticket'
+              subtitle='We typically respond within 24 hours'
+            />
 
-            <AuthAlert message={error} onClose={clearError} />
-            <AuthSuccess message={success} />
-
-            <FormControl mb='16px'>
-              <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='6px'>
-                Category *
-              </FormLabel>
-              <Select {...inputProps} placeholder='Select category'
-                value={category} onChange={e => { setCategory(e.target.value); clearError(); }}>
-                {CATEGORIES.map(c => (
-                  <option key={c} value={c}>{c}</option>
-                ))}
-              </Select>
-            </FormControl>
+            {error && (
+              <AuthAlert message={error} onClose={() => setError('')} />
+            )}
 
             <FormControl mb='16px'>
               <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='6px'>
                 Subject *
               </FormLabel>
-              <Input {...inputProps} placeholder='Brief description of your issue'
-                value={subject} onChange={e => { setSubject(e.target.value); clearError(); }} />
+              <Select
+                {...inputProps}
+                size='lg'
+                placeholder='Select subject'
+                value={supportSubject}
+                onChange={e => { setSupportSubject(e.target.value); setError(''); }}>
+                {TICKET_SUBJECTS.map(s => (
+                  <option key={s} value={s}>{s}</option>
+                ))}
+              </Select>
             </FormControl>
 
             <FormControl mb='24px'>
@@ -146,16 +205,20 @@ export default function Support() {
                 Message *
               </FormLabel>
               <Textarea
-                placeholder='Please describe your issue in detail...'
-                rows={6} fontSize='sm' borderRadius='12px'
-                bg={inputBg} borderColor={borderColor}
+                placeholder='Describe your issue in detail (max 350 characters)...'
+                rows={7}
+                maxLength={350}
+                fontSize='sm'
+                borderRadius='12px'
+                bg={inputBg}
+                borderColor={borderColor}
                 _hover={{ borderColor: 'brand.500' }}
                 _focus={{ borderColor: 'brand.500', boxShadow: '0 0 0 1px #4C5FD5' }}
-                value={message}
-                onChange={e => { setMessage(e.target.value); clearError(); }}
+                value={supportMessage}
+                onChange={e => { setSupportMessage(e.target.value); setError(''); }}
               />
-              <Text color={subColor} fontSize='xs' mt='4px'>
-                {message.length} characters {message.length < 20 ? `(${20 - message.length} more needed)` : ''}
+              <Text color={subColor} fontSize='xs' mt='4px' textAlign='right'>
+                {supportMessage.length}/350
               </Text>
             </FormControl>
 
@@ -166,16 +229,15 @@ export default function Support() {
               leftIcon={<Icon as={MdSend} />}
               _hover={{ bg: 'brand.600', transform: 'translateY(-1px)', shadow: 'lg' }}
               transition='all 0.2s'
-              isLoading={loading}
+              isLoading={dataLoading}
               loadingText='Submitting...'
               onClick={handleSubmit}>
               Submit Ticket
             </Button>
           </PageCard>
 
-          {/* Right — Info */}
+          {/* Info */}
           <Flex direction='column' gap='16px'>
-            {/* Account Info Card */}
             <PageCard p='24px'>
               <Flex align='center' gap='12px' mb='16px'>
                 <Box w='44px' h='44px' borderRadius='12px'
@@ -191,7 +253,7 @@ export default function Support() {
               {[
                 { label: 'Name', value: userData?.display_name },
                 { label: 'Tag ID', value: userData?.tag_id },
-                { label: 'Account Status', value: userData?.acct_status },
+                { label: 'Status', value: userData?.acct_status },
               ].map((item, i) => (
                 <Flex key={i} justify='space-between' py='8px'
                   borderBottom='1px solid' borderColor={borderColor}>
@@ -201,16 +263,15 @@ export default function Support() {
               ))}
             </PageCard>
 
-            {/* Tips Card */}
             <PageCard p='24px'>
               <Text color={textColor} fontSize='sm' fontWeight='700' mb='12px'>
-                💡 Before submitting
+                💡 Tips for faster support
               </Text>
               {[
-              'Include your Transaction ID for payment issues',
-              'Provide as much detail as possible',
-              'Check your notifications for updates',
-              'Response time: within 24 business hours',
+                'Include your Transaction ID for payment issues',
+                'Provide as much detail as possible',
+                'Check notifications for our response',
+                'Response time: within 24 business hours',
               ].map((tip, i) => (
                 <Flex key={i} align='flex-start' gap='8px' mb='10px'>
                   <Icon as={MdCheckCircle} color='green.400' w='16px' h='16px' mt='2px' flexShrink='0' />
@@ -223,22 +284,87 @@ export default function Support() {
       ) : (
         <PageCard p='0' overflow='hidden'>
           <Box px='20px' py='16px' borderBottom='1px solid' borderColor={borderColor}>
-            <Text color={textColor} fontSize='sm' fontWeight='700'>
-              My Support Tickets
-            </Text>
-            <Text color={subColor} fontSize='xs'>
-              View and track your submitted tickets
-            </Text>
+            <Text color={textColor} fontSize='sm' fontWeight='700'>My Support Tickets</Text>
+            <Text color={subColor} fontSize='xs'>Your submitted support requests</Text>
           </Box>
-          <Flex direction='column' align='center' py='48px' color={subColor}>
-            <Icon as={MdHistory} w='48px' h='48px' mb='12px' opacity={0.4} />
-            <Text fontSize='sm' fontWeight='500'>No tickets yet</Text>
-            <Text fontSize='xs' mt='4px'>Your submitted tickets will appear here</Text>
-            <Button mt='16px' size='sm' colorScheme='brand' borderRadius='10px'
-              onClick={() => setTab('new')}>
-              Submit First Ticket
-            </Button>
-          </Flex>
+
+          {/* Total count */}
+          {!ticketsLoading && tickets.length > 0 && (
+            <Box px='20px' py='10px' borderBottom='1px solid' borderColor={borderColor}>
+              <Text color={subColor} fontSize='xs'>
+                {ticketTotal} ticket{ticketTotal !== 1 ? 's' : ''} found
+              </Text>
+            </Box>
+          )}
+
+          {ticketsLoading ? (
+            <Flex justify='center' py='40px'>
+              <Spinner color='brand.500' />
+            </Flex>
+          ) : tickets.length === 0 ? (
+            <Flex direction='column' align='center' py='48px' color={subColor}>
+              <Icon as={MdHistory} w='48px' h='48px' mb='12px' opacity={0.4} />
+              <Text fontSize='sm' fontWeight='500'>No tickets found</Text>
+              <Text fontSize='xs' mt='4px'>Your submitted tickets will appear here</Text>
+              <Button mt='16px' size='sm' colorScheme='brand'
+                borderRadius='10px' onClick={() => setTab('new')}>
+                Submit a Ticket
+              </Button>
+            </Flex>
+          ) : (
+            tickets.map((ticket, i) => (
+              <Box key={ticket._id || i}>
+                <Flex p='16px' gap='12px' align='flex-start'
+                  bg={i % 2 === 0 ? 'transparent' : ticketBg}>
+                  <Box flex='1'>
+                    <Flex justify='space-between' align='center' mb='4px'>
+                      <Text color={textColor} fontSize='sm' fontWeight='600'>
+                        {ticket.ticket_type || 'Support Ticket'}
+                      </Text>
+                      <Badge
+                        colorScheme={statusColor(ticket.ticket_status)}
+                        borderRadius='full' fontSize='10px' px='8px'>
+                        {ticket.ticket_status || 'Open'}
+                      </Badge>
+                    </Flex>
+                    <Text color={subColor} fontSize='sm' noOfLines={4} mb='4px'>
+                      {ticket.ticket_message}
+                    </Text>
+                    <Text color={subColor} fontSize='xs'>
+                      {ticket.createdOn
+                        ? moment(ticket.createdOn).format('DD MMM YYYY, hh:mm A')
+                        : '—'}
+                    </Text>
+                  </Box>
+                </Flex>
+                {i < tickets.length - 1 && <Divider borderColor={borderColor} />}
+              </Box>
+            ))
+                    )}
+
+          {/* Pagination */}
+          {ticketTotalPages > 1 && !ticketsLoading && (
+            <Flex
+              justify='space-between' align='center'
+              px='20px' py='16px'
+              borderTop='1px solid' borderColor={borderColor}>
+              <Text color={subColor} fontSize='sm'>
+                Page <strong>{ticketPage}</strong> of <strong>{ticketTotalPages}</strong>
+              </Text>
+              <Flex gap='8px'>
+                <Button size='sm' borderRadius='10px' variant='outline'
+                  isDisabled={ticketPage === 1 || ticketsLoading}
+                  onClick={() => fetchTickets(ticketPage - 1)}>
+                  ← Prev
+                </Button>
+                <Button size='sm' borderRadius='10px' variant='outline'
+                  isDisabled={ticketPage === ticketTotalPages || ticketsLoading}
+                  onClick={() => fetchTickets(ticketPage + 1)}>
+                  Next →
+                </Button>
+              </Flex>
+            </Flex>
+          )}
         </PageCard>
       )}
     </PageLayout>
