@@ -351,18 +351,21 @@ export default function Support() {
               <Text color={subColor} fontSize='sm'>
                 Page <strong>{ticketPage}</strong> of <strong>{ticketTotalPages}</strong>
               </Text>
-              <Flex gap='8px'>
-                <Button size='sm' borderRadius='10px' variant='outline'
-                  isDisabled={ticketPage === 1 || ticketsLoading}
-                  onClick={() => fetchTickets(ticketPage - 1)}>
-                  ← Prev
-                </Button>
-                <Button size='sm' borderRadius='10px' variant='outline'
-                  isDisabled={ticketPage === ticketTotalPages || ticketsLoading}
-                  onClick={() => fetchTickets(ticketPage + 1)}>
-                  Next →
-                </Button>
-              </Flex>
+            <Flex gap='8px' align='center'>
+              {ticketsLoading && <Spinner size='sm' color='brand.500' />}
+              <Button size='sm' borderRadius='10px' variant='outline'
+                isDisabled={ticketPage === 1 || ticketsLoading}
+                isLoading={ticketsLoading}
+                onClick={() => fetchTickets(ticketPage - 1)}>
+                ← Prev
+              </Button>
+              <Button size='sm' borderRadius='10px' variant='outline'
+                isDisabled={ticketPage === ticketTotalPages || ticketsLoading}
+                isLoading={ticketsLoading}
+                onClick={() => fetchTickets(ticketPage + 1)}>
+                Next →
+              </Button>
+            </Flex>
             </Flex>
           )}
         </PageCard>

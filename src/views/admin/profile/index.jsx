@@ -4,7 +4,7 @@ import {
   useColorModeValue, SimpleGrid, Avatar,
   Tabs, TabList, TabPanels, Tab, TabPanel,
   Input, Select, FormControl, FormLabel,
-  Divider, Spinner,
+  Divider, Spinner, Alert, AlertIcon,
 } from '@chakra-ui/react';
 
 import {
@@ -25,21 +25,38 @@ import { PageLayout, PageCard } from 'layouts/PageLayout';
 const KycDocuments = ({ userId, userToken }) => {
   const dispatch = useDispatch();
   const {
-    documentData, docInitialLoading, totalPages, currentPage: docPage,
+        documentData, docInitialLoading, docTotalPages, documentLoading,
   } = useSelector(state => state.uploadedDocuments);
+  const [localPage, setLocalPage] = useState(1);
 
   const textColor = useColorModeValue('navy.700', 'white');
   const subColor = useColorModeValue('gray.500', 'gray.400');
-  const borderColor = useColorModeValue('gray.100', 'whiteAlpha.100');
+  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
+  
 
   useEffect(() => {
     if (!userId) return;
-    dispatch(fetchDocument({ userID: userId, user_token: userToken, page: 1, pageSize: 10 }));
+    dispatch(fetchDocument({ userID: userId, user_token: userToken, page: localPage, pageSize: 5 }));
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [userId, localPage]);
+
+  useEffect(() => {
     return () => dispatch(clearDocument());
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [userId]);
+  }, []);
+
+  const handleDocPageChange = (newPage) => {
+    setLocalPage(newPage);
+  };
 
   const docs = Array.isArray(documentData) ? documentData : [];
+  const totalDocPages = docTotalPages || 1;
+
+  if (docInitialLoading) return (
+    <Flex justify='center' py='32px'>
+      <Spinner color='brand.500' />
+    </Flex>
+  );
 
   if (docInitialLoading) return <Flex justify='center' py='32px'><Spinner color='brand.500' /></Flex>;
 
@@ -53,25 +70,55 @@ const KycDocuments = ({ userId, userToken }) => {
   return (
     <Box>
       {docs.map((doc, i) => (
-        <Box key={doc._id || i}>
-          <Flex justify='space-between' align='center' py='14px'>
+        <Box key={doc._id || i}
+          py='14px'
+          borderBottom={i < docs.length - 1 ? '1px solid' : 'none'}
+          borderColor={borderColor}>
+          <Flex justify='space-between' align='center' gap='16px'>
             <Box>
               <Text color={textColor} fontSize='sm' fontWeight='600'>
                 {doc.document_category || 'Document'}
               </Text>
-              <Text color={subColor} fontSize='xs'>
-                {doc.createdOn ? moment(doc.createdOn).format('DD MMM YYYY') : '—'}
+              <Text color={subColor} fontSize='xs' mt='2px'>
+                Uploaded: {doc.createdOn ? moment(doc.createdOn).format('DD MMM YYYY') : '—'}
               </Text>
             </Box>
             <Badge
-              colorScheme={doc.doc_status === 'Approved' ? 'green' : doc.doc_status === 'Rejected' ? 'red' : 'orange'}
-              borderRadius='full' px='10px'>
+              colorScheme={
+                doc.doc_status === 'Approved' ? 'green'
+                : doc.doc_status === 'Rejected' ? 'red'
+                : 'orange'}
+              borderRadius='full' px='10px' fontSize='xs'>
               {doc.doc_status || 'Pending'}
             </Badge>
           </Flex>
-          <Divider borderColor={borderColor} />
         </Box>
       ))}
+
+    {/* Pagination */}
+      {totalDocPages > 1 && (
+        <Flex justify='space-between' align='center' pt='16px' mt='8px'
+          borderTop='1px solid' borderColor={borderColor}>
+          <Text color={subColor} fontSize='xs'>
+            Page {localPage} of {totalDocPages}
+          </Text>
+          <Flex gap='8px' align='center'>
+            {documentLoading && (
+              <Spinner size='xs' color='brand.500' mr='4px' />
+            )}
+            <Button size='xs' borderRadius='8px' variant='outline'
+              isDisabled={localPage === 1 || documentLoading}
+              onClick={() => handleDocPageChange(localPage - 1)}>
+              ← Prev
+            </Button>
+            <Button size='xs' borderRadius='8px' variant='outline'
+              isDisabled={localPage === totalDocPages || documentLoading}
+              onClick={() => handleDocPageChange(localPage + 1)}>
+              Next →
+            </Button>
+          </Flex>
+        </Flex>
+      )}
     </Box>
   );
 };
@@ -97,6 +144,8 @@ export default function Profile() {
     'linear-gradient(135deg, #4C5FD5 0%, #6C5CE7 100%)',
     'linear-gradient(135deg, #1E2C5A 0%, #2D3A6A 100%)'
   );
+  const dashedBorderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
+  const rowHoverBg = useColorModeValue('gray.50', 'navy.700');
 
   const [form, setForm] = useState({
     display_name: '',
@@ -125,8 +174,14 @@ export default function Profile() {
     clearError(); setSuccess('');
   };
 
+  const isKycApproved = userData?.acct_approved_status === 'Approved';
+
   const handleSave = async () => {
     clearError(); setSuccess('');
+    if (isKycApproved) {
+      setError('Your account is verified. Personal details cannot be changed. Contact support if needed.');
+      return;
+    }
     if (!form.display_name) { setError('Full name is required'); return; }
     if (!form.phone) { setError('Phone number is required'); return; }
     setSaving(true);
@@ -253,30 +308,43 @@ export default function Profile() {
           <TabPanels>
             {/* Personal Info */}
             <TabPanel p='24px'>
-              <AuthAlert message={error} onClose={clearError} />
+            <AuthAlert message={error} onClose={clearError} />
               <AuthSuccess message={success} />
+
+              {isKycApproved && (
+                <Alert status='info' borderRadius='12px' mb='16px' fontSize='sm'>
+                  <AlertIcon />
+                  Your account is verified. Personal details are locked. Contact support to update.
+                </Alert>
+              )}
 
               <SimpleGrid columns={{ base: 1, md: 2 }} gap='16px' mb='16px'>
                 <FormControl>
                   <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='6px'>
-                    Full Name *
+                    Full Name {!isKycApproved && '*'}
                   </FormLabel>
                   <Input {...inputProps} value={form.display_name}
-                    onChange={e => handleChange('display_name', e.target.value)} />
+                    isReadOnly={isKycApproved}
+                    opacity={isKycApproved ? 0.6 : 1}
+                    onChange={e => !isKycApproved && handleChange('display_name', e.target.value)} />
                 </FormControl>
                 <FormControl>
                   <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='6px'>
-                    Phone Number *
+                    Phone Number {!isKycApproved && '*'}
                   </FormLabel>
                   <Input {...inputProps} value={form.phone}
-                    onChange={e => handleChange('phone', e.target.value)} />
+                    isReadOnly={isKycApproved}
+                    opacity={isKycApproved ? 0.6 : 1}
+                    onChange={e => !isKycApproved && handleChange('phone', e.target.value)} />
                 </FormControl>
                 <FormControl>
                   <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='6px'>
                     Gender
                   </FormLabel>
                   <Select {...inputProps} value={form.gender}
-                    onChange={e => handleChange('gender', e.target.value)}>
+                    isDisabled={isKycApproved}
+                    opacity={isKycApproved ? 0.6 : 1}
+                    onChange={e => !isKycApproved && handleChange('gender', e.target.value)}>
                     <option value=''>Select gender</option>
                     <option value='Male'>Male</option>
                     <option value='Female'>Female</option>
@@ -287,21 +355,27 @@ export default function Profile() {
                     State
                   </FormLabel>
                   <Input {...inputProps} value={form.state}
-                    onChange={e => handleChange('state', e.target.value)} />
+                    isReadOnly={isKycApproved}
+                    opacity={isKycApproved ? 0.6 : 1}
+                    onChange={e => !isKycApproved && handleChange('state', e.target.value)} />
                 </FormControl>
                 <FormControl>
                   <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='6px'>
                     City
                   </FormLabel>
                   <Input {...inputProps} value={form.city}
-                    onChange={e => handleChange('city', e.target.value)} />
+                    isReadOnly={isKycApproved}
+                    opacity={isKycApproved ? 0.6 : 1}
+                    onChange={e => !isKycApproved && handleChange('city', e.target.value)} />
                 </FormControl>
                 <FormControl>
                   <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='6px'>
                     Address
                   </FormLabel>
                   <Input {...inputProps} value={form.address}
-                    onChange={e => handleChange('address', e.target.value)} />
+                    isReadOnly={isKycApproved}
+                    opacity={isKycApproved ? 0.6 : 1}
+                    onChange={e => !isKycApproved && handleChange('address', e.target.value)} />
                 </FormControl>
               </SimpleGrid>
 
@@ -331,22 +405,39 @@ export default function Profile() {
                 { label: 'Member Since', value: userData?.createdOn ? moment(userData.createdOn).format('DD MMMM YYYY') : '—' },
                 { label: 'Date of Birth', value: userData?.dob || '—' },
                 { label: 'Country', value: userData?.country || '—' },
-              ].map((item, i) => (
-                <Box key={i}>
-                  <Flex justify='space-between' align='center' py='14px'>
-                    <Text color={subColor} fontSize='sm'>{item.label}</Text>
-                    <Text color={textColor} fontSize='sm' fontWeight='600'>
-                      {item.value || '—'}
-                    </Text>
-                  </Flex>
-                  <Divider borderColor={borderColor} />
-                </Box>
+                { label: 'Phone', value: userData?.phone || '—' },
+                { label: 'State', value: userData?.state || '—' },
+                { label: 'City', value: userData?.city || '—' },
+              ].map((item, i, arr) => (
+                <Flex
+                  key={i}
+                  justify='space-between'
+                  align='center'
+                  py='14px'
+                  px='4px'
+                  borderBottom={i < arr.length - 1 ? '1px solid' : 'none'}
+                  borderColor={borderColor}
+                  _hover={{ bg: rowHoverBg, borderRadius: '8px', px: '12px' }}
+                  transition='all 0.15s'>
+                  <Text color={subColor} fontSize='sm' fontWeight='500'>
+                    {item.label}
+                  </Text>
+                  <Text color={textColor} fontSize='sm' fontWeight='700'>
+                    {item.value || '—'}
+                  </Text>
+                </Flex>
               ))}
             </TabPanel>
 
             {/* KYC Documents */}
             <TabPanel p='24px'>
-              <KycDocuments userId={userData?._id} userToken={userToken} />
+            <KycDocuments
+              userId={userData?._id}
+              userToken={userToken}
+              textColor={textColor}
+              subColor={subColor}
+              borderColor={borderColor}
+            />
             </TabPanel>
 
           </TabPanels>
