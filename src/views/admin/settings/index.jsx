@@ -158,9 +158,7 @@ export default function Settings() {
     setPwLoading(true);
     try {
       const res = await dispatch(passwordUpdateData({
-        current_password: currentPw,
-        new_password: newPw,
-        user_token: userToken,
+        password: newPw,
       }));
       if (res.payload?.msg === '201' || res.payload?.status === 201) {
         setPwSuccess('Password updated successfully');
@@ -271,6 +269,9 @@ export default function Settings() {
           <FormControl mb='14px'>
             <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='6px'>
               Current Password
+              <Text as='span' color={subColor} fontWeight='400' fontSize='xs' ml='8px'>
+                (for verification only)
+              </Text>
             </FormLabel>
             <InputGroup size='lg'>
               <Input
