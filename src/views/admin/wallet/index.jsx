@@ -217,7 +217,9 @@ export default function Wallet() {
           <Stat>
             <StatLabel color={subColor} fontSize='xs' textTransform='uppercase' letterSpacing='0.5px'>Last Credit</StatLabel>
             <StatNumber color='green.500' fontSize='xl' mt='4px'>
-              {lastCredit ? formatNaira(lastCredit.amount) : '—'}
+              {lastCredit
+                ? `+${lastCredit.sender_currency_type === '$' ? '$' : '₦'}${Number(lastCredit.amount || 0).toLocaleString()}`
+                : '—'}
             </StatNumber>
             <StatHelpText color={subColor} fontSize='sm'>
               {lastCredit?.transac_nature || 'No recent credit'}
@@ -230,7 +232,9 @@ export default function Wallet() {
           <Stat>
             <StatLabel color={subColor} fontSize='xs' textTransform='uppercase' letterSpacing='0.5px'>Last Debit</StatLabel>
             <StatNumber color='red.500' fontSize='xl' mt='4px'>
-              {lastDebit ? formatNaira(lastDebit.amount) : '—'}
+              {lastDebit
+                ? `-${lastDebit.sender_currency_type === '$' ? '$' : '₦'}${Number(lastDebit.amount || 0).toLocaleString()}`
+                : '—'}
             </StatNumber>
             <StatHelpText color={subColor} fontSize='sm'>
               {lastDebit?.transac_nature || 'No recent debit'}
