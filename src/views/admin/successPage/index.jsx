@@ -15,7 +15,7 @@ export default function SuccessPage() {
   const textColor = useColorModeValue('navy.700', 'white');
   const subColor = useColorModeValue('gray.500', 'gray.400');
   const borderColor = useColorModeValue('gray.100', 'whiteAlpha.100');
-  const isPaystack = location.state?.reference !== undefined;
+  const isPaystack = location.state?.isPaystack === true;
   const isPaypal = location.state?.isPaypal === true;
   const isManual = location.state?.isManual === true;
   const isBuy = location.state?.isBuy === true;

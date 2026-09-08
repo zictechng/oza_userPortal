@@ -273,12 +273,12 @@ export default function ManualPayment() {
                   </Flex>
                   <Divider borderColor={borderColor} mb='12px' />
                   <Flex justify='space-between' align='center' py='6px'>
-                    <Text color={subColor} fontSize='xs'>MoMo Number</Text>
+                    <Text color={subColor} fontSize='sm'>MoMo Number</Text>
                     <Flex align='center' gap='8px'>
                       <Text color={textColor} fontSize='sm' fontWeight='800' letterSpacing='1px'>
                         {companyBank?.company_momoAccount}
                       </Text>
-                      <Button size='xs' variant='ghost' color='brand.500'
+                      <Button size='sm' variant='ghost' color='brand.500'
                         onClick={() => navigator.clipboard.writeText(companyBank?.company_momoAccount)}>
                         Copy
                       </Button>
