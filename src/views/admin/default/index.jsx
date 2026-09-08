@@ -22,6 +22,7 @@ import { useAppContext } from 'contexts/AppContext';
 import { fetchProducts, clearProducts } from 'storeMtg/dashRecentRecordSlice';
 import { getPendingBonus, resetState } from 'storeMtg/pendingBonusSlice';
 import { PageLayout, PageCard } from 'layouts/PageLayout';
+import AnalyticsSection from 'views/admin/default/components/AnalyticsSection';
 
 // ── Reusable wallet card
 const WalletCard = ({ label, value, icon, color, iconBg, action, actionLabel, onAction }) => {
@@ -412,6 +413,9 @@ export default function Dashboard() {
           </Box>
         )}
       </PageCard>
+      {/* Analytics */}
+      <AnalyticsSection />
+      
     </PageLayout>
   );
 }

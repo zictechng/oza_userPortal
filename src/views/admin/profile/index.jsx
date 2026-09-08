@@ -319,7 +319,7 @@ export default function Profile() {
                 <Text color={textColor} fontSize='sm' fontWeight='700'>
                   Complete your registration
                 </Text>
-                <Text color={subColor} fontSize='xs'>
+                <Text color={subColor} fontSize='sm'>
                   Upload your KYC documents to unlock all features and bonuses
                 </Text>
               </Box>
@@ -328,7 +328,7 @@ export default function Profile() {
               borderRadius='10px' fontWeight='700'
               _hover={{ bg: 'brand.600' }}
               onClick={() => navigate('/user/signup-process')}>
-              Continue Registration →
+              Complete your profile →
             </Button>
           </Flex>
         </Box>

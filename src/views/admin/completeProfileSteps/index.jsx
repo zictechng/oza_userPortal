@@ -171,9 +171,9 @@ export default function CompleteProfileSteps() {
                     transition='all 0.2s'
                     _hover={{ transform: 'scale(1.2)' }}>
                     {done ? (
-                      <Icon as={MdCheckCircle} color='green.500' w='14px' h='14px' />
+                      <Icon as={MdCheckCircle} color='green.500' w='16px' h='16px' />
                     ) : (
-                      <Text fontSize='10px' fontWeight='800'
+                      <Text fontSize='13px' fontWeight='800'
                         color={isActive ? 'brand.500' : 'whiteAlpha.700'}>
                         {step.id}
                       </Text>
@@ -181,11 +181,11 @@ export default function CompleteProfileSteps() {
                   </Box>
                   {/* Label */}
                   <Text
-                    fontSize='9px'
+                    fontSize='13px'
                     fontWeight={isActive ? '700' : '400'}
                     color={isActive ? 'white' : 'whiteAlpha.600'}
                     textAlign='center'
-                    maxW='60px'
+                    maxW='90px'
                     noOfLines={1}>
                     {step.label}
                   </Text>

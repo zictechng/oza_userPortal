@@ -306,7 +306,7 @@ export default function AccountOwnerShip(props) {
               <Text color={textColor} fontSize='sm' fontWeight='700'>
                 {otpSend ? 'OTP sent to your email ✓' : 'Get your OTP code'}
               </Text>
-              <Text color={subColor} fontSize='xs'>
+              <Text color={subColor} fontSize='sm'>
                 {otpSend
                   ? `Sent to ${user.userData?.email}`
                   : 'We will send a unique code to your registered email'}
@@ -339,7 +339,7 @@ export default function AccountOwnerShip(props) {
       <Text color={textColor} fontSize='sm' fontWeight='700' mb='4px'>
         Upload Your Selfie with OTP Code
       </Text>
-      <Text color={subColor} fontSize='xs' mb='16px'>
+      <Text color={subColor} fontSize='sm' mb='16px'>
         Take a clear selfie holding the paper with the OTP code written on it
       </Text>
 
