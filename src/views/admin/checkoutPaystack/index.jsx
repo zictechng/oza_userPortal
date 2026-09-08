@@ -84,15 +84,17 @@ export default function CheckoutPaystack() {
 
     const handleSuccess = (res) => {
     setBtnLoader(true);
-    if (serviceType === 'Buy') {
-      // Buy flow — existing endpoint
+      if (serviceType === 'Buy') {
       const buyData = {
-        buy_service: serviceCategory,
-        buy_amount: actualPayment,
-        buy_nairaTotal: displayAmount,
-        user_id: user?.userData?._id,
-        tag_id: user?.userData?.tag_id,
-        paystack_reference: res.reference,
+        myId: user?.userData?._id,
+        serviceName: serviceCategory,
+        serviceCategory: 'Exchange',
+        buy_amt: actualPayment,
+        total_money: displayAmount,
+        payId: res.reference,
+        method: 'Paystack Checkout',
+        serviceType: 'Buy',
+        buy_note: note || '',
       };
       dispatch(buyFundData(buyData)).then(() => {
         dispatch(resetBuyState());
