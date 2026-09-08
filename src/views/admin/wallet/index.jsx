@@ -17,6 +17,7 @@ import moment from 'moment';
 import { getPendingBonus, resetState } from 'storeMtg/pendingBonusSlice';
 import { fetchProducts, clearProducts } from 'storeMtg/dashRecentRecordSlice';
 import { PageLayout, PageCard } from 'layouts/PageLayout';
+import WalletAnalytics from 'views/admin/wallet/components/WalletAnalytics';
 
 // ── Wallet balance card
 const BalanceCard = ({ label, value, subValue, subLabel, icon, color, iconBg, actions }) => {
@@ -321,6 +322,9 @@ export default function Wallet() {
           ))
         )}
       </Box>
+      {/* Analytics */}
+      <WalletAnalytics/>
+
     </PageLayout>
   );
 }

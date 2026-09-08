@@ -92,7 +92,7 @@ export default function AnalyticsSection() {
           <Text color={textColor} fontSize='lg' fontWeight='800'>
             Analytics Overview
           </Text>
-          <Text color={subColor} fontSize='xs'>
+          <Text color={subColor} fontSize='sm'>
             Your transaction trends and activity breakdown
           </Text>
         </Box>
