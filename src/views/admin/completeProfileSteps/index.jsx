@@ -48,21 +48,21 @@ const STEPS = [
   },
   {
     id: 4,
-    label: 'Address Proof',
-    desc: 'Utility bill, bank statement or official mail',
-    icon: MdHome,
-    color: '#8B5CF6',
-    bg: '#EDE9FE',
-    stageKey: 'reg_stage6',
-  },
-  {
-    id: 5,
     label: 'Selfie Verification',
     desc: 'Take a selfie holding your OTP code',
     icon: MdFace,
     color: '#EF4444',
     bg: '#FEE2E2',
     stageKey: 'reg_stage5',
+  },
+  {
+    id: 5,
+    label: 'Address Proof',
+    desc: 'Utility bill, bank statement or official mail',
+    icon: MdHome,
+    color: '#8B5CF6',
+    bg: '#EDE9FE',
+    stageKey: 'reg_stage6',
   },
 ];
 
@@ -101,8 +101,8 @@ export default function CompleteProfileSteps() {
       case 1: return <ProfileDetailsForm />;
       case 2: return <ProfileImageUpload />;
       case 3: return <DocumentUpload />;
-      case 4: return <AddressProof />;
-      case 5: return <AccountOwnerShip />;
+      case 4: return <AccountOwnerShip />;
+      case 5: return <AddressProof />;
       default: return null;
     }
   };

@@ -126,10 +126,14 @@ export default function Dashboard() {
     'linear-gradient(135deg, #1E2C5A 0%, #2D3A6A 60%, #3D2C6A 100%)'
   );
 
-  const isProfileComplete = userData?.reg_stage1 === 'Yes' &&
+    const allStepsDone =
     userData?.reg_stage2 === 'Yes' &&
     userData?.reg_stage3 === 'Yes' &&
-    userData?.reg_stage4 === 'Yes';
+    userData?.reg_stage4 === 'Yes' &&
+    userData?.reg_stage5 === 'Yes' &&
+    userData?.reg_stage6 === 'Yes';
+
+  const isProfileComplete = allStepsDone;
 
   const fetchData = () => {
     if (!userData?._id || !userToken) return;
