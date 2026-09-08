@@ -13,6 +13,39 @@ import { PageLayout, PageCard } from 'layouts/PageLayout';
 
 const COUNTDOWN_MINUTES = 30;
 
+// Card for PayPal, Payoneer, Bitcoin accounts
+const PaymentAccountCard = ({ title, value, icon, textColor, subColor, borderColor }) => {
+  const { onCopy, hasCopied } = useClipboard(value || '');
+  if (!value) return null;
+  return (
+    <Box border='1px solid' borderColor={borderColor}
+      borderRadius='16px' p='20px' mb='16px'>
+      <Flex justify='space-between' align='center' mb='12px'>
+        <Flex align='center' gap='8px'>
+          <Text fontSize='20px'>{icon}</Text>
+          <Text color={textColor} fontSize='sm' fontWeight='700'>{title}</Text>
+        </Flex>
+        <Badge colorScheme='green' borderRadius='full' fontSize='10px'>Active</Badge>
+      </Flex>
+      <Divider borderColor={borderColor} mb='12px' />
+      <Flex justify='space-between' align='center' py='6px'>
+        <Text color={subColor} fontSize='xs'>Account / Address</Text>
+        <Flex align='center' gap='8px'>
+          <Text color={textColor} fontSize='sm' fontWeight='700'
+            maxW='200px' noOfLines={1}>
+            {value}
+          </Text>
+          <Button size='xs' variant='ghost' color='brand.500'
+            onClick={onCopy}
+            leftIcon={<Icon as={hasCopied ? MdCheck : MdContentCopy} />}>
+            {hasCopied ? 'Copied' : 'Copy'}
+          </Button>
+        </Flex>
+      </Flex>
+    </Box>
+  );
+};
+
 const BankCard = ({ bank, acctName, acctNumber, textColor, subColor, borderColor }) => {
   const { onCopy, hasCopied } = useClipboard(acctNumber || '');
   if (!bank) return null;
@@ -166,7 +199,50 @@ export default function ManualPayment() {
 
           {dLoading ? (
             <Flex justify='center' py='24px'><Spinner color='brand.500' /></Flex>
+          ) : isSales ? (
+            // SELL — show company PayPal/Payoneer/Bitcoin account
+            <>
+              {serviceCategory?.toLowerCase().includes('paypal') && companyBank?.company_paypal_address && (
+                <PaymentAccountCard
+                  title='Company PayPal Account'
+                  value={companyBank.company_paypal_address}
+                  icon='💳'
+                  textColor={textColor} subColor={subColor} borderColor={borderColor}
+                />
+              )}
+              {serviceCategory?.toLowerCase().includes('payoneer') && companyBank?.company_payoneer_address && (
+                <PaymentAccountCard
+                  title='Company Payoneer Account'
+                  value={companyBank.company_payoneer_address}
+                  icon='💰'
+                  textColor={textColor} subColor={subColor} borderColor={borderColor}
+                />
+              )}
+              {serviceCategory?.toLowerCase().includes('bitcoin') && companyBank?.company_btc_address && (
+                <PaymentAccountCard
+                  title='Company Bitcoin Wallet'
+                  value={companyBank.company_btc_address}
+                  icon='₿'
+                  textColor={textColor} subColor={subColor} borderColor={borderColor}
+                />
+              )}
+              {/* Fallback if no match */}
+              {!companyBank?.company_paypal_address &&
+               !companyBank?.company_payoneer_address &&
+               !companyBank?.company_btc_address && (
+                <Box p='16px' bg='orange.50' borderRadius='12px'
+                  border='1px solid' borderColor='orange.200'>
+                  <Text color='orange.700' fontSize='sm' fontWeight='600'>
+                    Payment details not configured yet
+                  </Text>
+                  <Text color='orange.600' fontSize='xs' mt='4px'>
+                    Please contact support for payment account details.
+                  </Text>
+                </Box>
+              )}
+            </>
           ) : (
+            // FUNDING/BUY — show bank accounts
             <>
               <BankCard
                 bank={companyBank?.company_bank1}
