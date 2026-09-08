@@ -64,7 +64,7 @@ export default function AddressProof(props) {
 
   const uploadPhoto = async () => {
     if (!files || files.length === 0) {
-      toast({ title: "Error!", description: "Please select a file.", status: "error", duration: 5000, isClosable: true, position: "top" });
+      toast({ title: "Error!", description: "Please select a file.", status: "error", duration: 5000, isClosable: true, position: "bottom" });
       return false;
     }
     const file = files[0];
@@ -103,7 +103,7 @@ export default function AddressProof(props) {
         headers: { Authorization: `Bearer ${userToken}` },
       });
       if (res.data.msg === '201') {
-        toast({ title: "Success!", description: "Address proof uploaded successfully.", status: "success", duration: 5000, isClosable: true, position: "top" });
+        toast({ title: "Success!", description: "Address proof uploaded successfully.", status: "success", duration: 5000, isClosable: true, position: "bottom" });
         setFiles(null); setFiles([]);
         dispatch(updateUserDetails(res.data));
       } else if (res.data.status === '401') {

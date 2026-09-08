@@ -65,7 +65,7 @@ export default function ProfileImageUpload(props) {
 
   const uploadPhoto = async () => {
     if (!files || files.length === 0) {
-      toast({ title: "Error!", description: "Please select a file.", status: "error", duration: 5000, isClosable: true, position: "top" });
+      toast({ title: "Error!", description: "Please select a file.", status: "error", duration: 5000, isClosable: true, position: "bottom" });
       return false;
     }
     const file = files[0];
@@ -102,7 +102,7 @@ export default function ProfileImageUpload(props) {
         headers: { Authorization: `Bearer ${userToken}` },
       });
       if (res.data.msg === '201') {
-        toast({ title: "Success!", description: "Profile photo uploaded successfully.", status: "success", duration: 5000, isClosable: true, position: "top" });
+        toast({ title: "Success!", description: "Profile photo uploaded successfully.", status: "success", duration: 5000, isClosable: true, position: "bottom" });
         setFiles(null); setLoading(false); setFiles([]);
         dispatch(updateUserDetails(res.data));
       } else if (res.data.status === '401') {

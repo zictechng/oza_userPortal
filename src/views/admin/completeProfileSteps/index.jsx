@@ -136,21 +136,62 @@ export default function CompleteProfileSteps() {
           </Box>
         </Flex>
 
-        {/* Progress Bar */}
+        {/* Progress Bar with clickable step dots */}
         <Box position='relative' zIndex='1'>
-          <Progress
-            value={progress}
-            size='sm'
-            borderRadius='full'
-            bg='whiteAlpha.300'
-            sx={{ '& > div': { background: 'white' } }}
-          />
-          <Flex justify='space-between' mt='6px'>
-            {STEPS.map((step, i) => (
-              <Text key={i} color='whiteAlpha.600' fontSize='10px'>
-                {step.id}
-              </Text>
-            ))}
+          {/* Track line */}
+          <Box h='4px' bg='whiteAlpha.300' borderRadius='full' position='relative'>
+            <Box
+              h='4px' bg='white' borderRadius='full'
+              w={`${progress}%`}
+              transition='width 0.5s ease'
+            />
+          </Box>
+
+          {/* Step dots */}
+          <Flex justify='space-between' mt='-10px' px='0px'>
+            {STEPS.map((step, i) => {
+              const done = isStepDone(step.stageKey);
+              const isActive = activeStep === i;
+              return (
+                <Flex
+                  key={i}
+                  direction='column'
+                  align='center'
+                  cursor='pointer'
+                  onClick={() => setActiveStep(i)}
+                  gap='6px'>
+                  {/* Dot */}
+                  <Box
+                    w='24px' h='24px'
+                    borderRadius='full'
+                    bg={done ? 'white' : isActive ? 'white' : 'whiteAlpha.400'}
+                    border='2px solid'
+                    borderColor={done ? 'green.400' : isActive ? 'white' : 'whiteAlpha.600'}
+                    display='flex' alignItems='center' justifyContent='center'
+                    transition='all 0.2s'
+                    _hover={{ transform: 'scale(1.2)' }}>
+                    {done ? (
+                      <Icon as={MdCheckCircle} color='green.500' w='14px' h='14px' />
+                    ) : (
+                      <Text fontSize='10px' fontWeight='800'
+                        color={isActive ? 'brand.500' : 'whiteAlpha.700'}>
+                        {step.id}
+                      </Text>
+                    )}
+                  </Box>
+                  {/* Label */}
+                  <Text
+                    fontSize='9px'
+                    fontWeight={isActive ? '700' : '400'}
+                    color={isActive ? 'white' : 'whiteAlpha.600'}
+                    textAlign='center'
+                    maxW='60px'
+                    noOfLines={1}>
+                    {step.label}
+                  </Text>
+                </Flex>
+              );
+            })}
           </Flex>
         </Box>
       </Box>
@@ -210,7 +251,7 @@ export default function CompleteProfileSteps() {
                         <Box flex='1' minW='0'>
                           <Text
                             color={done ? 'green.700' : isActive ? 'brand.600' : textColor}
-                            fontSize='xs' fontWeight='700' noOfLines={1}>
+                            fontSize='sm' fontWeight='700' noOfLines={1}>
                             {step.label}
                           </Text>
                           <Badge
@@ -231,11 +272,11 @@ export default function CompleteProfileSteps() {
                   borderRadius='12px' border='1px solid' borderColor='orange.200'>
                   <Flex align='center' gap='8px'>
                     <Icon as={MdLock} color='orange.500' w='16px' h='16px' />
-                    <Text color='orange.700' fontSize='xs' fontWeight='600'>
+                    <Text color='orange.700' fontSize='sm' fontWeight='600'>
                       Awaiting admin review
                     </Text>
                   </Flex>
-                  <Text color='orange.600' fontSize='xs' mt='4px'>
+                  <Text color='orange.600' fontSize='sm' mt='4px'>
                     All steps done! Review takes 1-24 hours.
                   </Text>
                 </Box>
@@ -273,7 +314,7 @@ export default function CompleteProfileSteps() {
                         </Badge>
                       )}
                     </Flex>
-                    <Text color={subColor} fontSize='xs' mt='2px'>
+                    <Text color={subColor} fontSize='base' mt='2px'>
                       {currentStep.desc}
                     </Text>
                   </Box>
@@ -303,7 +344,7 @@ export default function CompleteProfileSteps() {
                   onClick={() => setActiveStep(activeStep - 1)}>
                   ← Previous
                 </Button>
-                <Text color={subColor} fontSize='xs'>
+                <Text color={subColor} fontSize='sm'>
                   Step {activeStep + 1} of {STEPS.length}
                 </Text>
                 <Button

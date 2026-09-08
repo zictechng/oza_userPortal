@@ -66,11 +66,11 @@ export default function DocumentIDUpload(props) {
 
   const uploadPhoto = async () => {
     if (!docName || docName.length === 0) {
-      toast({ title: "Error!", description: "Select Document Type.", status: "error", duration: 5000, isClosable: true, position: "top" });
+      toast({ title: "Error!", description: "Select Document Type.", status: "error", duration: 5000, isClosable: true, position: "bottom" });
       return false;
     }
     if (!files || files.length === 0) {
-      toast({ title: "Error!", description: "Please select a file.", status: "error", duration: 5000, isClosable: true, position: "top" });
+      toast({ title: "Error!", description: "Please select a file.", status: "error", duration: 5000, isClosable: true, position: "bottom" });
       return false;
     }
     const file = files[0];
@@ -108,7 +108,7 @@ export default function DocumentIDUpload(props) {
         headers: { Authorization: `Bearer ${userToken}` },
       });
       if (res.data.msg === '201') {
-        toast({ title: "Success!", description: "Document uploaded successfully.", status: "success", duration: 5000, isClosable: true, position: "top" });
+        toast({ title: "Success!", description: "Document uploaded successfully.", status: "success", duration: 5000, isClosable: true, position: "bottom" });
         setFiles(null); setFiles([]); dispatch(updateUserDetails(res.data)); setDocName('');
       } else if (res.data.status === '401') {
         toast({ title: "Error!", description: "Authorization required.", status: "error", duration: 5000 });

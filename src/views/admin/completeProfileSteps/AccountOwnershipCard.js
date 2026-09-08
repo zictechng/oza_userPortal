@@ -119,7 +119,7 @@ export default function AccountOwnerShip(props) {
   const sendOTPCode = async () => {
     const formData = { userId: user.userData._id };
     if (user.userData.email === undefined || user.userData.email === '') {
-      toast({ title: "Error!", description: "Please login to get started.", status: "error", duration: 5000, isClosable: true, position: "top" });
+      toast({ title: "Error!", description: "Please login to get started.", status: "error", duration: 5000, isClosable: true, position: "bottom" });
       return;
     }
     try {
@@ -129,7 +129,7 @@ export default function AccountOwnerShip(props) {
       });
       if (res.data.msg === '201') {
         setOtpSend(true);
-        toast({ title: "OTP Sent!", description: "Check your email for the OTP code.", status: "success", duration: 5000, isClosable: true, position: "top" });
+        toast({ title: "OTP Sent!", description: "Check your email for the OTP code.", status: "success", duration: 5000, isClosable: true, position: "bottom" });
       } else if (res.data.status === '404') {
         toast({ title: "Error!", description: "No account found.", status: "error", duration: 5000 });
       } else if (res.data.status === '402') {
@@ -152,7 +152,7 @@ export default function AccountOwnerShip(props) {
 
   const uploadDoc = async () => {
     if (!files || files.length === 0) {
-      toast({ title: "Error!", description: "Please select or take a photo first.", status: "error", duration: 5000, isClosable: true, position: "top" });
+      toast({ title: "Error!", description: "Please select or take a photo first.", status: "error", duration: 5000, isClosable: true, position: "bottom" });
       return false;
     }
     const file = files[0];
@@ -195,7 +195,7 @@ export default function AccountOwnerShip(props) {
         headers: { Authorization: `Bearer ${userToken}` },
       });
       if (res.data.msg === '201') {
-        toast({ title: "Success!", description: "Selfie uploaded successfully. We will review your account.", status: "success", duration: 5000, isClosable: true, position: "top" });
+        toast({ title: "Success!", description: "Selfie uploaded successfully. We will review your account.", status: "success", duration: 5000, isClosable: true, position: "bottom" });
         setFiles(null); setFiles([]);
         dispatch(updateUserDetails(res.data));
       } else if (res.data.status === '401') {
