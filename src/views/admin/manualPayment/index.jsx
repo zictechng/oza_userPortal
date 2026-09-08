@@ -68,7 +68,7 @@ export default function ManualPayment() {
   
 
   // Read state from navigation
-  const {
+    const {
     payment: amount,
     track_id: reference,
     type: serviceType,
@@ -76,6 +76,17 @@ export default function ManualPayment() {
   } = location.state || {};
 
   const hasTransactionInfo = Boolean(amount);
+
+  // Sales = user sends $ to company, Funding = user sends ₦ to company
+    // Sales/Buy = user sends $ to company, Funding = user sends ₦ to company
+  const isSales = serviceType === 'Sales';
+  const isBuy = serviceType === 'Buy';
+  const isDollarTransaction = isSales || isBuy;
+  const currencySymbol = isDollarTransaction ? '$' : '₦';
+  const amountLabel = isDollarTransaction ? 'Amount (USD)' : 'Amount to Transfer';
+  const nairaEquivalent = isDollarTransaction && currentRate?.paypal_buying
+    ? Number(amount) * Number(currentRate.paypal_buying)
+    : null;
 
   // Countdown timer — 30 minutes
   const [timeLeft, setTimeLeft] = useState(COUNTDOWN_MINUTES * 60);
@@ -272,8 +283,8 @@ export default function ManualPayment() {
               {[
                 { label: 'Type', value: serviceType || 'Account Funding' },
                 { label: 'Service', value: serviceCategory || 'Manual Transfer' },
-                { label: 'Amount to Transfer', value: `₦${nairaAmount.toLocaleString()}`, highlight: true },
-                
+                { label: amountLabel, value: `${currencySymbol}${Number(amount || 0).toLocaleString()}`, highlight: true },
+                ...(isDollarTransaction && nairaEquivalent ? [{ label: 'NGN Equivalent', value: `₦${nairaEquivalent.toLocaleString()}` }] : []),
                 { label: 'Reference', value: reference || '—' },
               ].map((item, i, arr) => (
                 <Flex key={i} justify='space-between' py='12px'
@@ -308,13 +319,25 @@ export default function ManualPayment() {
                 Payment Instructions
               </Text>
             </Flex>
-            {[
+                          {(isSales ? [
+              `Send $${Number(amount || 0).toLocaleString()} to our ${serviceCategory} account`,
+              'Use your Tag ID as payment narration/note',
+              'Take a screenshot of your transfer receipt',
+              'Click "I Have Made Payment" to upload proof',
+              'Admin will verify and credit your NGN wallet within 1-24 hours',
+            ] : isBuy ? [
+              `Transfer ₦${nairaEquivalent ? nairaEquivalent.toLocaleString() : '—'} to any account on the left`,
+              'Use your Tag ID as payment narration',
+              'Take a screenshot of your transfer receipt',
+              'Click "I Have Made Payment" to upload proof',
+              'Admin will verify and deliver your funds within 1-24 hours',
+            ] : [
               'Transfer exact amount to any account on the left',
               'Use your Tag ID as payment narration',
               'Take a screenshot of your transfer receipt',
               'Click "I Have Made Payment" to upload proof',
               'Admin will verify and process within 1-24 hours',
-            ].map((step, i) => (
+            ]).map((step, i) => (
               <Flex key={i} align='flex-start' gap='10px' mb='10px'>
                 <Box w='20px' h='20px' borderRadius='full'
                   bg='brand.500' display='flex' alignItems='center'
@@ -329,11 +352,18 @@ export default function ManualPayment() {
           {/* Tag ID reminder */}
           <Box bg={infoBg} borderRadius='16px' p='16px'>
             <Text color={textColor} fontSize='sm' fontWeight='700' mb='4px'>
-              Your Tag ID (Use as narration)
+              Your Tag ID (Use as payment narration)
             </Text>
             <Text color='brand.500' fontSize='xl' fontWeight='800' letterSpacing='2px'>
               {user?.userData?.tag_id || '—'}
             </Text>
+            {isDollarTransaction && (
+              <Text color={subColor} fontSize='xs' mt='8px'>
+                {isSales
+                  ? `Send $${Number(amount || 0).toLocaleString()} to our ${serviceCategory} account and use your Tag ID as narration`
+                  : `Fund your order of $${Number(amount || 0).toLocaleString()} via manual transfer`}
+              </Text>
+            )}
           </Box>
         </Flex>
       </SimpleGrid>
