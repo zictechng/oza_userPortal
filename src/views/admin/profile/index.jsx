@@ -20,6 +20,8 @@ import { useFormValidation } from 'hooks/useFormValidation';
 import { updateUserDetails } from 'storeMtg/authSlice';
 import { fetchDocument, clearDocument, setDocPage } from 'storeMtg/getDocumentUploadSlice';
 import { PageLayout, PageCard } from 'layouts/PageLayout';
+import ProfileImageUpload from 'views/admin/completeProfileSteps/ProfileImageUploadCard';
+import DocumentIDUpload from 'views/admin/completeProfileSteps/DocumentUploadCard';
 
 
 const KycDocuments = ({ userId, userToken }) => {
@@ -303,6 +305,8 @@ export default function Profile() {
           <TabList px='20px' borderColor={borderColor}>
             <Tab fontSize='sm' fontWeight='600' py='16px'>Personal Info</Tab>
             <Tab fontSize='sm' fontWeight='600' py='16px'>Account Info</Tab>
+            <Tab fontSize='sm' fontWeight='600' py='16px'>Profile Photo</Tab>
+            <Tab fontSize='sm' fontWeight='600' py='16px'>Upload KYC</Tab>
             <Tab fontSize='sm' fontWeight='600' py='16px'>KYC Documents</Tab>
           </TabList>
 
@@ -437,9 +441,31 @@ export default function Profile() {
               ))}
             </TabPanel>
 
-            {/* KYC Documents */}
+            {/* Profile Photo Upload */}
             <TabPanel p='24px'>
-            <KycDocuments
+              <Text color={textColor} fontSize='sm' fontWeight='700' mb='4px'>
+                Profile Photo
+              </Text>
+              <Text color={subColor} fontSize='xs' mb='16px'>
+                Upload a clear photo of your face. This helps us verify your identity.
+              </Text>
+              <ProfileImageUpload />
+            </TabPanel>
+
+            {/* KYC Document Upload */}
+            <TabPanel p='24px'>
+              <Text color={textColor} fontSize='sm' fontWeight='700' mb='4px'>
+                Upload KYC Document
+              </Text>
+              <Text color={subColor} fontSize='xs' mb='16px'>
+                Upload a government-issued ID, bank statement, utility bill or proof of address.
+              </Text>
+              <DocumentIDUpload />
+            </TabPanel>
+
+            {/* KYC Documents List */}
+            <TabPanel p='24px'>
+              <KycDocuments
               userId={userData?._id}
               userToken={userToken}
               textColor={textColor}

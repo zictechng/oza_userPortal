@@ -25,16 +25,16 @@ const BankCard = ({ bank, acctName, acctNumber, textColor, subColor, borderColor
       </Flex>
       <Divider borderColor={borderColor} mb='12px' />
       <Flex justify='space-between' py='6px'>
-        <Text color={subColor} fontSize='xs'>Account Name</Text>
-        <Text color={textColor} fontSize='xs' fontWeight='600'>{acctName}</Text>
+        <Text color={subColor} fontSize='sm'>Account Name</Text>
+        <Text color={textColor} fontSize='sm' fontWeight='600'>{acctName}</Text>
       </Flex>
       <Flex justify='space-between' align='center' py='6px'>
-        <Text color={subColor} fontSize='xs'>Account Number</Text>
+        <Text color={subColor} fontSize='sm'>Account Number</Text>
         <Flex align='center' gap='8px'>
           <Text color={textColor} fontSize='sm' fontWeight='800' letterSpacing='1px'>
             {acctNumber}
           </Text>
-          <Button size='xs' variant='ghost' color='brand.500'
+          <Button size='sm' variant='ghost' color='brand.500'
             onClick={onCopy} leftIcon={<Icon as={hasCopied ? MdCheck : MdContentCopy} />}>
             {hasCopied ? 'Copied' : 'Copy'}
           </Button>
@@ -112,9 +112,9 @@ export default function ManualPayment() {
   const timerPercent = (timeLeft / (COUNTDOWN_MINUTES * 60)) * 100;
 
   const nairaAmount = Number(amount || 0);
-  const dollarEquivalent = currentRate?.paypal_buying && nairaAmount > 0
-    ? (nairaAmount / Number(currentRate.paypal_buying)).toFixed(2)
-    : 0;
+  // const dollarEquivalent = currentRate?.paypal_buying && nairaAmount > 0
+  //   ? (nairaAmount / Number(currentRate.paypal_buying)).toFixed(2)
+  //   : 0;
 
   useEffect(() => {
     dispatch(getCompanyBankInfo());
@@ -273,7 +273,7 @@ export default function ManualPayment() {
                 { label: 'Type', value: serviceType || 'Account Funding' },
                 { label: 'Service', value: serviceCategory || 'Manual Transfer' },
                 { label: 'Amount to Transfer', value: `₦${nairaAmount.toLocaleString()}`, highlight: true },
-                { label: 'Dollar Equivalent', value: dollarEquivalent > 0 ? `≈ $${dollarEquivalent}` : '—' },
+                
                 { label: 'Reference', value: reference || '—' },
               ].map((item, i, arr) => (
                 <Flex key={i} justify='space-between' py='12px'
@@ -319,7 +319,7 @@ export default function ManualPayment() {
                 <Box w='20px' h='20px' borderRadius='full'
                   bg='brand.500' display='flex' alignItems='center'
                   justifyContent='center' flexShrink='0'>
-                  <Text color='white' fontSize='10px' fontWeight='800'>{i + 1}</Text>
+                  <Text color='white' fontSize='13px' fontWeight='800'>{i + 1}</Text>
                 </Box>
                 <Text color={subColor} fontSize='sm'>{step}</Text>
               </Flex>
@@ -328,7 +328,7 @@ export default function ManualPayment() {
 
           {/* Tag ID reminder */}
           <Box bg={infoBg} borderRadius='16px' p='16px'>
-            <Text color={textColor} fontSize='xs' fontWeight='700' mb='4px'>
+            <Text color={textColor} fontSize='sm' fontWeight='700' mb='4px'>
               Your Tag ID (Use as narration)
             </Text>
             <Text color='brand.500' fontSize='xl' fontWeight='800' letterSpacing='2px'>

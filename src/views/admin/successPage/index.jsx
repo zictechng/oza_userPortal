@@ -31,7 +31,7 @@ export default function SuccessPage() {
           <Text color={textColor} fontSize='2xl' fontWeight='800' mb='8px'>
             Transaction Successful! 🎉
           </Text>
-          <Text color={subColor} fontSize='sm' mb='32px' lineHeight='1.6'>
+          <Text color={subColor} fontSize='base' mb='32px' lineHeight='1.6'>
             Your transaction has been submitted successfully.
             Our team will process it shortly and you will be notified.
           </Text>
