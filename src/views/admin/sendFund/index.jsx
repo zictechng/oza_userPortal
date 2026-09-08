@@ -38,7 +38,7 @@ export default function SendFund() {
           </Box>
           <Box>
             <Text color='white' fontSize='lg' fontWeight='800'>Send Funds</Text>
-            <Text color='whiteAlpha.800' fontSize='base'>
+            <Text color='whiteAlpha.800' fontSize='sm'>
               Transfer funds to another user by Tag ID
             </Text>
           </Box>
