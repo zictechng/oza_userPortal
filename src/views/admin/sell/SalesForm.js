@@ -596,6 +596,9 @@ import { capturePaypalPayment } from "storeMtg/paypalCheckoutSlice";
                       {fundLoading ? <Text><Spinner _hover={fundLoading ? {color: "#FFF"} : {color:'#5464c4'}} animationDuration="0.8s" size="sm" /> Wait</Text>
                     :'Manual Transfer'}
                   </Button>
+                  <Text px={5} color={"#999aa1"} align='center' fontSize={{ sm: '14px', lg: '15px', }} mt={-30}>
+                    No extra charges applied with manual transfer.
+                  </Text>
                     {!onlinePayment &&
                     <Text color='#222' fontSize='20px'>{showMessageButton}</Text>
                     }

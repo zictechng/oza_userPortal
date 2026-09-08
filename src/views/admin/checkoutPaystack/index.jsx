@@ -212,28 +212,55 @@ export default function CheckoutPaystack() {
 
             ) : paystackEnabled && PaystackDemoKey ? (
               /* PayStack enabled — show button */
-              <Box>
+                            <Box>
+                <style>{`
+                  .paystack-button {
+                    width: 100%;
+                    height: 40px;
+                    background: linear-gradient(135deg, #4C5FD5 0%, #3D4EAA 100%);
+                    color: white;
+                    border-radius: 14px;
+                    font-weight: 700;
+                    font-size: 16px;
+                    border: none;
+                    cursor: pointer;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    gap: 10px;
+                    letter-spacing: 0.3px;
+                    box-shadow: 0 4px 15px rgba(76, 95, 213, 0.4);
+                    transition: all 0.2s ease;
+                  }
+                  .paystack-button:hover {
+                    background: linear-gradient(135deg, #3D4EAA 0%, #2D3A9A 100%);
+                    box-shadow: 0 6px 20px rgba(76, 95, 213, 0.5);
+                    transform: translateY(-1px);
+                  }
+                  .paystack-button:active {
+                    transform: translateY(0);
+                    box-shadow: 0 2px 8px rgba(76, 95, 213, 0.4);
+                  }
+                  .paystack-button:disabled {
+                    opacity: 0.6;
+                    cursor: not-allowed;
+                    transform: none;
+                  }
+                `}</style>
                 <PaystackButton
                   {...paystackConfig}
                   className='paystack-button'
-                  style={{
-                    width: '100%',
-                    height: '52px',
-                    backgroundColor: '#4C5FD5',
-                    color: 'white',
-                    borderRadius: '12px',
-                    fontWeight: '700',
-                    fontSize: '16px',
-                    border: 'none',
-                    cursor: 'pointer',
-                  }}
-                  text={btnLoader ? 'Processing...' : '🔒 Pay Now with PayStack'}
+                  text={btnLoader ? '⏳ Processing...' : '🔒  Pay  ₦' + displayAmount.toLocaleString() + '  Securely'}
                 />
-                <Flex align='center' justify='center' gap='8px' mt='16px'>
-                  <Icon as={MdLock} color={subColor} w='14px' h='14px' />
-                  <Text color={subColor} fontSize='xs'>
-                    Your payment is secured and encrypted by PayStack
-                  </Text>
+                <Flex align='center' justify='center' gap='8px' mt='16px' flexWrap='wrap'>
+                  <Flex align='center' gap='4px'>
+                    <Icon as={MdLock} color='green.500' w='14px' h='14px' />
+                    <Text color={subColor} fontSize='xs'>SSL Secured</Text>
+                  </Flex>
+                  <Text color={subColor} fontSize='xs'>•</Text>
+                  <Text color={subColor} fontSize='xs'>256-bit encryption</Text>
+                  <Text color={subColor} fontSize='xs'>•</Text>
+                  <Text color={subColor} fontSize='xs'>Powered by PayStack</Text>
                 </Flex>
               </Box>
 
