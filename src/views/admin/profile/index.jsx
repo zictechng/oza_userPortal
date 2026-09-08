@@ -12,6 +12,7 @@ import {
   MdOutlineAccountBalanceWallet,
 } from 'react-icons/md';
 import { useDispatch, useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import moment from 'moment';
 import client from 'components/client';
 import { AuthAlert } from 'components/auth/AuthCard';
@@ -20,9 +21,7 @@ import { useFormValidation } from 'hooks/useFormValidation';
 import { updateUserDetails } from 'storeMtg/authSlice';
 import { fetchDocument, clearDocument, setDocPage } from 'storeMtg/getDocumentUploadSlice';
 import { PageLayout, PageCard } from 'layouts/PageLayout';
-import ProfileImageUpload from 'views/admin/completeProfileSteps/ProfileImageUploadCard';
-import DocumentIDUpload from 'views/admin/completeProfileSteps/DocumentUploadCard';
-import AddressProof from 'views/admin/completeProfileSteps/AddressProofCard';
+
 
 
 const KycDocuments = ({ userId, userToken }) => {
@@ -129,6 +128,7 @@ const KycDocuments = ({ userId, userToken }) => {
 
 export default function Profile() {
   const dispatch = useDispatch();
+  const navigate = useNavigate();
   const { user, userToken } = useSelector(state => state.authUser);
   const userData = user?.userData;
   const headers = { Authorization: `Bearer ${userToken}` };
@@ -150,6 +150,8 @@ export default function Profile() {
   const dashedBorderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
   const rowHoverBg = useColorModeValue('gray.50', 'navy.700');
   const dividerColor = useColorModeValue('#E2E8F0', 'rgba(255,255,255,0.1)');
+  const regBannerBg = useColorModeValue('orange.50', 'navy.700');
+  const regBannerBorder = useColorModeValue('orange.200', 'orange.700');
 
   const [form, setForm] = useState({
     display_name: '',
@@ -216,6 +218,11 @@ export default function Profile() {
 
   const isVerified = userData?.acct_approved_status === 'Approved';
   const profileComplete = userData?.reg_stage4 === 'Yes';
+  const allStepsDone = userData?.reg_stage2 === 'Yes' &&
+    userData?.reg_stage3 === 'Yes' &&
+    userData?.reg_stage4 === 'Yes' &&
+    userData?.reg_stage5 === 'Yes' &&
+    userData?.reg_stage6 === 'Yes';
 
   return (
     <Box
@@ -299,6 +306,34 @@ export default function Profile() {
         ))}
       </SimpleGrid>
 
+            {/* Complete Registration Banner */}
+      {!allStepsDone && !isVerified && (
+        <Box
+          bg={regBannerBg}
+          borderRadius='16px' p='16px' mb='20px'
+          border='1px solid' borderColor={regBannerBorder}>
+          <Flex justify='space-between' align='center' flexWrap='wrap' gap='12px'>
+            <Flex align='center' gap='10px'>
+              <Icon as={MdVerified} color='orange.400' w='20px' h='20px' />
+              <Box>
+                <Text color={textColor} fontSize='sm' fontWeight='700'>
+                  Complete your registration
+                </Text>
+                <Text color={subColor} fontSize='xs'>
+                  Upload your KYC documents to unlock all features and bonuses
+                </Text>
+              </Box>
+            </Flex>
+            <Button size='sm' bg='brand.500' color='white'
+              borderRadius='10px' fontWeight='700'
+              _hover={{ bg: 'brand.600' }}
+              onClick={() => navigate('/user/signup-process')}>
+              Continue Registration →
+            </Button>
+          </Flex>
+        </Box>
+      )}
+
       {/* Tabs */}
       <Box bg={cardBg} borderRadius='20px'
         border='1px solid' borderColor={borderColor} overflow='hidden'>
@@ -306,9 +341,6 @@ export default function Profile() {
           <TabList px='20px' borderColor={borderColor}>
             <Tab fontSize='sm' fontWeight='600' py='16px'>Personal Info</Tab>
             <Tab fontSize='sm' fontWeight='600' py='16px'>Account Info</Tab>
-            <Tab fontSize='sm' fontWeight='600' py='16px'>Profile Photo</Tab>
-            <Tab fontSize='sm' fontWeight='600' py='16px'>KYC Document</Tab>
-            <Tab fontSize='sm' fontWeight='600' py='16px'>Address Proof</Tab>
             <Tab fontSize='sm' fontWeight='600' py='16px'>Documents</Tab>
           </TabList>
 
@@ -399,8 +431,6 @@ export default function Profile() {
               </Button>
             </TabPanel>
 
-            
-
             {/* Account Info */}
             <TabPanel p='24px'>
               {/* Added clean divider line at the top of the Account Info section */}
@@ -442,40 +472,7 @@ export default function Profile() {
                 </Box>
               ))}
             </TabPanel>
-
-            {/* Profile Photo Upload */}
-            <TabPanel p='24px'>
-              <Text color={textColor} fontSize='sm' fontWeight='700' mb='4px'>
-                Profile Photo
-              </Text>
-              <Text color={subColor} fontSize='sm' mb='16px'>
-                Upload a clear photo of your face. This helps us verify your identity.
-              </Text>
-              <ProfileImageUpload />
-            </TabPanel>
-
-            {/* KYC Document Upload */}
-            <TabPanel p='24px'>
-              <Text color={textColor} fontSize='sm' fontWeight='700' mb='4px'>
-                KYC Document
-              </Text>
-              <Text color={subColor} fontSize='xs' mb='16px'>
-                Upload a government-issued ID — passport, NIN, driving licence or bank statement.
-              </Text>
-              <DocumentIDUpload />
-            </TabPanel>
-
-            {/* Address Proof Upload */}
-            <TabPanel p='24px'>
-              <Text color={textColor} fontSize='sm' fontWeight='700' mb='4px'>
-                Proof of Address
-              </Text>
-              <Text color={subColor} fontSize='xs' mb='16px'>
-                Upload a utility bill, bank statement or official mail showing your address.
-              </Text>
-              <AddressProof />
-            </TabPanel>
-
+            
             {/* KYC Documents List */}
             <TabPanel p='24px'>
               <KycDocuments
