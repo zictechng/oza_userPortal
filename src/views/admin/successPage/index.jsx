@@ -33,7 +33,7 @@ export default function SuccessPage() {
           <Text color={textColor} fontSize='2xl' fontWeight='800' mb='8px'>
             Transaction Successful! 🎉
           </Text>
-          <Text color={subColor} fontSize='sm' mb='32px' lineHeight='1.6'>
+          <Text color={subColor} fontSize='base' mb='32px' lineHeight='1.6'>
             {isPaystack
               ? 'Your payment was verified and your wallet has been credited instantly.'
               : 'Your transaction has been submitted. Our team will process it shortly.'}
@@ -43,14 +43,14 @@ export default function SuccessPage() {
             <Box
             bg={useColorModeValue('brand.50', 'navy.700')}
             borderRadius='16px' p='16px' mb='32px'>
-            <Text color={subColor} fontSize='xs' mb='4px'>
+            <Text color={subColor} fontSize='sm' mb='4px'>
               {isPaystack ? 'Updated Balance' : 'Current Balance'}
             </Text>
             <Text color='brand.500' fontSize='xl' fontWeight='800'>
               ₦{Number(user?.userData?.amount || 0).toLocaleString()}
             </Text>
             {location.state?.reference && (
-              <Text color={subColor} fontSize='xs' mt='4px'>
+              <Text color={subColor} fontSize='sm' mt='4px'>
                 Ref: {location.state.reference}
               </Text>
             )}

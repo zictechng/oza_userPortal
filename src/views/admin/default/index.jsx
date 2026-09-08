@@ -273,6 +273,17 @@ export default function Dashboard() {
             </Button>
             <Button
               bg='whiteAlpha.200' color='white'
+              border='2px solid'
+              borderColor='whiteAlpha.600'
+              _hover={{ bg: 'whiteAlpha.300', borderColor: 'white' }}
+              fontWeight='700' fontSize='sm'
+              borderRadius='12px' px='20px'
+              transition='all 0.2s'
+              onClick={() => navigate('/user/send-fund')}>
+              Send Fund
+            </Button>
+            <Button
+              bg='whiteAlpha.200' color='white'
               _hover={{ bg: 'whiteAlpha.300' }}
               fontWeight='700' fontSize='sm'
               borderRadius='12px' px='20px'
