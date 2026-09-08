@@ -4,7 +4,7 @@ import {
   MdHome, MdPerson, MdHistory, MdHelpOutline,
   MdSettings, MdNotifications, MdLock,
   MdCurrencyExchange, MdOutlineAccountBalanceWallet,
-  MdPayment, MdPeople, MdStars,
+  MdPayment, MdPeople, MdStars, MdAdd,
 } from 'react-icons/md';
 import {
   FiPhone, FiZap, FiTv, FiWifi, FiFileText,
@@ -65,11 +65,11 @@ const routes = [
     visible: true,
   },
   {
-    name: 'Send Fund',
+    name: 'Fund Account',
     layout: '/user',
-    path: '/send-fund',
-    icon: <Icon as={FiSend} width='20px' height='20px' color='inherit' />,
-    component: <SendFundComponent />,
+    path: '/fund-account',
+    icon: <Icon as={MdAdd} width='20px' height='20px' color='inherit' />,
+    component: <FundAccountComponent />,
     visible: true,
   },
   {
