@@ -69,7 +69,7 @@ export default function CheckoutPaypal() {
           duration: 5000,
           position: 'top',
         });
-        setTimeout(() => navigate('/user/success'), 2000);
+        setTimeout(() => navigate('/user/success', { state: { isPaypal: true } }), 2000);
       } else {
         toast({
           title: 'Payment Failed',

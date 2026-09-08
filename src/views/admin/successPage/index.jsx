@@ -16,6 +16,26 @@ export default function SuccessPage() {
   const subColor = useColorModeValue('gray.500', 'gray.400');
   const borderColor = useColorModeValue('gray.100', 'whiteAlpha.100');
   const isPaystack = location.state?.reference !== undefined;
+  const isPaypal = location.state?.isPaypal === true;
+  const isManual = location.state?.isManual === true;
+
+
+  const getTitle = () => {
+    if (isPaystack) return 'Wallet Credited! 🎉';
+    if (isPaypal) return 'Exchange Request Submitted! 🎉';
+    return 'Transaction Submitted! 🎉';
+  };
+
+  const getMessage = () => {
+    if (isPaystack) return 'Your payment was verified by PayStack and your wallet has been credited instantly.';
+    if (isPaypal) return 'Your PayPal exchange request has been submitted. Admin will verify and credit your NGN wallet within 1-24 hours.';
+    return 'Your transaction has been submitted. Our team will process it shortly and you will be notified.';
+  };
+
+  const getBalanceLabel = () => {
+    if (isPaystack) return 'Updated Balance';
+    return 'Current Balance';
+  };
 
   return (
     <PageLayout>
@@ -31,12 +51,10 @@ export default function SuccessPage() {
           </Box>
 
           <Text color={textColor} fontSize='2xl' fontWeight='800' mb='8px'>
-            Transaction Successful! 🎉
+            {getTitle()}
           </Text>
-          <Text color={subColor} fontSize='base' mb='32px' lineHeight='1.6'>
-            {isPaystack
-              ? 'Your payment was verified and your wallet has been credited instantly.'
-              : 'Your transaction has been submitted. Our team will process it shortly.'}
+          <Text color={subColor} fontSize='sm' mb='32px' lineHeight='1.6'>
+            {getMessage()}
           </Text>
 
           {/* Balance */}
@@ -44,7 +62,7 @@ export default function SuccessPage() {
             bg={useColorModeValue('brand.50', 'navy.700')}
             borderRadius='16px' p='16px' mb='32px'>
             <Text color={subColor} fontSize='sm' mb='4px'>
-              {isPaystack ? 'Updated Balance' : 'Current Balance'}
+              {getBalanceLabel()}
             </Text>
             <Text color='brand.500' fontSize='xl' fontWeight='800'>
               ₦{Number(user?.userData?.amount || 0).toLocaleString()}
