@@ -56,7 +56,7 @@ export const paystackFundData = createAsyncThunk(
   
         // Make the API call
         const response = await client.post(
-          'api/verify_paystack_payment',
+          'api/userAccount_funding',
           requestData,
           {
             headers: {
@@ -64,12 +64,6 @@ export const paystackFundData = createAsyncThunk(
             },
           }
         );
-          //console.log('slice feedback: ', response.data);
-          // Update Redux store with new balance instantly
-         if (response.data?.userData) {
-          dispatch(updateUserDetails({ userData: response.data.userData }));
-        }
-
         return response.data;
   
       } catch (error) {

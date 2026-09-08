@@ -9,6 +9,7 @@ import { useLocation, useNavigate } from 'react-router-dom';
 import { useDispatch, useSelector } from 'react-redux';
 import { PaystackButton } from 'react-paystack';
 import { paystackFundData, resetPaystackState } from 'storeMtg/fundAccountPaysackSlice';
+import { verifyPaystackPayment, resetVerifyState } from 'storeMtg/verifyPaystackSlice';
 import { getPaymentGateStatus, resetPaymentGatewayState } from 'storeMtg/checkPaymentGatewayStatusSlice';
 import { buyFundData, resetBuyState } from 'storeMtg/fundBuySlice';
 import { useToast } from '@chakra-ui/react';
@@ -104,8 +105,8 @@ export default function CheckoutPaystack() {
         userId: user?.userData?._id,
         amt: displayAmount,
       };
-      dispatch(paystackFundData(fundData)).then((result) => {
-        dispatch(resetPaystackState());
+      dispatch(verifyPaystackPayment(fundData)).then((result) => {
+        dispatch(resetVerifyState());
         if (result.payload?.msg === '201') {
           toast({
             title: 'Payment Successful! 🎉',
@@ -129,7 +130,7 @@ export default function CheckoutPaystack() {
       });
     }
   };
-  
+
   const handleClose = () => {
     toast({
       title: 'Payment cancelled',
