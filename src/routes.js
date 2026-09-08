@@ -73,6 +73,14 @@ const routes = [
     visible: true,
   },
   {
+    name: 'Send Fund',
+    layout: '/user',
+    path: '/send-fund',
+    icon: <Icon as={FiSend} width='20px' height='20px' color='inherit' />,
+    component: <SendFundComponent />,
+    visible: false,
+  },
+  {
     name: 'History',
     layout: '/user',
     path: '/history',
