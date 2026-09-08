@@ -18,16 +18,19 @@ export default function SuccessPage() {
   const isPaystack = location.state?.reference !== undefined;
   const isPaypal = location.state?.isPaypal === true;
   const isManual = location.state?.isManual === true;
+  const isBuy = location.state?.isBuy === true;
 
 
   const getTitle = () => {
     if (isPaystack) return 'Wallet Credited! 🎉';
     if (isPaypal) return 'Exchange Request Submitted! 🎉';
+    if (isBuy) return 'Buy Order Submitted! 🎉';
     return 'Transaction Submitted! 🎉';
   };
 
   const getMessage = () => {
     if (isPaystack) return 'Your payment was verified by PayStack and your wallet has been credited instantly.';
+    if (isBuy) return 'Your buy order has been received and payment confirmed. Admin will deliver your virtual funds within 1-24 hours.';
     if (isPaypal) return 'Your PayPal exchange request has been submitted. Admin will verify and credit your NGN wallet within 1-24 hours.';
     return 'Your transaction has been submitted. Our team will process it shortly and you will be notified.';
   };

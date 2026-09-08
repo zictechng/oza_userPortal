@@ -98,7 +98,7 @@ export default function CheckoutPaystack() {
       };
       dispatch(buyFundData(buyData)).then(() => {
         dispatch(resetBuyState());
-        navigate('/user/success', { state: { reference: res.reference, isPaystack: true } });
+        navigate('/user/success', { state: { reference: res.reference, isBuy: true } });
       });
     } else {
       // Funding flow — verify with PayStack and credit instantly
