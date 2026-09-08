@@ -137,8 +137,9 @@ export default function DocumentIDUpload(props) {
           <Text color='green.700' fontSize='sm' fontWeight='700'>
             KYC document already uploaded
           </Text>
-          <Text color='green.600' fontSize='xs'>
-            You can re-upload to replace your current document
+          <Text color='green.600' fontSize='sm'>
+            Waiting for review. You cannot replace your document at the moment.
+            Contact support if you need to update it.
           </Text>
         </Box>
       </Flex>
@@ -188,53 +189,60 @@ export default function DocumentIDUpload(props) {
       </Box>
 
       {/* Dropzone */}
-      <Box
+            <Box
         {...getRootProps()}
         bg={isDragActive ? dropActiveBg : dropBg}
         border='2px dashed'
-        borderColor={isDragActive ? 'brand.500' : borderColor}
-        borderRadius='16px' p='32px' textAlign='center'
+        borderColor={isDragActive ? 'brand.500' : files.length ? 'brand.500' : borderColor}
+        borderRadius='16px'
+        p={files.length ? '16px' : '32px'}
+        textAlign='center'
         cursor='pointer' mb='16px' transition='all 0.2s'
         _hover={{ borderColor: 'brand.500', bg: dropActiveBg }}>
         <Input variant='main' {...getInputProps()} />
-        <Flex direction='column' align='center' gap='10px'>
-          <Box w='56px' h='56px' borderRadius='16px'
-            bg='brand.100' display='flex' alignItems='center' justifyContent='center'>
-            <Icon as={isDragActive ? MdAssignment : MdUpload}
-              color='brand.500' w='28px' h='28px' />
-          </Box>
-          <Box>
-            <Text color={textColor} fontSize='sm' fontWeight='700'>
-              {isDragActive ? 'Drop document here'
-                : files.length ? 'Document selected — click Upload'
-                : 'Click or drag document here'}
-            </Text>
-            <Text color={subColor} fontSize='xs' mt='4px'>
-              PNG, JPG files only — max 5MB
-            </Text>
-          </Box>
-        </Flex>
-      </Box>
 
-      {/* Preview */}
-      <VStack align='stretch' spacing={3} mb='16px'>
-        {files.map((file) => (
-          <HStack key={file.name} spacing={3} align='center'
-            p='10px' bg={dropBg} borderRadius='10px'>
-            {file.type.startsWith('image') && (
-              <Image src={file.preview} alt={file.name}
-                boxSize='48px' objectFit='cover' borderRadius='8px' />
-            )}
-            <Text color={textColor} fontSize='sm' flex='1' noOfLines={1}>
-              {file.name}
+        {files.length > 0 ? (
+          /* Show preview inside dropzone */
+          <Flex direction='column' align='center' gap='12px'>
+            <Image
+              src={files[0].preview}
+              alt={files[0].name}
+              maxH='200px'
+              borderRadius='12px'
+              objectFit='contain'
+            />
+            <Flex align='center' gap='8px'>
+              <Text color={textColor} fontSize='xs' fontWeight='600' noOfLines={1}>
+                {files[0].name}
+              </Text>
+              <Button size='xs' colorScheme='red' variant='ghost'
+                onClick={(e) => { e.stopPropagation(); removeFile(files[0].name); }}>
+                Remove
+              </Button>
+            </Flex>
+            <Text color={subColor} fontSize='xs'>
+              Click to change document
             </Text>
-            <Button size='xs' colorScheme='red' variant='ghost'
-              onClick={() => removeFile(file.name)}>
-              Remove
-            </Button>
-          </HStack>
-        ))}
-      </VStack>
+          </Flex>
+        ) : (
+          /* Empty state */
+          <Flex direction='column' align='center' gap='10px'>
+            <Box w='56px' h='56px' borderRadius='16px'
+              bg='brand.100' display='flex' alignItems='center' justifyContent='center'>
+              <Icon as={isDragActive ? MdAssignment : MdUpload}
+                color='brand.500' w='28px' h='28px' />
+            </Box>
+            <Box>
+              <Text color={textColor} fontSize='sm' fontWeight='700'>
+                {isDragActive ? 'Drop document here' : 'Click or drag document here'}
+              </Text>
+              <Text color={subColor} fontSize='xs' mt='4px'>
+                PNG, JPG files only — max 5MB
+              </Text>
+            </Box>
+          </Flex>
+        )}
+      </Box>
 
       {error && (
         <Alert status='error' mb='12px' borderRadius='10px' fontSize='sm'>

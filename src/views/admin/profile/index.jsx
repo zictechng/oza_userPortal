@@ -22,6 +22,7 @@ import { fetchDocument, clearDocument, setDocPage } from 'storeMtg/getDocumentUp
 import { PageLayout, PageCard } from 'layouts/PageLayout';
 import ProfileImageUpload from 'views/admin/completeProfileSteps/ProfileImageUploadCard';
 import DocumentIDUpload from 'views/admin/completeProfileSteps/DocumentUploadCard';
+import AddressProof from 'views/admin/completeProfileSteps/AddressProofCard';
 
 
 const KycDocuments = ({ userId, userToken }) => {
@@ -306,8 +307,9 @@ export default function Profile() {
             <Tab fontSize='sm' fontWeight='600' py='16px'>Personal Info</Tab>
             <Tab fontSize='sm' fontWeight='600' py='16px'>Account Info</Tab>
             <Tab fontSize='sm' fontWeight='600' py='16px'>Profile Photo</Tab>
-            <Tab fontSize='sm' fontWeight='600' py='16px'>Upload KYC</Tab>
-            <Tab fontSize='sm' fontWeight='600' py='16px'>KYC Documents</Tab>
+            <Tab fontSize='sm' fontWeight='600' py='16px'>KYC Document</Tab>
+            <Tab fontSize='sm' fontWeight='600' py='16px'>Address Proof</Tab>
+            <Tab fontSize='sm' fontWeight='600' py='16px'>Documents</Tab>
           </TabList>
 
           <TabPanels>
@@ -446,7 +448,7 @@ export default function Profile() {
               <Text color={textColor} fontSize='sm' fontWeight='700' mb='4px'>
                 Profile Photo
               </Text>
-              <Text color={subColor} fontSize='xs' mb='16px'>
+              <Text color={subColor} fontSize='sm' mb='16px'>
                 Upload a clear photo of your face. This helps us verify your identity.
               </Text>
               <ProfileImageUpload />
@@ -455,12 +457,23 @@ export default function Profile() {
             {/* KYC Document Upload */}
             <TabPanel p='24px'>
               <Text color={textColor} fontSize='sm' fontWeight='700' mb='4px'>
-                Upload KYC Document
+                KYC Document
               </Text>
               <Text color={subColor} fontSize='xs' mb='16px'>
-                Upload a government-issued ID, bank statement, utility bill or proof of address.
+                Upload a government-issued ID — passport, NIN, driving licence or bank statement.
               </Text>
               <DocumentIDUpload />
+            </TabPanel>
+
+            {/* Address Proof Upload */}
+            <TabPanel p='24px'>
+              <Text color={textColor} fontSize='sm' fontWeight='700' mb='4px'>
+                Proof of Address
+              </Text>
+              <Text color={subColor} fontSize='xs' mb='16px'>
+                Upload a utility bill, bank statement or official mail showing your address.
+              </Text>
+              <AddressProof />
             </TabPanel>
 
             {/* KYC Documents List */}
