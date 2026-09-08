@@ -1,5 +1,6 @@
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import client from "components/client";
+import { updateUserDetails } from "storeMtg/authSlice";
 
 
 const fundAccountPaystackSlice = createSlice({
@@ -38,7 +39,7 @@ const fundAccountPaystackSlice = createSlice({
 // Async thunk to send post data to an API
 export const paystackFundData = createAsyncThunk(
     'api/send_funds',
-    async (postData, { getState, rejectWithValue }) => {
+    async (postData, { getState, rejectWithValue, dispatch  }) => {
       try {
         const { authUser } = getState();
         
@@ -64,7 +65,12 @@ export const paystackFundData = createAsyncThunk(
           }
         );
           //console.log('slice feedback: ', response.data);
-         return response.data;
+          // Update Redux store with new balance instantly
+         if (response.data?.userData) {
+          dispatch(updateUserDetails({ userData: response.data.userData }));
+        }
+
+        return response.data;
   
       } catch (error) {
         console.error('Error updating password:', error);
