@@ -84,7 +84,9 @@ export default function CheckoutPaystack() {
 
     const handleSuccess = (res) => {
     setBtnLoader(true);
-      if (serviceType === 'Buy') {
+    console.log('handleSuccess — serviceType:', serviceType, 'location.state:', location.state);
+    const isBuyTransaction = serviceType === 'Buy' || location.state?.serviceType === 'Buy';
+    if (isBuyTransaction) {
       const buyData = {
         myId: user?.userData?._id,
         serviceName: serviceCategory,
@@ -100,7 +102,7 @@ export default function CheckoutPaystack() {
         dispatch(resetBuyState());
         navigate('/user/success', { state: { reference: res.reference, isBuy: true } });
       });
-    } else {
+    } else if (!isBuyTransaction) {
       // Funding flow — verify with PayStack and credit instantly
       const fundData = {
         reference: res.reference,
