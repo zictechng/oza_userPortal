@@ -245,7 +245,7 @@ import { updateUserDetails } from "storeMtg/authSlice";
                       isClosable: true,
                       position: "top",
                     });
-                    navigate('/user/success')
+                    navigate('/user/success', { state: { isSendFund: true } })
                
                 } 
                 else if(result.payload.msg !=='200')
