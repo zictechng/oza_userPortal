@@ -53,9 +53,38 @@ export default function CheckoutPaystack() {
   // Display amount = amount / 100
   const displayAmount = Number(amount || 0) / 100;
 
-  const handleSuccess = (res) => {
+  // const handleSuccess = (res) => {
+  //   setBtnLoader(true);
+  //   if (serviceType === 'Buy') {
+  //     const buyData = {
+  //       buy_service: serviceCategory,
+  //       buy_amount: actualPayment,
+  //       buy_nairaTotal: displayAmount,
+  //       user_id: user?.userData?._id,
+  //       tag_id: user?.userData?.tag_id,
+  //       paystack_reference: res.reference,
+  //     };
+  //     dispatch(buyFundData(buyData)).then(() => {
+  //       dispatch(resetBuyState());
+  //       navigate('/user/success', { state: { reference: res.reference } });
+  //     });
+  //   } else {
+  //     const fundData = {
+  //       amt: displayAmount,
+  //       user_id: user?.userData?._id,
+  //       paystack_reference: res.reference,
+  //     };
+  //     dispatch(paystackFundData(fundData)).then(() => {
+  //       dispatch(resetPaystackState());
+  //       navigate('/user/success', { state: { reference: res.reference } });
+  //     });
+  //   }
+  // };
+
+    const handleSuccess = (res) => {
     setBtnLoader(true);
     if (serviceType === 'Buy') {
+      // Buy flow — existing endpoint
       const buyData = {
         buy_service: serviceCategory,
         buy_amount: actualPayment,
@@ -69,18 +98,38 @@ export default function CheckoutPaystack() {
         navigate('/user/success', { state: { reference: res.reference } });
       });
     } else {
+      // Funding flow — verify with PayStack and credit instantly
       const fundData = {
+        reference: res.reference,
+        userId: user?.userData?._id,
         amt: displayAmount,
-        user_id: user?.userData?._id,
-        paystack_reference: res.reference,
       };
-      dispatch(paystackFundData(fundData)).then(() => {
+      dispatch(paystackFundData(fundData)).then((result) => {
         dispatch(resetPaystackState());
-        navigate('/user/success', { state: { reference: res.reference } });
+        if (result.payload?.msg === '201') {
+          toast({
+            title: 'Payment Successful! 🎉',
+            description: `Your wallet has been credited with ₦${displayAmount.toLocaleString()}`,
+            status: 'success',
+            duration: 6000,
+            isClosable: true,
+            position: 'top',
+          });
+          navigate('/user/success', { state: { reference: res.reference } });
+        } else {
+          toast({
+            title: 'Payment issue',
+            description: result.payload?.message || 'Contact support with your reference.',
+            status: 'warning',
+            duration: 8000,
+            isClosable: true,
+            position: 'top',
+          });
+        }
       });
     }
   };
-
+  
   const handleClose = () => {
     toast({
       title: 'Payment cancelled',
@@ -130,7 +179,7 @@ export default function CheckoutPaystack() {
             </Text>
             {[
               { label: 'Service', value: serviceCategory || serviceType || '—' },
-              { label: 'Payment Method', value: 'PayStack (Card)' },
+              { label: 'Payment Method', value: ' Card' },
               { label: 'Reference', value: reference || '—' },
             ].map((item, i) => (
               <Flex key={i} justify='space-between' py='12px'

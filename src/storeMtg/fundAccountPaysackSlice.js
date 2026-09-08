@@ -55,7 +55,7 @@ export const paystackFundData = createAsyncThunk(
   
         // Make the API call
         const response = await client.post(
-          'api/userAccount_funding',
+          'api/verify_paystack_payment',
           requestData,
           {
             headers: {
