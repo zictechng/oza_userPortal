@@ -75,7 +75,7 @@ export default function WalletAnalytics() {
   if (!chartData) return null;
 
   return (
-    <Box mt='24px'>
+    <Box mt='34px' mb='30px'>
       <Flex justify='space-between' align='center' mb='20px'>
         <Box>
           <Text color={textColor} fontSize='lg' fontWeight='800'>

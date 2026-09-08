@@ -11,7 +11,8 @@ import updatePassword from "storeMtg/passwordUpdateSlice";
 import accountPinUpdate from "storeMtg/pinUpdateSlice"
 import accountDeactivation  from "storeMtg/deactivateAccountSlice";
 import userBankDetails from "storeMtg/userBankDetailsSlice";
-import referralDetails from "storeMtg/getReferralSlice"
+import referralDetails from "storeMtg/getReferralSlice";
+import paymentGatewayStatus from "storeMtg/checkPaymentGatewayStatusSlice"
 
 const appReducer = combineReducers({
     authUser: authSlice,
@@ -27,6 +28,7 @@ const appReducer = combineReducers({
     deactivateAccount: accountDeactivation,
     bankDetails: userBankDetails,
     referral: referralDetails,
+    paymentGatewayStatus: paymentGatewayStatus,
 });
 
 const rootReducer = (state, action) => {

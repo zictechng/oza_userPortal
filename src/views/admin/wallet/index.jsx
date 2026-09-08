@@ -255,6 +255,10 @@ export default function Wallet() {
         </Box>
       </SimpleGrid>
 
+      {/* Analytics */}
+      <WalletAnalytics/>
+
+
       {/* Recent Transactions */}
       <Box bg={cardBg} borderRadius='20px' p='20px'
         border='1px solid' borderColor={borderColor}
@@ -322,9 +326,7 @@ export default function Wallet() {
           ))
         )}
       </Box>
-      {/* Analytics */}
-      <WalletAnalytics/>
-
+      
     </PageLayout>
   );
 }

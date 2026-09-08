@@ -8,38 +8,46 @@ export function SidebarBrand() {
   const { appName, appLogo } = useAppContext();
 
   return (
-    <Flex align='center' direction='column'>
-      {appLogo ? (
-        <Image
-          src={appLogo}
-          alt={appName}
-          h='32px'
-          objectFit='contain'
-          my='16px'
-        />
-      ) : (
-        <Flex align='center' gap='8px' my='16px'>
+    <Flex direction='column'>
+      <Flex align='center' gap='10px' my='16px' px='4px'>
+        {/* Logo or initial */}
+        {appLogo ? (
+          <Image
+            src={appLogo}
+            alt={appName}
+            h='32px'
+            w='32px'
+            objectFit='contain'
+            borderRadius='8px'
+            flexShrink='0'
+          />
+        ) : (
           <Box
             w='32px' h='32px'
             borderRadius='8px'
             bg='brand.500'
             display='flex'
             alignItems='center'
-            justifyContent='center'>
+            justifyContent='center'
+            flexShrink='0'>
             <Text color='white' fontWeight='800' fontSize='16px'>
               {appName?.charAt(0) || 'A'}
             </Text>
           </Box>
-          <Text
-            fontSize='20px'
-            fontWeight='800'
-            color={colorMode === 'light' ? 'brand.500' : 'white'}
-            letterSpacing='-0.5px'>
-            {appName || ''}
-          </Text>
-        </Flex>
-      )}
-      <HSeparator mb='20px' mt='10px' />
+        )}
+
+        {/* App name */}
+        <Text
+          fontSize='17px'
+          fontWeight='800'
+          color={colorMode === 'light' ? 'navy.700' : 'white'}
+          letterSpacing='-0.5px'
+          noOfLines={1}>
+          {appName || ''}
+        </Text>
+      </Flex>
+
+      <HSeparator mb='20px' />
     </Flex>
   );
 }

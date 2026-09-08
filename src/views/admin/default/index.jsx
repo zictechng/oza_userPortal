@@ -337,7 +337,11 @@ export default function Dashboard() {
           ))}
         </SimpleGrid>
       </PageCard>
-
+        
+        {/* Analytics */}
+      <AnalyticsSection />
+      
+      
       {/* Recent Transactions */}
       <PageCard p='20px'>
         <Flex justify='space-between' align='center' mb='16px'>
@@ -413,8 +417,6 @@ export default function Dashboard() {
           </Box>
         )}
       </PageCard>
-      {/* Analytics */}
-      <AnalyticsSection />
       
     </PageLayout>
   );
