@@ -29,13 +29,13 @@ const PaymentAccountCard = ({ title, value, icon, textColor, subColor, borderCol
       </Flex>
       <Divider borderColor={borderColor} mb='12px' />
       <Flex justify='space-between' align='center' py='6px'>
-        <Text color={subColor} fontSize='xs'>Account / Address</Text>
+        <Text color={subColor} fontSize='sm'>Account / Address</Text>
         <Flex align='center' gap='8px'>
           <Text color={textColor} fontSize='sm' fontWeight='700'
             maxW='200px' noOfLines={1}>
             {value}
           </Text>
-          <Button size='xs' variant='ghost' color='brand.500'
+          <Button size='sm' variant='ghost' color='brand.500'
             onClick={onCopy}
             leftIcon={<Icon as={hasCopied ? MdCheck : MdContentCopy} />}>
             {hasCopied ? 'Copied' : 'Copy'}
@@ -187,13 +187,13 @@ export default function ManualPayment() {
         </Flex>
       </Box>
 
-      <SimpleGrid columns={{ base: 1, lg: 2 }} gap='20px'>
+      <SimpleGrid columns={{ base: 1, lg: 2 }} gap='20px' alignItems='start'>
         {/* Bank Details */}
         <PageCard p='24px'>
           <Text color={textColor} fontWeight='700' fontSize='md' mb='4px'>
             Our Bank Accounts
           </Text>
-          <Text color={subColor} fontSize='xs' mb='20px'>
+          <Text color={subColor} fontSize='sm' mb='20px'>
             Transfer to any of the accounts below and upload your proof of payment
           </Text>
 
