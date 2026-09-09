@@ -2,7 +2,7 @@ import React, { useState, useEffect } from 'react';
 import {
   Button, Flex, FormControl, FormLabel,
   Input, Text, useColorModeValue,
-  SimpleGrid, Select, Box, Spinner, useToast,
+  SimpleGrid, Box, Spinner, useToast,
 } from '@chakra-ui/react';
 import { FiFileText } from 'react-icons/fi';
 import { useNavigate } from 'react-router-dom';
@@ -10,11 +10,20 @@ import { BillsLayout, BillsSuccess } from 'components/bills/BillsLayout';
 import { useBills } from 'hooks/useBills';
 import { AuthAlert } from 'components/auth/AuthCard';
 import { useFormValidation } from 'hooks/useFormValidation';
+import client from 'components/client';
+import { useSelector } from 'react-redux';
+
+// Standard price fallback
+const EXAM_PRICES = {
+  waec: 3500, neco: 1000, jamb: 3500, nabteb: 1000,
+  waec_gce: 3500, bece: 1000,
+};
 
 export default function BuyExamCards() {
   const navigate = useNavigate();
   const toast = useToast();
   const { fetchNetworks, buyExamCards, networks, networksLoading, userBalance } = useBills();
+  const { user, userToken } = useSelector(state => state.authUser);
   const { error, setError, clearError } = useFormValidation();
 
   const textColor = useColorModeValue('navy.700', 'white');
@@ -23,7 +32,9 @@ export default function BuyExamCards() {
   const quickBg = useColorModeValue('gray.50', 'navy.700');
 
   const [selectedExam, setSelectedExam] = useState(null);
-  const [quantity, setQuantity] = useState('1');
+  const [examPrice, setExamPrice] = useState(0);
+  const [priceLoading, setPriceLoading] = useState(false);
+  const [quantity, setQuantity] = useState(1);
   const [phone, setPhone] = useState('');
   const [loading, setLoading] = useState(false);
   const [success, setSuccess] = useState(null);
@@ -33,60 +44,68 @@ export default function BuyExamCards() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // Standard exam card prices as fallback if not from API
-  const EXAM_PRICES = {
-    waec: 3500, neco: 1000, jamb: 3500, nabteb: 1000,
-    waec_gce: 3500, bece: 1000,
-    };
-  const examPrice = Number(
-    selectedExam?.price ||
-    selectedExam?.extra?.unit_price ||
-    EXAM_PRICES[selectedExam?.id?.toLowerCase()] ||
-    EXAM_PRICES[selectedExam?.name?.toLowerCase()] ||
-    0
-    );
-  const totalAmount = selectedExam ? examPrice * Number(quantity) : 0;
+  const totalAmount = examPrice * quantity;
+
+  // Fetch price from API when exam type selected
+  const handleExamSelect = async (exam) => {
+    setSelectedExam(exam);
+    setExamPrice(0);
+    clearError();
+    setPriceLoading(true);
+    try {
+      const res = await client.get(
+        `/api/bills/exam_price/${exam.service_id}`,
+        { headers: { Authorization: `Bearer ${userToken}` } }
+      );
+      if (res.data.msg === '200' && res.data.price) {
+        setExamPrice(Number(res.data.price));
+      } else {
+        // Fallback to standard prices
+        const fallback = EXAM_PRICES[exam.id?.toLowerCase()] ||
+          EXAM_PRICES[exam.name?.toLowerCase()] || 0;
+        setExamPrice(fallback);
+      }
+    } catch (e) {
+      const fallback = EXAM_PRICES[exam.id?.toLowerCase()] ||
+        EXAM_PRICES[exam.name?.toLowerCase()] || 0;
+      setExamPrice(fallback);
+    } finally {
+      setPriceLoading(false);
+    }
+  };
 
   const handleSubmit = async () => {
     clearError();
     if (!selectedExam) { setError('Please select an exam type'); 
       toast({
-          title: 'Failed',
+          title: 'Error!',
           description: 'Please select an exam type',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-          position: 'bottom-right',
+          status: 'error', duration: 5000,
+          isClosable: true, position: 'bottom-right',
         });
       return; }
-    if (!quantity || Number(quantity) < 1) { setError('Please select quantity'); 
-      toast({
-          title: 'Failed',
+    if (quantity < 1) { setError('Please select quantity'); 
+        toast({
+          title: 'Error!',
           description: 'Please select quantity',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-          position: 'bottom-right',
+          status: 'error', duration: 5000,
+          isClosable: true, position: 'bottom-right',
         });
       return; }
     if (!phone || phone.length < 10) { setError('Please enter a valid phone number'); 
-       toast({
-          title: 'Failed',
+      toast({
+          title: 'Error!',
           description: 'Please enter a valid phone number',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-          position: 'bottom-right',
+          status: 'error', duration: 5000,
+          isClosable: true, position: 'bottom-right',
         });
-      return; }
+        return; }
     if (totalAmount > userBalance) { setError('Insufficient wallet balance'); 
       toast({
-          title: 'Failed',
+          title: 'Error!',
           description: 'Insufficient wallet balance',
-          status: 'error',
-          duration: 3000,
-          isClosable: true,
-          position: 'bottom-right',
+          status: 'error', duration: 5000,
+          isClosable: true, position: 'bottom-right',
         });
       return; }
 
@@ -94,11 +113,11 @@ export default function BuyExamCards() {
     try {
       const res = await buyExamCards({
         service_id: selectedExam.service_id,
-        exam_type: selectedExam.id,
+        exam_type: selectedExam.id, // used as product_code in backend
         exam_label: selectedExam.name,
         quantity,
         phone,
-        amount: examPrice * Number(quantity),
+        amount: totalAmount,
       });
 
       if (res.msg === '200') {
@@ -112,11 +131,12 @@ export default function BuyExamCards() {
         setSuccess({
           items: [
             { label: 'Exam Type', value: selectedExam.name },
-            { label: 'Quantity', value: quantity },
+            { label: 'Quantity', value: String(quantity) },
+            { label: 'Price per Card', value: `₦${examPrice.toLocaleString()}` },
             { label: 'Total Amount', value: `₦${totalAmount.toLocaleString()}` },
             { label: 'Reference', value: res.reference || '—' },
             { label: 'New Balance', value: `₦${Number(res.balance || 0).toLocaleString()}` },
-            { label: 'Pins', value: pins.length > 0 ? pins.join(' | ') : 'Check your email' },
+            { label: 'PIN(s)', value: pins.length > 0 ? pins.join(' | ') : 'Check your email' },
           ]
         });
       } else {
@@ -162,24 +182,21 @@ export default function BuyExamCards() {
         ) : (
           <SimpleGrid columns={2} gap='10px'>
             {networks.map(exam => (
-              <Button key={exam.id} h='64px' borderRadius='12px'
+              <Button key={exam.id} h='72px' borderRadius='12px'
                 border='2px solid'
                 borderColor={selectedExam?.id === exam.id ? 'brand.500' : borderColor}
                 bg={selectedExam?.id === exam.id ? 'brand.500' : quickBg}
                 color={selectedExam?.id === exam.id ? 'white' : textColor}
                 flexDirection='column' gap='4px'
                 fontWeight='700' fontSize='sm'
-                _hover={{ borderColor: 'brand.500' }}
-                onClick={() => { setSelectedExam(exam); clearError(); }}>
+                _hover={{ borderColor: 'brand.500', transform: 'translateY(-2px)' }}
+                transition='all 0.2s'
+                onClick={() => handleExamSelect(exam)}>
                 <Text fontWeight='800'>{exam.name}</Text>
                 <Text fontSize='10px' opacity={0.8}>
-                  ₦{Number(
-                    exam.price ||
-                    exam.extra?.unit_price ||
-                    EXAM_PRICES[exam.id?.toLowerCase()] ||
-                    EXAM_PRICES[exam.name?.toLowerCase()] ||
-                    0
-                  ).toLocaleString()}/card
+                  {selectedExam?.id === exam.id && priceLoading
+                    ? 'Loading price...'
+                    : `₦${(EXAM_PRICES[exam.id?.toLowerCase()] || 0).toLocaleString()}/card`}
                 </Text>
               </Button>
             ))}
@@ -187,21 +204,40 @@ export default function BuyExamCards() {
         )}
       </FormControl>
 
+      {/* Price display after selection */}
+      {selectedExam && (
+        <Box bg={quickBg} borderRadius='12px' p='12px' mb='16px'>
+          <Flex justify='space-between' align='center'>
+            <Text color={subColor} fontSize='sm'>{selectedExam.name} Price</Text>
+            {priceLoading ? (
+              <Spinner size='xs' color='brand.500' />
+            ) : (
+              <Text color='brand.500' fontSize='sm' fontWeight='800'>
+                ₦{examPrice.toLocaleString()}/card
+              </Text>
+            )}
+          </Flex>
+        </Box>
+      )}
+
       {/* Quantity */}
       <FormControl mb='20px'>
         <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='8px'>
           Quantity *
         </FormLabel>
-          <Select size='lg' borderRadius='12px' fontSize='sm'
-          value={quantity}
-          onChange={e => { setQuantity(e.target.value); clearError(); }}
-          _focus={{ borderColor: 'brand.500', boxShadow: '0 0 0 1px #4C5FD5' }}>
-          <option value='1'>1 card</option>
-          <option value='2'>2 cards</option>
-          <option value='3'>3 cards</option>
-          <option value='4'>4 cards</option>
-          <option value='5'>5 cards</option>
-        </Select>
+        <SimpleGrid columns={5} gap='8px'>
+          {[1, 2, 3, 4, 5].map(q => (
+            <Button key={q} h='48px' borderRadius='12px'
+              border='2px solid'
+              borderColor={quantity === q ? 'brand.500' : borderColor}
+              bg={quantity === q ? 'brand.500' : quickBg}
+              color={quantity === q ? 'white' : textColor}
+              fontWeight='700' fontSize='sm'
+              onClick={() => { setQuantity(q); clearError(); }}>
+              {q}
+            </Button>
+          ))}
+        </SimpleGrid>
       </FormControl>
 
       {/* Phone */}
@@ -217,16 +253,16 @@ export default function BuyExamCards() {
       </FormControl>
 
       {/* Total summary */}
-      {selectedExam && (
+      {selectedExam && examPrice > 0 && (
         <Flex justify='space-between' align='center'
           bg='brand.50' borderRadius='12px'
           px='16px' py='12px' mb='16px'
           border='1px solid' borderColor='brand.100'>
           <Text color='brand.700' fontSize='sm' fontWeight='600'>
-            {quantity} × {selectedExam.name}
+            {quantity} × ₦{examPrice.toLocaleString()}
           </Text>
           <Text color='brand.500' fontSize='lg' fontWeight='800'>
-           ₦{(examPrice * Number(quantity)).toLocaleString()}
+            ₦{totalAmount.toLocaleString()}
           </Text>
         </Flex>
       )}
@@ -247,8 +283,9 @@ export default function BuyExamCards() {
         _hover={{ bg: 'brand.600', transform: 'translateY(-1px)', shadow: 'lg' }}
         transition='all 0.2s'
         isLoading={loading} loadingText='Processing...'
+        isDisabled={!selectedExam || examPrice === 0 || priceLoading}
         onClick={handleSubmit}>
-        Purchase {quantity} {selectedExam?.name || 'Exam'} Card{Number(quantity) > 1 ? 's' : ''}
+        Buy {quantity} {selectedExam?.name || 'Exam'} Card{quantity > 1 ? 's' : ''} — ₦{totalAmount.toLocaleString()}
       </Button>
     </BillsLayout>
   );
