@@ -72,7 +72,15 @@ export default function BuyTv() {
 
       if (res.msg === '200') {
         setCustomerName(res.customer_name || '');
-        setPlans(res.bouquets || []);
+        // Normalize bouquet fields from VTUGate
+        const rawPlans = res.bouquets || [];
+        const normalized = rawPlans.map(p => ({
+          ...p,
+          name: p.name || p.plan_name || p.bouquet_name || p.package || '',
+          amount: Number(p.amount || p.price || p.plan_price || p.bouquet_price || p.monthly_price || 0),
+          code: p.code || p.plan_code || p.bouquet_code || p.id || '',
+        }));
+        setPlans(normalized);
         setVerified(true);
         clearError();
         toast({
