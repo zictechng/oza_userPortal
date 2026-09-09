@@ -1,12 +1,13 @@
 import React, { useEffect } from 'react';
 import {
   Box, Flex, Text, Icon, SimpleGrid,
-  useColorModeValue, Divider, Spinner,
+  useColorModeValue, Divider, Spinner, Button,
 } from '@chakra-ui/react';
 import { MdCurrencyExchange, MdArrowUpward, MdArrowDownward } from 'react-icons/md';
 import { useDispatch, useSelector } from 'react-redux';
 import { getExchangeRate } from 'storeMtg/exchangeRateSlice';
 import { PageLayout, PageCard } from 'layouts/PageLayout';
+import { useNavigate } from 'react-router-dom';
 
 const RateRow = ({ label, buyRate, sellRate, icon, color, borderColor, textColor, subColor }) => (
   <Box>
@@ -39,6 +40,7 @@ const RateRow = ({ label, buyRate, sellRate, icon, color, borderColor, textColor
 );
 
 export default function ExchangeRate() {
+  const navigate = useNavigate();
   const dispatch = useDispatch();
   const { data: currentRate, dataLoading } = useSelector(state => state.exchangeRate);
 
@@ -67,7 +69,9 @@ export default function ExchangeRate() {
         position='relative' overflow='hidden'>
         <Box position='absolute' top='-40px' right='-40px'
           w='150px' h='150px' borderRadius='full' bg='whiteAlpha.100' />
-        <Flex align='center' gap='12px' position='relative' zIndex='1'>
+        <Flex justify='space-between' align='center'
+          position='relative' zIndex='1' flexWrap='wrap' gap='16px'>
+            <Flex align='center' gap='12px'>
           <Box w='48px' h='48px' borderRadius='14px' bg='whiteAlpha.200'
             display='flex' alignItems='center' justifyContent='center'>
             <Icon as={MdCurrencyExchange} color='white' w='24px' h='24px' />
@@ -77,7 +81,31 @@ export default function ExchangeRate() {
             <Text color='whiteAlpha.700' fontSize='sm'>
               Live rates for PayPal, Payoneer and Bitcoin
             </Text>
+            
           </Box>
+          </Flex>
+           <Flex gap='10px' direction={{ base: 'column', sm: 'row' }}>
+            <Button
+              bg='white' color='brand.500'
+              _hover={{ bg: 'whiteAlpha.900' }}
+              fontWeight='700' fontSize='sm'
+              borderRadius='12px' px='20px'
+              onClick={() => navigate('/user/sales')}>
+              Sell
+            </Button>
+            <Button
+              bg='whiteAlpha.200' color='white'
+              border='2px solid'
+              borderColor='whiteAlpha.600'
+              _hover={{ bg: 'whiteAlpha.300', borderColor: 'white' }}
+              fontWeight='700' fontSize='sm'
+              borderRadius='12px' px='20px'
+              transition='all 0.2s'
+              onClick={() => navigate('/user/buy')}>
+              Buy
+            </Button>
+            
+          </Flex>
         </Flex>
       </Box>
 
@@ -87,7 +115,7 @@ export default function ExchangeRate() {
           <Text color={textColor} fontWeight='700' fontSize='md' mb='4px'>
             Current Exchange Rates
           </Text>
-          <Text color={subColor} fontSize='xs' mb='20px'>
+          <Text color={subColor} fontSize='sm' mb='20px'>
             Rates are updated regularly. Contact support for bulk rates.
           </Text>
 

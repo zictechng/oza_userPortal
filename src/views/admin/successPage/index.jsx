@@ -59,7 +59,7 @@ export default function SuccessPage() {
           <Text color={textColor} fontSize='2xl' fontWeight='800' mb='8px'>
             {getTitle()}
           </Text>
-          <Text color={subColor} fontSize='sm' mb='32px' lineHeight='1.6'>
+          <Text color={subColor} fontSize='1Xl' mb='32px' lineHeight='1.6'>
             {getMessage()}
           </Text>
 
