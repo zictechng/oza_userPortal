@@ -3,6 +3,7 @@ import {
   Box, Button, Flex, FormControl, FormLabel,
   Input, Text, useColorModeValue,
   SimpleGrid, Spinner, Select, Badge, Divider,
+  useToast,
 } from '@chakra-ui/react';
 import { FiZap } from 'react-icons/fi';
 import { MdCheckCircle, MdArrowBack } from 'react-icons/md';
@@ -21,6 +22,7 @@ export default function BuyElectricity() {
     networks, networksLoading, userBalance,
   } = useBills();
   const { error, setError, clearError } = useFormValidation();
+  const toast = useToast();
 
   const textColor = useColorModeValue('navy.700', 'white');
   const subColor = useColorModeValue('gray.500', 'gray.400');
@@ -45,8 +47,27 @@ export default function BuyElectricity() {
 
   const handleVerifyMeter = async () => {
     clearError();
-    if (!selectedNetwork) { setError('Please select a disco'); return; }
-    if (!meterNo || meterNo.length < 6) { setError('Please enter a valid meter number'); return; }
+    if (!selectedNetwork) 
+      { setError('Please select a disco'); 
+      toast({
+          title: 'Failed',
+          description: 'Please select a disco',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+          position: 'bottom-right',
+        });
+      return; }
+    if (!meterNo || meterNo.length < 6) { setError('Please enter a valid meter number'); 
+      toast({
+          title: 'Failed',
+          description: 'Please enter a valid meter number',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+          position: 'bottom-right',
+        });
+      return; }
 
     setVerifying(true);
     try {
@@ -60,8 +81,25 @@ export default function BuyElectricity() {
         setCustomerName(res.customer_name || '');
         setVerified(true);
         clearError();
+        toast({
+          title: 'Meter Verified ✓',
+          description: res.customer_name || 'Meter number verified successfully',
+          status: 'success',
+          duration: 3000,
+          isClosable: true,
+          position: 'bottom-right',
+        });
       } else {
-        setError(res.message || 'Could not verify meter. Please check and try again.');
+        const msg = res.message || 'Could not verify meter. Please check and try again.';
+        setError(msg);
+        toast({
+          title: 'Verification Failed',
+          description: msg,
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+          position: 'bottom-right',
+        });
       }
     } catch (e) {
       setError('Verification failed. Please try again.');
@@ -90,6 +128,14 @@ export default function BuyElectricity() {
       });
 
       if (res.msg === '200') {
+        toast({
+          title: 'Payment Successful! ✅',
+          description: `Electricity token purchased for meter ${meterNo}`,
+          status: 'success',
+          duration: 5000,
+          isClosable: true,
+          position: 'bottom-right',
+        });
         setSuccess({
           items: [
             { label: 'Disco', value: selectedNetwork.name },
@@ -101,11 +147,28 @@ export default function BuyElectricity() {
             { label: 'New Balance', value: `₦${Number(res.balance || 0).toLocaleString()}` },
           ]
         });
-      } else {
-        setError(res.message || 'Transaction failed. Please try again.');
+        } else {
+        const msg = res.message || 'Transaction failed. Please try again.';
+        setError(msg);
+        toast({
+          title: 'Transaction Failed',
+          description: msg,
+          status: 'error',
+          duration: 5000,
+          isClosable: true,
+          position: 'bottom-right',
+        });
       }
     } catch (e) {
       setError('Connection error. Please try again.');
+      toast({
+        title: 'Connection Error',
+        description: 'Please check your connection and try again.',
+        status: 'error',
+        duration: 5000,
+        isClosable: true,
+        position: 'bottom-right',
+      });
     } finally {
       setLoading(false);
     }
