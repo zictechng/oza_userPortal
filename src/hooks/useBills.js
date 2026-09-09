@@ -100,18 +100,18 @@ export const useBills = () => {
     return res.data;
   };
 
-  const verifyTv = async ({ smart_card_number, service_id }) => {
+  const verifyTv = async ({ smartcard_number, service_id }) => {
     const res = await client.post('/api/bills/verify_tv', {
-      smart_card_number, service_id,
+      smartcard_number, service_id,
     }, { headers });
-    
     return res.data;
   };
 
-  const buyTv = async ({ network, smart_card_number, plan_id, plan_name, amount, customer_name }) => {
+  const buyTv = async ({ service_id, provider_name, smartcard_number, phone, plan_code, plan_name, amount, customer_name }) => {
     const res = await client.post('/api/bills/buy_tv', {
-      userId, tag_id: tagId, network, smart_card_number,
-      plan_id, plan_name, amount: Number(amount), customer_name,
+      userId, tag_id: tagId, service_id, provider_name,
+      smartcard_number, phone: phone || '08000000000',
+      plan_code, plan_name, amount: Number(amount), customer_name,
     }, { headers });
     if (res.data?.msg === '200' && res.data?.balance !== undefined) {
       updateBalance(res.data.balance);
@@ -119,9 +119,12 @@ export const useBills = () => {
     return res.data;
   };
 
-  const buyExamCards = async ({ exam_type, quantity }) => {
+  const buyExamCards = async ({ service_id, exam_type, exam_label, quantity, phone, amount }) => {
+    const userData = user?.userData;
     const res = await client.post('/api/bills/buy_exam_cards', {
-      userId, tag_id: tagId, exam_type, quantity: Number(quantity),
+      userId, tag_id: tagId, service_id, exam_type, exam_label,
+      quantity: Number(quantity), phone: phone || userData?.phone || '08000000000',
+      email: userData?.email, amount: Number(amount),
     }, { headers });
     if (res.data?.msg === '200' && res.data?.balance !== undefined) {
       updateBalance(res.data.balance);

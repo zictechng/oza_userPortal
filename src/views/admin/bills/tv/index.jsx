@@ -1,11 +1,11 @@
-
 import React, { useState, useEffect } from 'react';
 import {
   Box, Button, Flex, FormControl, FormLabel,
   Input, Text, useColorModeValue,
-  SimpleGrid, Spinner, Badge,
+  SimpleGrid, Spinner, Badge, Divider, useToast,
 } from '@chakra-ui/react';
 import { FiTv } from 'react-icons/fi';
+import { MdCheckCircle } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { BillsLayout, BillsSuccess } from 'components/bills/BillsLayout';
 import { useBills } from 'hooks/useBills';
@@ -14,17 +14,19 @@ import { useFormValidation } from 'hooks/useFormValidation';
 
 export default function BuyTv() {
   const navigate = useNavigate();
+  const toast = useToast();
   const { fetchNetworks, verifyTv, buyTv, networks, networksLoading, userBalance } = useBills();
   const { error, setError, clearError } = useFormValidation();
 
   const textColor = useColorModeValue('navy.700', 'white');
   const subColor = useColorModeValue('gray.500', 'gray.400');
-  const borderColor = useColorModeValue('gray.100', 'whiteAlpha.100');
+  const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
   const quickBg = useColorModeValue('gray.50', 'navy.700');
+  const successBg = useColorModeValue('green.50', 'navy.700');
 
-  const [network, setNetwork] = useState('');
   const [selectedNetwork, setSelectedNetwork] = useState(null);
   const [smartCard, setSmartCard] = useState('');
+  const [phone, setPhone] = useState('');
   const [plans, setPlans] = useState([]);
   const [selectedPlan, setSelectedPlan] = useState(null);
   const [customerName, setCustomerName] = useState('');
@@ -40,20 +42,53 @@ export default function BuyTv() {
 
   const handleVerify = async () => {
     clearError();
-    if (!network) { setError('Please select a TV provider'); return; }
-    if (!smartCard || smartCard.length < 5) { setError('Please enter a valid smart card number'); return; }
+    if (!selectedNetwork) { setError('Please select a TV provider'); 
+      toast({
+          title: 'Failed',
+          description: 'Please select a TV provider',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+          position: 'bottom-right',
+        });
+      return; }
+    if (!smartCard || smartCard.length < 5) { setError('Please enter a valid smart card number'); 
+      toast({
+          title: 'Failed',
+          description: 'Please enter a valid smart card number',
+          status: 'error',
+          duration: 3000,
+          isClosable: true,
+          position: 'bottom-right',
+        });
+      return; }
+
     setVerifying(true);
     try {
       const res = await verifyTv({
-        smart_card_number: smartCard,
-        service_id: selectedNetwork?.service_id,
+        smartcard_number: smartCard,
+        service_id: selectedNetwork.service_id,
       });
+
       if (res.msg === '200') {
-        setCustomerName(res.data?.customer_name || '');
-        setPlans(res.data?.plans || []);
+        setCustomerName(res.customer_name || '');
+        setPlans(res.bouquets || []);
         setVerified(true);
+        clearError();
+        toast({
+          title: 'Smart Card Verified ✓',
+          description: res.customer_name || 'Smart card verified successfully',
+          status: 'success', duration: 3000,
+          isClosable: true, position: 'bottom-right',
+        });
       } else {
         setError(res.message || 'Could not verify smart card. Please check and try again.');
+        toast({
+          title: 'Verification Failed',
+          description: res.message || 'Please check your smart card number.',
+          status: 'error', duration: 5000,
+          isClosable: true, position: 'bottom-right',
+        });
       }
     } catch (e) {
       setError('Verification failed. Please try again.');
@@ -71,27 +106,43 @@ export default function BuyTv() {
     setLoading(true);
     try {
       const res = await buyTv({
-        network,
-        smart_card_number: smartCard,
-        plan_id: selectedPlan.id || selectedPlan.plan_id,
-        plan_name: selectedPlan.name || selectedPlan.plan_name,
+        service_id: selectedNetwork.service_id,
+        provider_name: selectedNetwork.name,
+        smartcard_number: smartCard,
+        phone: phone || '08000000000',
+        plan_code: selectedPlan.code || selectedPlan.plan_code || selectedPlan.id,
+        plan_name: selectedPlan.name || selectedPlan.bouquet_name,
         amount: selectedPlan.amount,
         customer_name: customerName,
       });
+
       if (res.msg === '200') {
+        toast({
+          title: 'Subscription Successful! ✅',
+          description: `${selectedNetwork.name} subscription activated`,
+          status: 'success', duration: 5000,
+          isClosable: true, position: 'bottom-right',
+        });
         setSuccess({
           items: [
-            { label: 'Provider', value: network.toUpperCase() },
+            { label: 'Provider', value: selectedNetwork.name },
             { label: 'Smart Card', value: smartCard },
             { label: 'Customer', value: customerName },
-            { label: 'Plan', value: selectedPlan.name || selectedPlan.plan_name },
+            { label: 'Plan', value: selectedPlan.name || selectedPlan.bouquet_name },
             { label: 'Amount', value: `₦${Number(selectedPlan.amount).toLocaleString()}` },
             { label: 'Reference', value: res.reference || '—' },
             { label: 'New Balance', value: `₦${Number(res.balance || 0).toLocaleString()}` },
           ]
         });
       } else {
-        setError(res.message || 'Transaction failed. Please try again.');
+        const msg = res.message || 'Transaction failed. Please try again.';
+        setError(msg);
+        toast({
+          title: 'Transaction Failed',
+          description: msg,
+          status: 'error', duration: 5000,
+          isClosable: true, position: 'bottom-right',
+        });
       }
     } catch (e) {
       setError('Connection error. Please try again.');
@@ -103,19 +154,24 @@ export default function BuyTv() {
   if (success) {
     return (
       <BillsLayout title='TV Subscription' icon={FiTv} iconBg='#D1FAE5' iconColor='#10B981'>
-        <BillsSuccess title='TV Subscription Successful!' items={success.items} onDone={() => navigate('/user')} />
+        <BillsSuccess title='TV Subscription Successful!'
+          items={success.items} onDone={() => navigate('/user')} />
       </BillsLayout>
     );
   }
 
   return (
-    <BillsLayout title='TV Subscription' subtitle='Renew your cable TV subscription instantly'
+    <BillsLayout title='TV Subscription'
+      subtitle='Renew your cable TV subscription instantly'
       icon={FiTv} iconBg='#D1FAE5' iconColor='#10B981'>
 
       <AuthAlert message={error} onClose={clearError} />
 
+      {/* Select Provider */}
       <FormControl mb='20px'>
-        <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='8px'>Select Provider *</FormLabel>
+        <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='8px'>
+          Select Provider *
+        </FormLabel>
         {networksLoading ? (
           <Flex justify='center' py='16px'><Spinner size='sm' color='brand.500' /></Flex>
         ) : (
@@ -123,12 +179,19 @@ export default function BuyTv() {
             {networks.map(net => (
               <Button key={net.id} h='48px' borderRadius='12px'
                 border='2px solid'
-                borderColor={network === net.id ? 'brand.500' : borderColor}
-                bg={network === net.id ? 'brand.500' : quickBg}
-                color={network === net.id ? 'white' : textColor}
+                borderColor={selectedNetwork?.id === net.id ? 'brand.500' : borderColor}
+                bg={selectedNetwork?.id === net.id ? 'brand.500' : quickBg}
+                color={selectedNetwork?.id === net.id ? 'white' : textColor}
                 fontWeight='600' fontSize='sm'
                 _hover={{ borderColor: 'brand.500' }}
-                onClick={() => { setNetwork(net.id); setSelectedNetwork(net); setVerified(false); setCustomerName(''); setPlans([]); setSelectedPlan(null); clearError(); }}>
+                onClick={() => {
+                  setSelectedNetwork(net);
+                  setVerified(false);
+                  setCustomerName('');
+                  setPlans([]);
+                  setSelectedPlan(null);
+                  clearError();
+                }}>
                 {net.name}
               </Button>
             ))}
@@ -136,15 +199,30 @@ export default function BuyTv() {
         )}
       </FormControl>
 
+      {/* Smart Card */}
       <FormControl mb='16px'>
-        <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='8px'>Smart Card Number *</FormLabel>
-        <Input placeholder='Enter smart card number' size='lg' borderRadius='12px' fontSize='sm'
+        <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='8px'>
+          Smart Card Number *
+        </FormLabel>
+        <Input placeholder='Enter smart card number'
+          size='lg' borderRadius='12px' fontSize='sm'
           value={smartCard}
-          onChange={e => { setSmartCard(e.target.value); setVerified(false); clearError(); }} />
+          onChange={e => {
+            setSmartCard(e.target.value);
+            setVerified(false);
+            setCustomerName('');
+            setPlans([]);
+            setSelectedPlan(null);
+            clearError();
+          }}
+          _focus={{ borderColor: 'brand.500', boxShadow: '0 0 0 1px #4C5FD5' }}
+        />
       </FormControl>
 
+      {/* Verify Button or Verified */}
       {!verified ? (
-        <Button w='100%' h='48px' variant='outline' borderColor='brand.500' color='brand.500'
+        <Button w='100%' h='48px' variant='outline'
+          borderColor='brand.500' color='brand.500'
           borderRadius='12px' fontWeight='700' fontSize='sm' mb='20px'
           isLoading={verifying} loadingText='Verifying...'
           onClick={handleVerify}>
@@ -152,30 +230,48 @@ export default function BuyTv() {
         </Button>
       ) : (
         <>
-          <Flex align='center' gap='10px' bg='green.50' borderRadius='12px'
-            px='16px' py='12px' mb='20px' border='1px solid' borderColor='green.200'>
-            <Badge colorScheme='green' borderRadius='full'>✓ Verified</Badge>
-            <Text color='green.700' fontSize='sm' fontWeight='600'>{customerName}</Text>
+          <Flex align='center' gap='10px' bg={successBg}
+            borderRadius='12px' px='16px' py='12px' mb='20px'
+            border='1px solid' borderColor='green.200'>
+            <MdCheckCircle color='#10B981' size={20} />
+            <Box>
+              <Text color='green.700' fontSize='sm' fontWeight='700'>
+                ✓ Smart Card Verified
+              </Text>
+              <Text color='green.600' fontSize='xs'>{customerName}</Text>
+            </Box>
+            <Button size='xs' variant='ghost' color={subColor} ml='auto'
+              onClick={() => { setVerified(false); setCustomerName(''); setPlans([]); setSelectedPlan(null); }}>
+              Change
+            </Button>
           </Flex>
 
+          {/* Plans */}
           {plans.length > 0 && (
             <FormControl mb='20px'>
-              <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='8px'>Select Plan *</FormLabel>
-              <Box maxH='200px' overflowY='auto'>
+              <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='8px'>
+                Select Plan *
+              </FormLabel>
+              <Box maxH='240px' overflowY='auto'>
                 {plans.map((plan, i) => (
-                  <Flex key={i} justify='space-between' align='center'
-                    p='12px' mb='8px' borderRadius='12px' border='2px solid'
-                    borderColor={selectedPlan?.id === plan.id ? 'brand.500' : borderColor}
-                    bg={selectedPlan?.id === plan.id ? 'brand.50' : quickBg}
-                    cursor='pointer'
-                    onClick={() => { setSelectedPlan(plan); clearError(); }}>
-                    <Text color={textColor} fontSize='sm' fontWeight='600'>
-                      {plan.name || plan.plan_name}
-                    </Text>
-                    <Text color='brand.500' fontSize='sm' fontWeight='700'>
-                      ₦{Number(plan.amount || 0).toLocaleString()}
-                    </Text>
-                  </Flex>
+                  <Box key={i}>
+                    <Flex align='center' justify='space-between'
+                      p='14px 12px' cursor='pointer' borderRadius='12px'
+                      bg={selectedPlan?.code === plan.code ? 'brand.50' : 'transparent'}
+                      border='2px solid'
+                      borderColor={selectedPlan?.code === plan.code ? 'brand.500' : 'transparent'}
+                      _hover={{ bg: quickBg }}
+                      transition='all 0.15s'
+                      onClick={() => { setSelectedPlan(plan); clearError(); }}>
+                      <Text color={textColor} fontSize='sm' fontWeight='600'>
+                        {plan.name || plan.bouquet_name}
+                      </Text>
+                      <Text color='brand.500' fontSize='sm' fontWeight='800'>
+                        ₦{Number(plan.amount || 0).toLocaleString()}
+                      </Text>
+                    </Flex>
+                    {i < plans.length - 1 && <Divider borderColor={borderColor} />}
+                  </Box>
                 ))}
               </Box>
             </FormControl>
@@ -183,10 +279,25 @@ export default function BuyTv() {
         </>
       )}
 
-      <Flex justify='space-between' bg={quickBg} borderRadius='12px'
+      {/* Phone */}
+      <FormControl mb='20px'>
+        <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='8px'>
+          Phone Number (optional)
+        </FormLabel>
+        <Input placeholder='08012345678' size='lg' borderRadius='12px'
+          fontSize='sm' type='tel' value={phone}
+          onChange={e => setPhone(e.target.value)}
+          _focus={{ borderColor: 'brand.500', boxShadow: '0 0 0 1px #4C5FD5' }}
+        />
+      </FormControl>
+
+      {/* Balance */}
+      <Flex justify='space-between' align='center'
+        bg={quickBg} borderRadius='12px'
         px='16px' py='12px' mb='24px'>
         <Text color={subColor} fontSize='sm'>Wallet Balance</Text>
-        <Text color={textColor} fontSize='sm' fontWeight='700'>
+        <Text color={selectedPlan && Number(selectedPlan.amount) > userBalance ? 'red.500' : textColor}
+          fontSize='sm' fontWeight='700'>
           ₦{Number(userBalance).toLocaleString()}
         </Text>
       </Flex>
