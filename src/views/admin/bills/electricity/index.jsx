@@ -87,8 +87,9 @@ export default function BuyElectricity() {
             { label: 'Meter', value: meterNumber },
             { label: 'Customer', value: customerName },
             { label: 'Amount', value: `₦${Number(amount).toLocaleString()}` },
-            { label: 'Token', value: res.data?.token || res.token || '—' },
-            { label: 'Reference', value: res.data?.reference || '—' },
+            { label: 'Token', value: res.token || res.data?.token || '—' },
+            { label: 'Reference', value: res.reference || '—' },
+            { label: 'New Balance', value: `₦${Number(res.balance || 0).toLocaleString()}` },
           ]
         });
       } else {

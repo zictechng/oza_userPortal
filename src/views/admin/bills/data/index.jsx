@@ -66,8 +66,8 @@ export default function BuyData() {
             { label: 'Plan', value: selectedPlan.name || selectedPlan.plan_name },
             { label: 'Phone', value: phone },
             { label: 'Amount', value: `₦${Number(selectedPlan.amount).toLocaleString()}` },
-            { label: 'Reference', value: res.data?.reference || '—' },
-            { label: 'New Balance', value: `₦${Number(res.data?.balance || 0).toLocaleString()}` },
+            { label: 'Reference', value: res.reference || '—' },
+            { label: 'New Balance', value: `₦${Number(res.balance || 0).toLocaleString()}` },
           ]
         });
       } else {

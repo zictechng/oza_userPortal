@@ -46,14 +46,14 @@ export default function BuyAirtime() {
     setLoading(true);
     try {
       const res = await buyAirtime({ network, phone, amount });
-      if (res.msg === '200') {
+        if (res.msg === '200') {
         setSuccess({
           items: [
             { label: 'Network', value: network.toUpperCase() },
             { label: 'Phone', value: phone },
             { label: 'Amount', value: `₦${Number(amount).toLocaleString()}` },
-            { label: 'Reference', value: res.data?.reference || '—' },
-            { label: 'New Balance', value: `₦${Number(res.data?.balance || 0).toLocaleString()}` },
+            { label: 'Reference', value: res.reference || '—' },
+            { label: 'New Balance', value: `₦${Number(res.balance || 0).toLocaleString()}` },
           ]
         });
       } else {

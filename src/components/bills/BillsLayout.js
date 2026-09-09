@@ -84,7 +84,7 @@ export const BillsSuccess = ({ title, items, onDone }) => {
         <Text fontSize='32px'>✅</Text>
       </Box>
       <Text color={textColor} fontSize='lg' fontWeight='800' mb='8px'>{title}</Text>
-      <Text color={subColor} fontSize='sm' mb='24px'>Transaction completed successfully</Text>
+      <Text color={subColor} fontSize='base' mb='24px'>Transaction completed successfully</Text>
 
       {items && items.map((item, i) => (
         <Flex key={i} justify='space-between' py='10px'
