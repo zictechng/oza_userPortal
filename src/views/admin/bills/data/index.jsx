@@ -73,36 +73,47 @@ export default function BuyData() {
   }, []);
 
   // Step 1 → Select network → fetch plans
+    // Step 1 → Select network → fetch plans
   const handleNetworkSelect = async (net) => {
+    if (!net.service_id) {
+      setError(`Service not configured for ${net.name}. Contact support.`);
+      return;
+    }
     setSelectedNetwork(net);
     setSelectedPlan(null);
     setPlans([]);
     setPlansLoading(true);
+    setStep(2); // Move to step 2 immediately to show loader
     clearError();
     try {
       const res = await client.get(
         `/api/bills/plans/data/${net.service_id}`,
         { headers: { Authorization: `Bearer ${userToken}` } }
       );
-        if (res.data.msg === '200') {
-        // Normalize plan fields from any provider
+      if (res.data.msg === '200') {
         const rawPlans = res.data.plans || [];
-        console.log('Raw plan sample:', rawPlans[0]); // Debug — remove after fix
+        // Normalize all possible field names from any provider
         const normalized = rawPlans.map(p => ({
           ...p,
-          name: p.name || p.data_plan || p.plan_name || p.description || p.plan,
-          amount: p.amount || p.price || p.plan_price || p.cost || 0,
-          plan_code: p.plan_code || p.code || p.id || p.plan_id,
+          name: p.name || p.data_plan || p.plan_name || p.description || p.plan || '',
+          amount: Number(p.amount || p.price || p.plan_price || p.cost || 0),
+          plan_code: p.plan_code || p.code || p.id || p.plan_id || '',
           validity: p.validity || p.duration || p.period || p.expiry || '',
-          service_id: p.service_id || selectedNetwork.service_id,
+          service_id: net.service_id,
         }));
-        setPlans(normalized);
-        setStep(2);
+        if (normalized.length === 0) {
+          setError(`No data plans available for ${net.name}. Try another network.`);
+          setStep(1);
+        } else {
+          setPlans(normalized);
+        }
       } else {
         setError(res.data.message || 'Could not load plans. Try again.');
+        setStep(1);
       }
     } catch (e) {
-      setError('Connection error. Please try again.');
+      setError(`Failed to load ${net.name} plans. Please try again.`);
+      setStep(1);
     } finally {
       setPlansLoading(false);
     }
@@ -129,7 +140,7 @@ export default function BuyData() {
 
     setLoading(true);
     try {
-      const res = await client.post('/api/bills/buy_data', {
+      const response = await client.post('/api/bills/buy_data', {
         userId: user?.userData?._id,
         tag_id: user?.userData?.tag_id,
         network: selectedNetwork.id,
@@ -139,10 +150,10 @@ export default function BuyData() {
         plan_code: selectedPlan.plan_code || selectedPlan.code || selectedPlan.id,
         plan_name: selectedPlan.name || selectedPlan.plan_name,
         amount: Number(selectedPlan.amount),
-      }, { headers: { Authorization: `Bearer ${userToken}` } });
-
-      if (res.data.msg === '200') {
-                // Update balance in Redux
+     }, { headers: { Authorization: `Bearer ${userToken}` } });
+      const res = response.data; // response.data is the actual API response
+      if (res.msg === '200') {
+        // Update balance in Redux instantly
         if (res.balance !== undefined) {
           dispatch(updateUserDetails({
             userData: { ...user?.userData, amount: res.balance }
@@ -159,7 +170,7 @@ export default function BuyData() {
           ]
         });
       } else {
-        setError(res.data.message || 'Transaction failed. Please try again.');
+        setError(res.message || res.data?.message || 'Transaction failed. Please try again.');
       }
     } catch (e) {
       setError('Connection error. Please try again.');
