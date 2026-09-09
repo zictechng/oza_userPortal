@@ -33,9 +33,19 @@ export default function BuyExamCards() {
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const totalAmount = selectedExam
-    ? Number(selectedExam.price || selectedExam.amount || 0) * Number(quantity)
-    : 0;
+  // Standard exam card prices as fallback if not from API
+  const EXAM_PRICES = {
+    waec: 3500, neco: 1000, jamb: 3500, nabteb: 1000,
+    waec_gce: 3500, bece: 1000,
+    };
+  const examPrice = Number(
+    selectedExam?.price ||
+    selectedExam?.extra?.unit_price ||
+    EXAM_PRICES[selectedExam?.id?.toLowerCase()] ||
+    EXAM_PRICES[selectedExam?.name?.toLowerCase()] ||
+    0
+    );
+  const totalAmount = selectedExam ? examPrice * Number(quantity) : 0;
 
   const handleSubmit = async () => {
     clearError();
@@ -88,7 +98,7 @@ export default function BuyExamCards() {
         exam_label: selectedExam.name,
         quantity,
         phone,
-        amount: totalAmount,
+        amount: examPrice * Number(quantity),
       });
 
       if (res.msg === '200') {
@@ -163,7 +173,13 @@ export default function BuyExamCards() {
                 onClick={() => { setSelectedExam(exam); clearError(); }}>
                 <Text fontWeight='800'>{exam.name}</Text>
                 <Text fontSize='10px' opacity={0.8}>
-                  ₦{Number(exam.price || exam.amount || 0).toLocaleString()}/card
+                  ₦{Number(
+                    exam.price ||
+                    exam.extra?.unit_price ||
+                    EXAM_PRICES[exam.id?.toLowerCase()] ||
+                    EXAM_PRICES[exam.name?.toLowerCase()] ||
+                    0
+                  ).toLocaleString()}/card
                 </Text>
               </Button>
             ))}
@@ -176,13 +192,15 @@ export default function BuyExamCards() {
         <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='8px'>
           Quantity *
         </FormLabel>
-        <Select size='lg' borderRadius='12px' fontSize='sm'
+          <Select size='lg' borderRadius='12px' fontSize='sm'
           value={quantity}
           onChange={e => { setQuantity(e.target.value); clearError(); }}
           _focus={{ borderColor: 'brand.500', boxShadow: '0 0 0 1px #4C5FD5' }}>
-          {[1, 2, 3, 4, 5].map(q => (
-            <option key={q} value={q}>{q} card{q > 1 ? 's' : ''}</option>
-          ))}
+          <option value='1'>1 card</option>
+          <option value='2'>2 cards</option>
+          <option value='3'>3 cards</option>
+          <option value='4'>4 cards</option>
+          <option value='5'>5 cards</option>
         </Select>
       </FormControl>
 
@@ -208,7 +226,7 @@ export default function BuyExamCards() {
             {quantity} × {selectedExam.name}
           </Text>
           <Text color='brand.500' fontSize='lg' fontWeight='800'>
-            ₦{totalAmount.toLocaleString()}
+           ₦{(examPrice * Number(quantity)).toLocaleString()}
           </Text>
         </Flex>
       )}
