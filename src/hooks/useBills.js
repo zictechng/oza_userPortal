@@ -1,18 +1,31 @@
 
 import { useState, useCallback } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch  } from 'react-redux';
 import client from 'components/client';
+import { updateUserDetails } from 'storeMtg/authSlice';
 
 export const useBills = () => {
+  const dispatch = useDispatch();
   const { user, userToken } = useSelector(state => state.authUser);
   const headers = { Authorization: `Bearer ${userToken}` };
   const userId = user?.userData?._id;
   const tagId = user?.userData?.tag_id;
+  
 
   const [networks, setNetworks] = useState([]);
   const [plans, setPlans] = useState([]);
   const [networksLoading, setNetworksLoading] = useState(false);
   const [plansLoading, setPlansLoading] = useState(false);
+
+
+  // Update balance in Redux store after any bill purchase
+  const updateBalance = (newBalance) => {
+    if (newBalance !== undefined && newBalance !== null) {
+      dispatch(updateUserDetails({
+        userData: { ...user?.userData, amount: newBalance }
+      }));
+    }
+  };
 
   const fetchNetworks = useCallback(async (serviceType) => {
     setNetworksLoading(true);
@@ -52,6 +65,9 @@ export const useBills = () => {
     const res = await client.post('/api/bills/buy_airtime', {
       userId, tag_id: tagId, network, phone, amount: Number(amount),
     }, { headers });
+    if (res.data?.msg === '200' && res.data?.balance !== undefined) {
+      updateBalance(res.data.balance);
+    }
     return res.data;
   };
 
@@ -60,6 +76,9 @@ export const useBills = () => {
       userId, tag_id: tagId, network, network_name,
       phone, plan_id, plan_name, amount: Number(amount),
     }, { headers });
+    if (res.data?.msg === '200' && res.data?.balance !== undefined) {
+      updateBalance(res.data.balance);
+    }
     return res.data;
   };
 
@@ -75,6 +94,9 @@ export const useBills = () => {
       userId, tag_id: tagId, network, meter_number,
       meter_type, amount: Number(amount), customer_name, service_id,
     }, { headers });
+    if (res.data?.msg === '200' && res.data?.balance !== undefined) {
+      updateBalance(res.data.balance);
+    }
     return res.data;
   };
 
@@ -82,6 +104,7 @@ export const useBills = () => {
     const res = await client.post('/api/bills/verify_tv', {
       smart_card_number, service_id,
     }, { headers });
+    
     return res.data;
   };
 
@@ -90,6 +113,9 @@ export const useBills = () => {
       userId, tag_id: tagId, network, smart_card_number,
       plan_id, plan_name, amount: Number(amount), customer_name,
     }, { headers });
+    if (res.data?.msg === '200' && res.data?.balance !== undefined) {
+      updateBalance(res.data.balance);
+    }
     return res.data;
   };
 
@@ -97,6 +123,9 @@ export const useBills = () => {
     const res = await client.post('/api/bills/buy_exam_cards', {
       userId, tag_id: tagId, exam_type, quantity: Number(quantity),
     }, { headers });
+    if (res.data?.msg === '200' && res.data?.balance !== undefined) {
+      updateBalance(res.data.balance);
+    }
     return res.data;
   };
 
