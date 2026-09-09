@@ -24,15 +24,15 @@ const StepDot = ({ step, currentStep, label, color }) => (
       display='flex' alignItems='center' justifyContent='center'
       transition='all 0.3s'>
       {currentStep > step ? (
-        <MdCheckCircle color='white' size={16} />
+        <MdCheckCircle color='white' size={20} />
       ) : (
-        <Text fontSize='11px' fontWeight='800'
+        <Text fontSize='12px' fontWeight='800'
           color={currentStep >= step ? 'white' : 'gray.400'}>
           {step}
         </Text>
       )}
     </Box>
-    <Text fontSize='9px' fontWeight='600'
+    <Text fontSize='12px' fontWeight='600'
       color={currentStep >= step ? color : 'gray.400'}
       textAlign='center' maxW='50px' noOfLines={1}>
       {label}
@@ -84,8 +84,19 @@ export default function BuyData() {
         `/api/bills/plans/data/${net.service_id}`,
         { headers: { Authorization: `Bearer ${userToken}` } }
       );
-      if (res.data.msg === '200') {
-        setPlans(res.data.plans || []);
+        if (res.data.msg === '200') {
+        // Normalize plan fields from any provider
+        const rawPlans = res.data.plans || [];
+        console.log('Raw plan sample:', rawPlans[0]); // Debug — remove after fix
+        const normalized = rawPlans.map(p => ({
+          ...p,
+          name: p.name || p.data_plan || p.plan_name || p.description || p.plan,
+          amount: p.amount || p.price || p.plan_price || p.cost || 0,
+          plan_code: p.plan_code || p.code || p.id || p.plan_id,
+          validity: p.validity || p.duration || p.period || p.expiry || '',
+          service_id: p.service_id || selectedNetwork.service_id,
+        }));
+        setPlans(normalized);
         setStep(2);
       } else {
         setError(res.data.message || 'Could not load plans. Try again.');
@@ -188,13 +199,13 @@ export default function BuyData() {
         <StepDot step={3} currentStep={step} label='Buy' color={stepColor} />
       </Flex>
 
-      {/* ── STEP 1 — Select Network ────────────────── */}
+      {/* ── STEP 1 — Select Network*/}
       {step === 1 && (
         <Box>
           <Text color={textColor} fontSize='sm' fontWeight='700' mb='4px'>
             Select Network
           </Text>
-          <Text color={subColor} fontSize='xs' mb='16px'>
+          <Text color={subColor} fontSize='sm' mb='16px'>
             Choose the network you want to buy data for
           </Text>
           {networksLoading ? (
@@ -223,11 +234,11 @@ export default function BuyData() {
         </Box>
       )}
 
-      {/* ── STEP 2 — Select Plan ───────────────────── */}
+      {/* ── STEP 2 — Select Plan*/}
       {step === 2 && (
         <Box>
           <Flex align='center' gap='8px' mb='16px'>
-            <Button size='xs' variant='ghost' color={subColor}
+            <Button size='1X2l' variant='ghost' color={subColor}
               leftIcon={<MdArrowBack />}
               onClick={() => { setStep(1); setSelectedNetwork(null); }}>
               Back
@@ -241,7 +252,7 @@ export default function BuyData() {
           <Text color={textColor} fontSize='sm' fontWeight='700' mb='4px'>
             Select Data Plan
           </Text>
-          <Text color={subColor} fontSize='xs' mb='16px'>
+          <Text color={subColor} fontSize='sm' mb='16px'>
             Tap a plan to continue
           </Text>
 
