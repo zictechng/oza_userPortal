@@ -82,17 +82,17 @@ export const useBills = () => {
     return res.data;
   };
 
-  const verifyMeter = async ({ meter_number, service_id, meter_type }) => {
+   const verifyMeter = async ({ meter_no, service_id, disco }) => {
     const res = await client.post('/api/bills/verify_meter', {
-      meter_number, service_id, meter_type,
+      meter_no, service_id, disco,
     }, { headers });
     return res.data;
   };
 
-  const buyElectricity = async ({ network, meter_number, meter_type, amount, customer_name, service_id }) => {
+  const buyElectricity = async ({ service_id, disco, disco_name, meter_no, amount, phone_number, customer_name }) => {
     const res = await client.post('/api/bills/buy_electricity', {
-      userId, tag_id: tagId, network, meter_number,
-      meter_type, amount: Number(amount), customer_name, service_id,
+      userId, tag_id: tagId, service_id, disco, disco_name,
+      meter_no, amount: Number(amount), phone_number, customer_name,
     }, { headers });
     if (res.data?.msg === '200' && res.data?.balance !== undefined) {
       updateBalance(res.data.balance);
