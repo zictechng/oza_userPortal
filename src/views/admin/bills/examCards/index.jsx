@@ -13,7 +13,7 @@ import { useFormValidation } from 'hooks/useFormValidation';
 import client from 'components/client';
 import { useSelector } from 'react-redux';
 
-// Standard price fallback
+// Standard price fallback — used only when API fails, never shown in UI
 const EXAM_PRICES = {
   waec: 3500, neco: 1000, jamb: 3500, nabteb: 1000,
   waec_gce: 3500, bece: 1000,
@@ -193,10 +193,12 @@ export default function BuyExamCards() {
                 transition='all 0.2s'
                 onClick={() => handleExamSelect(exam)}>
                 <Text fontWeight='800'>{exam.name}</Text>
-                <Text fontSize='10px' opacity={0.8}>
+                  <Text fontSize='13px' opacity={0.8}>
                   {selectedExam?.id === exam.id && priceLoading
-                    ? 'Loading price...'
-                    : `₦${(EXAM_PRICES[exam.id?.toLowerCase()] || 0).toLocaleString()}/card`}
+                    ? 'Fetching price...'
+                    : selectedExam?.id === exam.id && examPrice > 0
+                    ? `₦${examPrice.toLocaleString()}/card`
+                    : 'Tap to see price'}
                 </Text>
               </Button>
             ))}
