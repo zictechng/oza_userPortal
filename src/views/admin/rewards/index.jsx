@@ -1,20 +1,29 @@
-
-import React, { useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import {
   Box, Flex, Text, Icon, Button,
   useColorModeValue, Badge, Divider,
   Spinner, SimpleGrid, Progress,
+  Input, useToast, Modal, ModalOverlay,
+  ModalContent, ModalHeader, ModalBody,
+  ModalFooter, ModalCloseButton, useDisclosure,
 } from '@chakra-ui/react';
 import {
   MdStars, MdEmojiEvents, MdTrendingUp,
-  MdCardGiftcard, MdInfo,
+  MdCardGiftcard, MdInfo, MdRedeem,
 } from 'react-icons/md';
-import { useSelector } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
+import { updateUserDetails } from 'storeMtg/authSlice';
 import { PageLayout, PageCard } from 'layouts/PageLayout';
+import client from 'components/client';
 
 export default function Rewards() {
-  const { user } = useSelector(state => state.authUser);
+  const toast = useToast();
+  const dispatch = useDispatch();
+  const { isOpen, onOpen, onClose } = useDisclosure();
+  const { user, userToken } = useSelector(state => state.authUser);
   const userData = user?.userData;
+  const [coinsToRedeem, setCoinsToRedeem] = useState('');
+  const [redeemLoading, setRedeemLoading] = useState(false);
 
   const textColor = useColorModeValue('navy.700', 'white');
   const subColor = useColorModeValue('gray.500', 'gray.400');
@@ -24,7 +33,7 @@ export default function Rewards() {
     'linear-gradient(135deg, #3D2A00 0%, #2D1E00 100%)'
   );
 
-  const coinsBalance = Number(userData?.coins_balance || 0);
+  const coinsBalance = Number(userData?.coins || 0);
   const bonusBalance = Number(userData?.all_bonus_acct || 0);
 
   // Tier system
@@ -36,7 +45,49 @@ export default function Rewards() {
     { name: 'Diamond', min: 100000, max: Infinity, color: '#B9F2FF', icon: '💫' },
   ];
 
-  const currentTier = tiers.find(t => coinsBalance >= t.min && coinsBalance <= t.max) || tiers[0];
+    const currentTier = tiers.find(t => coinsBalance >= t.min && coinsBalance <= t.max) || tiers[0];
+
+  const handleRedeem = async () => {
+    const coins = Number(coinsToRedeem);
+    if (!coins || coins < 100) {
+      toast({ title: 'Minimum 100 coins required', status: 'warning', duration: 3000, position: 'bottom-right' });
+      return;
+    }
+    if (coins > coinsBalance) {
+      toast({ title: 'Insufficient coins balance', status: 'error', duration: 3000, position: 'bottom-right' });
+      return;
+    }
+    setRedeemLoading(true);
+    try {
+      const res = await client.post('/api/redeem_coins', {
+        userId: userData?._id,
+        coinsToRedeem: coins,
+      }, { headers: { Authorization: `Bearer ${userToken}` } });
+
+      if (res.data.msg === '200') {
+        dispatch(updateUserDetails({
+          userData: {
+            ...userData,
+            coins: res.data.newCoins,
+            amount: res.data.newAmount,
+          }
+        }));
+        toast({
+          title: '🪙 Coins Redeemed!',
+          description: `${coins.toLocaleString()} coins → ₦${res.data.ngnValue.toLocaleString()} added to main wallet`,
+          status: 'success', duration: 5000, position: 'bottom-right',
+        });
+        setCoinsToRedeem('');
+        onClose();
+      } else {
+        toast({ title: res.data.message || 'Redemption failed', status: 'error', duration: 4000, position: 'bottom-right' });
+      }
+    } catch (e) {
+      toast({ title: 'Connection error. Try again.', status: 'error', duration: 3000, position: 'bottom-right' });
+    } finally {
+      setRedeemLoading(false);
+    }
+  };
   const nextTier = tiers[tiers.indexOf(currentTier) + 1];
   const tierProgress = nextTier
     ? Math.min(((coinsBalance - currentTier.min) / (nextTier.min - currentTier.min)) * 100, 100)
@@ -54,7 +105,7 @@ export default function Rewards() {
           <Box>
             <Text color='whiteAlpha.700' fontSize='sm' mb='4px'>Your Coins Balance</Text>
             <Text color='white' fontSize='3xl' fontWeight='800'>
-              {coinsBalance.toLocaleString()} coins
+             {coinsBalance.toLocaleString()} coins
             </Text>
             <Flex align='center' gap='8px' mt='8px'>
               <Text fontSize='20px'>{currentTier.icon}</Text>
@@ -77,9 +128,17 @@ export default function Rewards() {
         {nextTier && (
           <Box mt='20px' position='relative' zIndex='1'>
             <Flex justify='space-between' mb='6px'>
-              <Text color='whiteAlpha.700' fontSize='sm'>
-                {coinsBalance.toLocaleString()} coins
-              </Text>
+              <Text fontSize='3xl' fontWeight='900' color='white'>
+              {coinsBalance.toLocaleString()} coins
+            </Text>
+            <Button
+              mt='12px' size='sm' colorScheme='yellow'
+              variant='solid' borderRadius='10px'
+              leftIcon={<MdRedeem />}
+              onClick={onOpen}
+              isDisabled={coinsBalance < 100}>
+              Redeem Coins
+            </Button>
               <Text color='whiteAlpha.700' fontSize='sm'>
                 {nextTier.min.toLocaleString()} to {nextTier.name}
               </Text>
@@ -166,8 +225,9 @@ export default function Rewards() {
             {[
               'Coins are earned automatically on every transaction',
               'Higher tier members earn coins at a faster rate',
-              'Coins can be redeemed for transaction discounts',
-              'Contact support to redeem your coins',
+              'Coins can be redeemed for NGN credited to your main wallet',
+              'Minimum redemption: 100 coins',
+              'Each coin = ₦1 credited to main wallet',
             ].map((note, i) => (
               <Flex key={i} align='flex-start' gap='8px' mb='8px'>
                 <Box w='6px' h='6px' borderRadius='full'
@@ -178,6 +238,53 @@ export default function Rewards() {
           </PageCard>
         </Flex>
       </SimpleGrid>
+          {/* Redeem Modal */}
+      <Modal isOpen={isOpen} onClose={onClose} isCentered>
+        <ModalOverlay />
+        <ModalContent borderRadius='16px'>
+          <ModalHeader>🪙 Redeem Coins</ModalHeader>
+          <ModalCloseButton />
+          <ModalBody>
+            <Text fontSize='sm' color={subColor} mb='16px'>
+              Convert your coins to NGN credited to your main wallet.
+              <br />
+              <strong>Rate: 1 coin = ₦1 | Minimum: 100 coins</strong>
+            </Text>
+            <Box bg='yellow.50' borderRadius='12px' p='12px' mb='16px'>
+              <Flex justify='space-between'>
+                <Text fontSize='sm' color='yellow.700'>Available Coins</Text>
+                <Text fontSize='sm' fontWeight='800' color='yellow.700'>
+                  {coinsBalance.toLocaleString()}
+                </Text>
+              </Flex>
+              <Flex justify='space-between' mt='4px'>
+                <Text fontSize='sm' color='yellow.700'>Estimated Value</Text>
+                <Text fontSize='sm' fontWeight='800' color='yellow.700'>
+                  ₦{(Number(coinsToRedeem) || 0).toLocaleString()}
+                </Text>
+              </Flex>
+            </Box>
+            <Input
+              placeholder='Enter coins to redeem (min 100)'
+              type='number'
+              value={coinsToRedeem}
+              onChange={e => setCoinsToRedeem(e.target.value)}
+              borderRadius='10px'
+              size='lg'
+            />
+          </ModalBody>
+          <ModalFooter gap='8px'>
+            <Button variant='ghost' onClick={onClose}>Cancel</Button>
+            <Button
+              colorScheme='yellow' borderRadius='10px'
+              isLoading={redeemLoading}
+              loadingText='Redeeming...'
+              onClick={handleRedeem}>
+              Redeem {Number(coinsToRedeem) > 0 ? `${Number(coinsToRedeem).toLocaleString()} Coins` : ''}
+            </Button>
+          </ModalFooter>
+        </ModalContent>
+      </Modal>
     </PageLayout>
   );
 }

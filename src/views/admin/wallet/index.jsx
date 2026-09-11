@@ -205,7 +205,7 @@ export default function Wallet() {
           iconBg='#FEF3C7'
         />
         <BalanceCard
-          label='USD Volume'
+          label='All-time USD Volume'
           value={formatDollar(userData?.tran_account)}
           subLabel='All-time USD transactions (record only)'
           icon={MdCurrencyExchange}
