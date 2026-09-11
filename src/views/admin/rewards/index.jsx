@@ -59,8 +59,9 @@ export default function Rewards() {
 
   const handleRedeem = async () => {
     const coins = Number(coinsToRedeem);
-    if (!coins || coins < (rewardsSettings?.min_redeem_coins || 250)) {
-      toast({ title: `Minimum ${rewardsSettings?.min_redeem_coins || 100} coins required`, status: 'warning', duration: 3000, position: 'bottom-right' });
+    const minCoins = rewardsSettings?.min_redeem_coins || 100
+    if (!coins || coins < minCoins) {
+      toast({ title: `Minimum ${minCoins} coins required`, status: 'warning', duration: 3000, position: 'bottom-right' });
       return;
     }
     if (coins > coinsBalance) {
@@ -146,7 +147,7 @@ export default function Rewards() {
               variant='solid' borderRadius='10px'
               leftIcon={<MdRedeem />}
               onClick={onOpen}
-              isDisabled={coinsBalance < 100}>
+              isDisabled={coinsBalance < (rewardsSettings?.min_redeem_coins || 100)}>
               Redeem Coins
             </Button>
               <Text color='whiteAlpha.700' fontSize='sm'>
@@ -270,7 +271,7 @@ export default function Rewards() {
               <Flex justify='space-between' mt='4px'>
                 <Text fontSize='sm' color='yellow.700'>Estimated Value</Text>
                 <Text fontSize='sm' fontWeight='800' color='yellow.700'>
-                  ₦{(Number(coinsToRedeem) || 0).toLocaleString()}
+                  ₦{((Number(coinsToRedeem) || 0) * Number(rewardsSettings?.coin_ngn_value || 1)).toLocaleString()}
                 </Text>
               </Flex>
             </Box>

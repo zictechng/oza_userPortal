@@ -20,6 +20,7 @@ import { PageLayout, PageCard } from 'layouts/PageLayout';
 import WalletAnalytics from 'views/admin/wallet/components/WalletAnalytics';
 import { updateUserDetails } from 'storeMtg/authSlice';
 import client from 'components/client';
+import { useRef } from 'react';
 
 // ── Wallet balance card
 const BalanceCard = ({ label, value, subValue, subLabel, icon, color, iconBg, actions }) => {
@@ -91,20 +92,24 @@ export default function Wallet() {
   const formatNaira = (val) => `₦${Number(val || 0).toLocaleString()}`;
   const formatDollar = (val) => `$${Number(val || 0).toLocaleString()}`;
 
-   const refreshUserData = async () => {
+      const refreshUserData = async () => {
+    if (!userData?._id) return;
     try {
-      const res = await client.get(`/api/profile/${userData?._id}`,
+      const res = await client.get(`/api/profile/${userData._id}`,
         { headers: { Authorization: `Bearer ${userToken}` } });
-      if (res.data) {
-        dispatch(updateUserDetails({ userData: res.data }));
+      if (res.data?.others) {
+        dispatch(updateUserDetails({ userData: res.data.others }));
       }
     } catch (e) {
       console.log('Refresh error:', e.message);
     }
   };
 
+  const userIdRef = useRef(null);
+
   useEffect(() => {
-    if (userData?._id) {
+    if (userData?._id && userData._id !== userIdRef.current) {
+      userIdRef.current = userData._id;
       dispatch(fetchProducts({ userID: userData._id, user_token: userToken }));
       dispatch(getPendingBonus({ tag_id: userData?.tag_id, user_token: userToken }));
       refreshUserData();
@@ -114,7 +119,7 @@ export default function Wallet() {
       dispatch(resetState());
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, userData?._id, userToken]);
+  }, []);
 
   const totalBalance = Number(userData?.amount || 0) + Number(userData?.all_bonus_acct || 0);
 
