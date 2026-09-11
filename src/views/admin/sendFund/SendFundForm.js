@@ -305,8 +305,7 @@ import { updateUserDetails } from "storeMtg/authSlice";
                     
                 </Flex>
                 <Flex px="5px" mb="8px" justifyContent="space-between" align="center">
-                    
-                    <Text
+                  <Text
                     fontSize={{ sm: '14px', lg: '16px'}}
                     py={1.5}
                     color="gray.400"
@@ -317,36 +316,62 @@ import { updateUserDetails } from "storeMtg/authSlice";
 
                 {/* Move Bonus to Main Quick Button */}
                   <Box
-                    bg='purple.50'
+                    bg={isSelfTransfer ? 'purple.100' : 'purple.50'}
                     border='1px solid'
-                    borderColor='purple.200'
+                    borderColor={isSelfTransfer ? 'purple.400' : 'purple.200'}
                     borderRadius='12px'
                     p='12px'
                     mb='16px'>
                     <Flex justify='space-between' align='center'>
                       <Box>
-                        <Text fontSize='xs' fontWeight='700' color='purple.700'>
+                        <Text fontSize='sm' fontWeight='700' color='purple.700'>
                           💰 Bonus Balance: ₦{Number(myBonusBalance).toLocaleString()}
                         </Text>
-                        <Text fontSize='xs' color='gray.500'>
-                          Move bonus funds into your main wallet
+                        <Text fontSize='sm' color='gray.500'>
+                          {isSelfTransfer
+                            ? 'Moving bonus funds to your main wallet'
+                            : 'Move bonus funds into your main wallet'}
                         </Text>
                       </Box>
-                      <Button
-                        size='xs'
-                        colorScheme='purple'
-                        borderRadius='8px'
-                        onClick={() => {
-                          setDetailsFormData(prev => ({
-                            ...prev,
-                            tag_id: myTagId,
-                            account_source: '2',
-                          }))
-                          setIsSelfTransfer(true)
-                          setNewData(null)
-                        }}>
-                        Move to Main
-                      </Button>
+                      <Flex gap='8px'>
+                        {isSelfTransfer && (
+                          <Button
+                            size='xs'
+                            variant='outline'
+                            colorScheme='red'
+                            borderRadius='8px'
+                            onClick={() => {
+                              setDetailsFormData(prev => ({
+                                ...prev,
+                                tag_id: '',
+                                account_source: '',
+                                sendAmt: '',
+                                send_note: '',
+                              }))
+                              setIsSelfTransfer(false)
+                              setNewData(null)
+                            }}>
+                            Cancel
+                          </Button>
+                        )}
+                        {!isSelfTransfer && (
+                          <Button
+                            size='sm'
+                            colorScheme='purple'
+                            borderRadius='8px'
+                            onClick={() => {
+                              setDetailsFormData(prev => ({
+                                ...prev,
+                                tag_id: myTagId,
+                                account_source: '2',
+                              }))
+                              setIsSelfTransfer(true)
+                              setNewData(null)
+                            }}>
+                            Move to Main
+                          </Button>
+                        )}
+                      </Flex>
                     </Flex>
                   </Box>
 
@@ -375,7 +400,7 @@ import { updateUserDetails } from "storeMtg/authSlice";
                         <Text fontSize='sm' fontWeight='700' color='purple.700'>
                           Bonus → Main Transfer
                         </Text>
-                        <Text fontSize='xs' color='purple.500'>
+                        <Text fontSize='sm' color='purple.500'>
                           Funds will move from your bonus account to your main wallet
                         </Text>
                       </Box>
@@ -403,13 +428,17 @@ import { updateUserDetails } from "storeMtg/authSlice";
             onChange={handleDataChange}
             isDisabled={isSelfTransfer}>
           <option value="2">Account [USD]</option>
-          <option value="1">Fund Account [NGN]</option>
+          <option value="1">Main Account [NGN]</option>
         </Select>
        </Flex>
        <Flex direction={{ base: "column", "2xl": "row" }} mb={5}>
         <HStack gap="10" width="full">
           <InputGroup flex="1">
-          <InputLeftElement children='&#36;' fontSize={'25px'} color={'gray.300'} />
+          <InputLeftElement
+            children={detailsFormData.account_source === '1' ? '₦' : '$'}
+            fontSize={'25px'}
+            color={'gray.300'}
+          />
             <Input placeholder="Amount" width={{base:'100%', lg:'400px', md:'400px'}} 
             value={detailsFormData.sendAmt}
             name="sendAmt"

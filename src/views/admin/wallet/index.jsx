@@ -166,10 +166,10 @@ export default function Wallet() {
 
       {/* Wallet Cards */}
       <SimpleGrid columns={{ base: 1, md: 2, lg: 4 }} gap='16px' mb='24px'>
-        <BalanceCard
+                <BalanceCard
           label='Main Wallet'
           value={formatNaira(userData?.amount)}
-          subLabel='Available to use'
+          subLabel='Bills, send funds, buy USD'
           icon={MdOutlineAccountBalanceWallet}
           color='#4C5FD5' iconBg='#EEF2FF'
           actions={[
@@ -177,13 +177,12 @@ export default function Wallet() {
               borderRadius='8px' onClick={() => navigate('/user/fund-account')}>
               Fund +
             </Button>,
-            
           ]}
         />
         <BalanceCard
           label='Bonus Wallet'
           value={formatNaira(userData?.all_bonus_acct)}
-          subLabel='Withdrawable earnings'
+          subLabel='Signup, referral & commission earnings'
           icon={MdStar}
           color='#10B981' iconBg='#D1FAE5'
           actions={[
@@ -191,20 +190,24 @@ export default function Wallet() {
               borderRadius='8px' onClick={() => navigate('/user/withdraw')}>
               Withdraw
             </Button>,
+            <Button key='move' size='xs' colorScheme='green' variant='ghost'
+              borderRadius='8px' onClick={() => navigate('/user/send-fund')}>
+              Move →
+            </Button>,
           ]}
         />
         <BalanceCard
-          label='Signup Bonus'
-          value={bonusLoading ? '...' : formatNaira(bonusData?.feedbackBonus || userData?.signup_account || 0)}
-          subLabel={userData?.signup_bonus_activated ? 'Activated ✓' : 'Pending — complete a qualifying transaction'}
+          label='Pending Signup Bonus'
+          value={`$${Number(userData?.signup_account || 0).toLocaleString()}`}
+          subLabel={userData?.signup_bonus_activated ? '✓ Activated — credited to bonus wallet' : 'Complete a qualifying transaction to unlock'}
           icon={MdCardGiftcard}
           color='#F59E0B'
           iconBg='#FEF3C7'
         />
         <BalanceCard
-          label='All-time Volume'
+          label='USD Volume'
           value={formatDollar(userData?.tran_account)}
-          subLabel='Total transactions'
+          subLabel='All-time USD transactions (record only)'
           icon={MdCurrencyExchange}
           color='#8B5CF6' iconBg='#EDE9FE'
         />
