@@ -114,7 +114,8 @@ export default function ManualPayment() {
     // Sales/Buy = user sends $ to company, Funding = user sends ₦ to company
   const isSales = serviceType === 'Sales';
   const isBuy = serviceType === 'Buy';
-  const isDollarTransaction = isSales || isBuy;
+  const isUsdFunding = serviceType === 'USD Funding';
+  const isDollarTransaction = isSales || isBuy || isUsdFunding;
   const currencySymbol = isDollarTransaction ? '$' : '₦';
   const amountLabel = isDollarTransaction ? 'Amount (USD)' : 'Amount to Transfer';
   const nairaEquivalent = isDollarTransaction && currentRate?.paypal_buying

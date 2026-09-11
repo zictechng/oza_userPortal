@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import {
   Box, Flex, Text, Icon, SimpleGrid,
   useColorModeValue, Divider, Button,
-  Select, Input, Textarea, useToast,
-  FormControl, FormLabel, Spinner,
+  Select, Input, InputGroup, InputLeftElement,
+  Textarea, useToast, Spinner,
+  FormControl, FormLabel,
   Modal, ModalOverlay, ModalContent,
   ModalHeader, ModalBody, ModalCloseButton,
 } from '@chakra-ui/react';
@@ -100,21 +101,11 @@ function UsdFundingForm() {
       <Text color={textColor} fontSize='md' fontWeight='800' mb='4px'>
         Fund USD Wallet
       </Text>
-      <Text color={subColor} fontSize='sm' mb='20px'>
+      <Text color={subColor} fontSize='base' mb='20px'>
         Send via PayPal, Payoneer or Bitcoin and submit proof of payment
       </Text>
 
       {/* Current USD Balance */}
-      <Box bg={infoBg} borderRadius='12px' p='14px' mb='20px'
-        border='1px solid' borderColor='green.200'>
-        <Text color='green.700' fontSize='xs' fontWeight='600'
-          textTransform='uppercase' letterSpacing='0.5px'>
-          Current USD Balance
-        </Text>
-        <Text color='green.700' fontSize='xl' fontWeight='800' mt='4px'>
-          ${Number(userData?.usd_balance || 0).toLocaleString()}
-        </Text>
-      </Box>
 
       <FormControl mb='16px'>
         <FormLabel fontSize='sm' fontWeight='600' color={textColor}>
@@ -129,14 +120,26 @@ function UsdFundingForm() {
         </Select>
       </FormControl>
 
-      <FormControl mb='16px'>
+            <FormControl mb='16px'>
         <FormLabel fontSize='sm' fontWeight='600' color={textColor}>
           Amount (USD) *
         </FormLabel>
-        <Input placeholder='Enter amount in USD' size='lg' borderRadius='12px'
-          type='number' value={amt} onChange={e => setAmt(e.target.value)}
-          _focus={{ borderColor: '#10B981', boxShadow: '0 0 0 1px #10B981' }}
-        />
+        <InputGroup size='lg'>
+          <InputLeftElement
+            children='$'
+            fontSize='20px'
+            color='gray.400'
+            fontWeight='700'
+          />
+          <Input
+            placeholder='Enter amount in USD'
+            borderRadius='12px'
+            type='number'
+            value={amt}
+            onChange={e => setAmt(e.target.value)}
+            _focus={{ borderColor: '#10B981', boxShadow: '0 0 0 1px #10B981' }}
+          />
+        </InputGroup>
       </FormControl>
 
       <FormControl mb='24px'>
@@ -183,9 +186,14 @@ function UsdFundingForm() {
               <Button w='100%' h='48px' bg='#10B981' color='white'
                 borderRadius='12px' fontWeight='700' fontSize='sm'
                 _hover={{ bg: '#059669' }}
-                isLoading={loading} loadingText='Processing...'
+                disabled={loading}
                 onClick={handleManualTransfer}>
-                Manual Transfer
+                {loading
+                  ? <Text display='flex' alignItems='center' gap='8px'>
+                      <Spinner size='sm' color='white' />
+                      Processing...
+                    </Text>
+                  : 'Manual Transfer'}
               </Button>
             </Flex>
           </ModalBody>
@@ -249,7 +257,7 @@ export default function FundAccount() {
           boxShadow={activeTab === 'naira' ? 'sm' : 'none'}
           transition='all 0.2s'
           onClick={() => setActiveTab('naira')}>
-          <Text fontSize='sm' fontWeight='700'
+          <Text fontSize='base' fontWeight='700'
             color={activeTab === 'naira' ? '#4C5FD5' : subColor}>
             🇳🇬 Naira Funding
           </Text>
@@ -260,7 +268,7 @@ export default function FundAccount() {
           boxShadow={activeTab === 'usd' ? 'sm' : 'none'}
           transition='all 0.2s'
           onClick={() => setActiveTab('usd')}>
-          <Text fontSize='sm' fontWeight='700'
+          <Text fontSize='base' fontWeight='700'
             color={activeTab === 'usd' ? '#10B981' : subColor}>
             💵 USD Funding
           </Text>
@@ -297,7 +305,7 @@ export default function FundAccount() {
                 ? `₦${Number(user?.userData?.amount || 0).toLocaleString()}`
                 : `$${Number(user?.userData?.usd_balance || 0).toLocaleString()}`}
             </Text>
-            <Text color={subColor} fontSize='xs' mt='4px'>
+            <Text color={subColor} fontSize='sm' mt='4px'>
               {activeTab === 'naira' ? 'NGN Main wallet' : 'USD spendable wallet'}
             </Text>
           </Box>

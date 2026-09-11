@@ -22,11 +22,13 @@ export default function SuccessPage() {
   const isManual = location.state?.isManual === true;
   const isBuy = location.state?.isBuy === true;
   const isSendFund = location.state?.isSendFund === true;
+  const isUsdFunding = location.state?.isUsdFunding === true;
 
 
   const getTitle = () => {
     if (isPaystack) return 'Wallet Credited! 🎉';
     if (isSendFund) return 'Transfer Successful! 🎉';
+    if (isUsdFunding) return 'USD Funding Request Submitted! 🎉';
     if (isPaypal) return 'Exchange Request Submitted! 🎉';
     if (isBuy) return 'Buy Order Submitted! 🎉';
     return 'Transaction Submitted! 🎉';
@@ -35,12 +37,14 @@ export default function SuccessPage() {
   const getMessage = () => {
     if (isPaystack) return 'Your payment was verified by PayStack and your wallet has been credited instantly.';
     if (isSendFund) return 'Your funds have been transferred instantly to the recipient account.';
+    if (isUsdFunding) return 'Your USD wallet funding request has been submitted. Admin will verify and credit your USD wallet within 1-24 hours.';
     if (isBuy) return 'Your buy order has been received and payment confirmed. Admin will deliver your virtual funds within 1-24 hours.';
     if (isPaypal) return 'Your PayPal exchange request has been submitted. Admin will verify and credit your NGN wallet within 1-24 hours.';
     return 'Your transaction has been submitted. Our team will process it shortly and you will be notified.';
   };
 
   const getBalanceLabel = () => {
+    if (isUsdFunding) return 'USD Wallet Balance';
     if (isPaystack) return 'Updated Balance';
     return 'Current Balance';
   };
@@ -73,7 +77,9 @@ export default function SuccessPage() {
               {getBalanceLabel()}
             </Text>
             <Text color='brand.500' fontSize='xl' fontWeight='800'>
-              ₦{Number(user?.userData?.amount || 0).toLocaleString()}
+              {isUsdFunding
+                ? `$${Number(user?.userData?.usd_balance || 0).toLocaleString()}`
+                : `₦${Number(user?.userData?.amount || 0).toLocaleString()}`}
             </Text>
             {location.state?.reference && (
               <Text color={subColor} fontSize='sm' mt='4px'>
