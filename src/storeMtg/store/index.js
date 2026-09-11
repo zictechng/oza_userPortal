@@ -1,4 +1,5 @@
 import { configureStore } from "@reduxjs/toolkit";
+import { createMigrate } from 'redux-persist';
 import {
   persistReducer,
   FLUSH,
@@ -40,11 +41,20 @@ import fundSales from "storeMtg/fundSaleSlice";
 import paypalCheckout from "storeMtg/paypalCheckoutSlice";
 import userNotifications from "storeMtg/notificationSlice"
 
+
+const migrations = {
+  2: (state) => {
+    // Wipe persisted state on version bump — forces fresh initialState
+    return undefined;
+  },
+};
+
 // Redux-persist configuration
 const persistConfig = {
   key: "root",
-  version: 1,
+  version: 2,
   storage,
+   migrate: createMigrate(migrations, { debug: false }),
 };
 
 // Combine all reducers into one

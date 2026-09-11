@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import React, { useEffect, useRef } from 'react';
 import {
   Box, Flex, SimpleGrid, Text, Button, Icon,
   useColorModeValue, Divider, Badge, Spinner,
@@ -18,6 +18,9 @@ import { getPendingBonus, resetState } from 'storeMtg/pendingBonusSlice';
 import { fetchProducts, clearProducts } from 'storeMtg/dashRecentRecordSlice';
 import { PageLayout, PageCard } from 'layouts/PageLayout';
 import WalletAnalytics from 'views/admin/wallet/components/WalletAnalytics';
+import { updateUserDetails } from 'storeMtg/authSlice';
+import client from 'components/client';
+import { refreshUserProfile } from 'storeMtg/authSlice';
 
 // ── Wallet balance card
 const BalanceCard = ({ label, value, subValue, subLabel, icon, color, iconBg, actions }) => {
@@ -71,7 +74,9 @@ export default function Wallet() {
   const navigate = useNavigate();
   const dispatch = useDispatch();
   const { user, userToken } = useSelector(state => state.authUser);
-  const { recentData, status } = useSelector(state => state.recentTransaction);
+  const { recentData = [], status = 'idle' } = useSelector(
+  state => state.recentTransaction ?? {}
+);
   const { data: bonusData, dataLoading: bonusLoading } = useSelector(state => state.pendingBonus);
 
   const userData = user?.userData;
@@ -89,17 +94,19 @@ export default function Wallet() {
   const formatNaira = (val) => `₦${Number(val || 0).toLocaleString()}`;
   const formatDollar = (val) => `$${Number(val || 0).toLocaleString()}`;
 
+  // Then inside useEffect:
   useEffect(() => {
     if (!userData?._id || !userToken) return;
+
     dispatch(fetchProducts({ userID: userData._id, user_token: userToken }));
     dispatch(getPendingBonus({ tag_id: userData?.tag_id, user_token: userToken }));
+    dispatch(refreshUserProfile({ userID: userData._id, user_token: userToken })); // ← ADD THIS
+
     return () => {
       dispatch(clearProducts());
       dispatch(resetState());
     };
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, [dispatch, userData?._id, userToken]);
-
+  }, [dispatch, userData?._id, userData?.tag_id, userToken]);
   const totalBalance = Number(userData?.amount || 0) + Number(userData?.all_bonus_acct || 0);
 
   // Calculate tx stats
@@ -131,9 +138,9 @@ export default function Wallet() {
             <Text color='white' fontSize={{ base: '32px', md: '42px' }} fontWeight='800' mb='8px'>
               {formatNaira(totalBalance)}
             </Text>
-            <Text color='whiteAlpha.600' fontSize='sm'>
-              Last updated: {moment().format('DD MMM YYYY, hh:mm A')}
-            </Text>
+            <Text color='whiteAlpha.600' fontSize='xs' mt='4px'>
+            Last updated: {moment().format('DD MMM YYYY, hh:mm A')}
+          </Text>
           </Box>
           <Flex gap='10px' flexWrap='wrap'>
             <Button
@@ -294,7 +301,7 @@ export default function Wallet() {
           <Stat>
             <StatLabel color={subColor} fontSize='xs' textTransform='uppercase' letterSpacing='0.5px'>Coins Balance</StatLabel>
             <StatNumber color={textColor} fontSize='xl' mt='4px'>
-              {Number(userData?.coins_balance || 0).toLocaleString()} coins
+              {Number(userData?.coins || 0).toLocaleString()} coins
             </StatNumber>
             <StatHelpText color={subColor} fontSize='sm'>Earn coins on every transaction</StatHelpText>
           </Stat>

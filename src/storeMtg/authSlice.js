@@ -47,6 +47,15 @@ const authSlice = createSlice({
           //console.log("Login success", action.payload);
         }
       })
+      .addCase(refreshUserProfile.fulfilled, (state, action) => {
+      if (action.payload?.msg === '200' && state.user) {
+          // Merge fresh userData fields into the persisted auth state
+          state.user.userData = {
+            ...state.user.userData,
+            ...action.payload.userData,
+          };
+        }
+      })
      .addCase(authUserLogin.rejected, (state, action) => {
         state.loading = false;
         state.user = null;
@@ -76,9 +85,27 @@ const authSlice = createSlice({
         state.loading = false;
         state.error = action.error.message;
         console.error("Logout error", action.error.message);
-      });
+      })
+      
   },
 });
+
+
+// src/storeMtg/authSlice.js
+
+export const refreshUserProfile = createAsyncThunk(
+  'user/refreshProfile',
+  async ({ userID, user_token }, { rejectWithValue }) => {
+    try {
+      const response = await client.get(`/api/user_profile/${userID}`, {
+        headers: { Authorization: `Bearer ${user_token}` },
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || 'Failed to refresh profile');
+    }
+  }
+);
 
 
 export const authUserLogin = createAsyncThunk(
