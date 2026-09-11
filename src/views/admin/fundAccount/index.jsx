@@ -1,55 +1,278 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   Box, Flex, Text, Icon, SimpleGrid,
-  useColorModeValue, Divider,
+  useColorModeValue, Divider, Button,
+  Select, Input, Textarea, useToast,
+  FormControl, FormLabel, Spinner,
+  Modal, ModalOverlay, ModalContent,
+  ModalHeader, ModalBody, ModalCloseButton,
 } from '@chakra-ui/react';
-import { MdAdd, MdInfo, MdAccountBalance } from 'react-icons/md';
+import { MdAdd, MdInfo, MdAccountBalance, MdAttachMoney } from 'react-icons/md';
 import { PageLayout, PageCard } from 'layouts/PageLayout';
 import { useSelector } from 'react-redux';
+import { useNavigate } from 'react-router-dom';
 import FundAccountForm from 'views/admin/fundAccount/FundAccountForm';
+import client from 'components/client';
+
+
+
+function UsdFundingForm() {
+  const toast = useToast();
+  const navigate = useNavigate();
+  const { user, userToken } = useSelector(state => state.authUser);
+  const userData = user?.userData;
+  const textColor = useColorModeValue('navy.700', 'white');
+  const subColor = useColorModeValue('gray.500', 'gray.400');
+  const infoBg = useColorModeValue('green.50', 'navy.700');
+
+  const [serviceName, setServiceName] = useState('');
+  const [amt, setAmt] = useState('');
+  const [note, setNote] = useState('');
+  const [loading, setLoading] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+
+  const validateForm = () => {
+    if (!serviceName) {
+      toast({ title: 'Select a funding method', status: 'warning', duration: 3000, position: 'bottom-right' });
+      return false;
+    }
+    if (!amt || Number(amt) <= 0) {
+      toast({ title: 'Enter a valid amount', status: 'warning', duration: 3000, position: 'bottom-right' });
+      return false;
+    }
+    return true;
+  };
+
+  const handleOpenModal = () => {
+    if (validateForm()) setModalOpen(true);
+  };
+
+  // PayPal checkout — only for PayPal
+  const handlePaypalCheckout = () => {
+    setModalOpen(false);
+    navigate('/user/checkout-paypal', {
+      state: {
+        amount: amt,
+        serviceName,
+        serviceType: 'USD Funding',
+        isBuy: false,
+        isUsdFunding: true,
+        note,
+      }
+    });
+  };
+
+  // Manual transfer — for all methods
+  const handleManualTransfer = async () => {
+    setLoading(true);
+    try {
+      const res = await client.post('/api/usd_account_funding', {
+        userId: userData?._id,
+        amt: Number(amt),
+        serviceName,
+        method: 'Manual',
+        note,
+      }, { headers: { Authorization: `Bearer ${userToken}` } });
+
+      if (res.data.msg === '200') {
+        setModalOpen(false);
+        navigate('/user/manual-payment', {
+          state: {
+            payment: amt,
+            track_id: res.data.tid,
+            type: 'USD Funding',
+            serviceCategory: serviceName,
+            isUsdFunding: true,
+          }
+        });
+      } else {
+        toast({ title: res.data.message || 'Request failed', status: 'error', duration: 4000, position: 'bottom-right' });
+      }
+    } catch (e) {
+      toast({ title: 'Connection error. Try again.', status: 'error', duration: 3000, position: 'bottom-right' });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  return (
+    <Box>
+      <Text color={textColor} fontSize='md' fontWeight='800' mb='4px'>
+        Fund USD Wallet
+      </Text>
+      <Text color={subColor} fontSize='sm' mb='20px'>
+        Send via PayPal, Payoneer or Bitcoin and submit proof of payment
+      </Text>
+
+      {/* Current USD Balance */}
+      <Box bg={infoBg} borderRadius='12px' p='14px' mb='20px'
+        border='1px solid' borderColor='green.200'>
+        <Text color='green.700' fontSize='xs' fontWeight='600'
+          textTransform='uppercase' letterSpacing='0.5px'>
+          Current USD Balance
+        </Text>
+        <Text color='green.700' fontSize='xl' fontWeight='800' mt='4px'>
+          ${Number(userData?.usd_balance || 0).toLocaleString()}
+        </Text>
+      </Box>
+
+      <FormControl mb='16px'>
+        <FormLabel fontSize='sm' fontWeight='600' color={textColor}>
+          Funding Method *
+        </FormLabel>
+        <Select placeholder='Select method' size='lg' borderRadius='12px'
+          value={serviceName} onChange={e => setServiceName(e.target.value)}
+          _focus={{ borderColor: '#10B981', boxShadow: '0 0 0 1px #10B981' }}>
+          <option value='PayPal'>PayPal</option>
+          <option value='Payoneer'>Payoneer</option>
+          <option value='Bitcoin'>Bitcoin</option>
+        </Select>
+      </FormControl>
+
+      <FormControl mb='16px'>
+        <FormLabel fontSize='sm' fontWeight='600' color={textColor}>
+          Amount (USD) *
+        </FormLabel>
+        <Input placeholder='Enter amount in USD' size='lg' borderRadius='12px'
+          type='number' value={amt} onChange={e => setAmt(e.target.value)}
+          _focus={{ borderColor: '#10B981', boxShadow: '0 0 0 1px #10B981' }}
+        />
+      </FormControl>
+
+      <FormControl mb='24px'>
+        <FormLabel fontSize='sm' fontWeight='600' color={textColor}>
+          Note (optional)
+        </FormLabel>
+        <Textarea placeholder='Additional notes...' borderRadius='12px'
+          value={note} onChange={e => setNote(e.target.value)} rows={3}
+          _focus={{ borderColor: '#10B981', boxShadow: '0 0 0 1px #10B981' }}
+        />
+      </FormControl>
+
+      <Button w='100%' h='52px' bg='#10B981' color='white'
+        borderRadius='12px' fontWeight='700' fontSize='sm'
+        _hover={{ bg: '#059669', transform: 'translateY(-1px)', shadow: 'lg' }}
+        transition='all 0.2s'
+        onClick={handleOpenModal}>
+        Fund USD Wallet
+      </Button>
+
+      {/* Modal — same pattern as Naira funding */}
+      <Modal isOpen={modalOpen} onClose={() => setModalOpen(false)}>
+        <ModalOverlay />
+        <ModalContent borderRadius='16px'>
+          <ModalHeader>Choose Funding Method</ModalHeader>
+          <Text px={5} color='gray.500' fontSize='sm'>
+            {serviceName === 'PayPal'
+              ? 'Pay directly via PayPal checkout or transfer manually and upload proof.'
+              : `Transfer via ${serviceName} manually and upload your proof of payment.`}
+          </Text>
+          <ModalCloseButton onClick={() => setModalOpen(false)} />
+          <ModalBody pb={6} pt={4}>
+            <Flex direction='column' gap='12px'>
+              {/* PayPal Checkout — only shown for PayPal */}
+              {serviceName === 'PayPal' && (
+                <Button w='100%' h='48px' bg='#4C5FD5' color='white'
+                  borderRadius='12px' fontWeight='700' fontSize='sm'
+                  _hover={{ bg: '#3D4EAA' }}
+                  onClick={handlePaypalCheckout}>
+                  Pay with PayPal
+                </Button>
+              )}
+              {/* Manual Transfer — always shown */}
+              <Button w='100%' h='48px' bg='#10B981' color='white'
+                borderRadius='12px' fontWeight='700' fontSize='sm'
+                _hover={{ bg: '#059669' }}
+                isLoading={loading} loadingText='Processing...'
+                onClick={handleManualTransfer}>
+                Manual Transfer
+              </Button>
+            </Flex>
+          </ModalBody>
+        </ModalContent>
+      </Modal>
+    </Box>
+  );
+}
 
 export default function FundAccount() {
   const { user } = useSelector(state => state.authUser);
+  const [activeTab, setActiveTab] = useState('naira');
   const textColor = useColorModeValue('navy.700', 'white');
   const subColor = useColorModeValue('gray.500', 'gray.400');
   const borderColor = useColorModeValue('gray.100', 'whiteAlpha.100');
   const infoBg = useColorModeValue('brand.50', 'navy.700');
-  const bannerGrad = useColorModeValue(
+  const activeBg = useColorModeValue('white', 'navy.800');
+  const tabBg = useColorModeValue('gray.100', 'navy.700');
+  const bannerGradNaira = useColorModeValue(
     'linear-gradient(135deg, #4C5FD5 0%, #3D4EAA 100%)',
     'linear-gradient(135deg, #1E2C5A 0%, #111c44 100%)'
   );
+  const bannerGradUsd = useColorModeValue(
+    'linear-gradient(135deg, #10B981 0%, #059669 100%)',
+    'linear-gradient(135deg, #022c22 0%, #064e3b 100%)'
+  );
+  const bannerGrad = activeTab === 'naira' ? bannerGradNaira : bannerGradUsd;
 
   return (
     <PageLayout>
       {/* Banner */}
-      <Box
-        bg={bannerGrad}
-        borderRadius='20px'
-        p='24px'
-        mb='24px'
-        position='relative'
-        overflow='hidden'>
+      <Box bg={bannerGrad} borderRadius='20px' p='24px' mb='24px'
+        position='relative' overflow='hidden'>
         <Box position='absolute' top='-30px' right='-30px'
           w='120px' h='120px' borderRadius='full' bg='whiteAlpha.100' />
         <Flex align='center' gap='12px'>
-          <Box w='44px' h='44px' borderRadius='12px'
-            bg='whiteAlpha.200'
+          <Box w='44px' h='44px' borderRadius='12px' bg='whiteAlpha.200'
             display='flex' alignItems='center' justifyContent='center'>
-            <Icon as={MdAdd} color='white' w='24px' h='24px' />
+            <Icon as={activeTab === 'naira' ? MdAdd : MdAccountBalance}
+              color='white' w='24px' h='24px' />
           </Box>
           <Box>
-            <Text color='white' fontSize='lg' fontWeight='800'>Fund Your Account</Text>
-            <Text color='whiteAlpha.800' fontSize='base'>
-              Add money to your wallet via PayStack or manual transfer
+            <Text color='white' fontSize='lg' fontWeight='800'>
+              {activeTab === 'naira' ? 'Fund Naira Wallet' : 'Fund USD Wallet'}
+            </Text>
+            <Text color='whiteAlpha.800' fontSize='sm'>
+              {activeTab === 'naira'
+                ? 'Add NGN via PayStack or manual bank transfer'
+                : 'Fund your USD wallet via PayPal, Payoneer or Bitcoin'}
             </Text>
           </Box>
         </Flex>
       </Box>
 
+      {/* Tab Selector */}
+      <Box bg={tabBg} borderRadius='16px' p='6px' mb='24px'
+        display='inline-flex' gap='4px'>
+        <Box
+          px='20px' py='10px' borderRadius='12px' cursor='pointer'
+          bg={activeTab === 'naira' ? activeBg : 'transparent'}
+          boxShadow={activeTab === 'naira' ? 'sm' : 'none'}
+          transition='all 0.2s'
+          onClick={() => setActiveTab('naira')}>
+          <Text fontSize='sm' fontWeight='700'
+            color={activeTab === 'naira' ? '#4C5FD5' : subColor}>
+            🇳🇬 Naira Funding
+          </Text>
+        </Box>
+        <Box
+          px='20px' py='10px' borderRadius='12px' cursor='pointer'
+          bg={activeTab === 'usd' ? activeBg : 'transparent'}
+          boxShadow={activeTab === 'usd' ? 'sm' : 'none'}
+          transition='all 0.2s'
+          onClick={() => setActiveTab('usd')}>
+          <Text fontSize='sm' fontWeight='700'
+            color={activeTab === 'usd' ? '#10B981' : subColor}>
+            💵 USD Funding
+          </Text>
+        </Box>
+      </Box>
+
       <SimpleGrid columns={{ base: 1, lg: 2 }} gap='20px'>
         {/* Form */}
         <PageCard p='28px'>
-          <FundAccountForm />
+          {activeTab === 'naira'
+            ? <FundAccountForm />
+            : <UsdFundingForm />}
         </PageCard>
 
         {/* Info */}

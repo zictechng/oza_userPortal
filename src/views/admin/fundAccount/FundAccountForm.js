@@ -275,18 +275,16 @@ import { getFundLimitRate } from "storeMtg/getFundingLimitSlice";
                       mb='40px'
                       mt='40px'
                       width={{base: '100%' }}>
-                          <Button
-                          bg='#5464c4'
+                        <Button
+                          w='100%'
+                          h='52px'
+                          bg='#4C5FD5'
                           color='white'
-                          _hover={{ bg: "#5363CE" }}
-                          _active={{ bg: "#5363CE" }}
-                          _focus={{ bg: "#5363CE" }}
-                          fontWeight='500'
-                          fontSize='14px'
-                          py='20px'
-                          px='27'
-                          me='38px' 
-                          width={{ md: '200px', lg: '200px', base: '100%' }}
+                          borderRadius='12px'
+                          fontWeight='700'
+                          fontSize='sm'
+                          _hover={{ bg: '#3D4EAA', transform: 'translateY(-1px)', shadow: 'lg' }}
+                          transition='all 0.2s'
                           onClick={() => fundAccountForm()}>
                           Fund Account
                       </Button>

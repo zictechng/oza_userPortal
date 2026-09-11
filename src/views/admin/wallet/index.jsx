@@ -205,13 +205,22 @@ export default function Wallet() {
           iconBg='#FEF3C7'
         />
         <BalanceCard
-          label='All-time USD Account'
+          label='All-time USD Wallet'
+          value={formatDollar(userData?.usd_balance)}
+          subLabel='Fund via PayPal, Payoneer or Bitcoin'
+          icon={MdCurrencyExchange}
+          color='#10B981' iconBg='#D1FAE5'
+          actions={[
+            <Button key='fund-usd' size='xs' colorScheme='green' variant='solid'
+              borderRadius='8px' onClick={() => navigate('/user/fund-account')}>
+              Fund +
+            </Button>,
+          ]}
+        />
+        <BalanceCard
+          label='All-time USD Volume'
           value={formatDollar(userData?.tran_account)}
-          subLabel={
-            userData?.signup_account > 0
-              ? `All-time volume · Pending bonus: $${Number(userData?.signup_account || 0).toLocaleString()}`
-              : 'All-time USD transaction volume'
-          }
+          subLabel='Total USD transactions (record only)'
           icon={MdCurrencyExchange}
           color='#8B5CF6' iconBg='#EDE9FE'
         />

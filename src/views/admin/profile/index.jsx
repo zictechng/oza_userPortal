@@ -276,36 +276,17 @@ export default function Profile() {
                 borderRadius='full' px='10px' fontSize='xs'>
                 {userData?.acct_type || 'User'}
               </Badge>
+              <Badge
+                colorScheme={userData?.acct_status === 'Active' ? 'green' : 'red'}
+                variant='outline' borderRadius='full' px='10px' fontSize='xs'>
+                {userData?.acct_status || 'Pending'}
+              </Badge>
             </Flex>
           </Box>
         </Flex>
       </Box>
 
-      {/* Stats Row */}
-      <SimpleGrid columns={{ base: 2, md: 4 }} gap='16px' mb='24px'>
-        {[
-          { label: 'Member Since', value: userData?.createdOn ? moment(userData.createdOn).format('MMM YYYY') : '—', color: '#F59E0B', bg: '#FEF3C7' },
-          { label: 'KYC Status', value: userData?.acct_approved_status || '—', color: '#10B981', bg: '#D1FAE5' },
-          { label: 'Coins', value: `🪙 ${Number(userData?.coins || 0).toLocaleString()}`, color: '#8B5CF6', bg: '#EDE9FE' },
-        ].map((stat, i) => (
-          <Box key={i} bg={cardBg} borderRadius='16px' p='16px'
-            border='1px solid' borderColor={borderColor}>
-            <Box w='32px' h='32px' borderRadius='8px' bg={stat.bg}
-              display='flex' alignItems='center' justifyContent='center' mb='8px'>
-              <Box w='12px' h='12px' borderRadius='full' bg={stat.color} />
-            </Box>
-            <Text color={subColor} fontSize='xs' fontWeight='600'
-              textTransform='uppercase' letterSpacing='0.5px' mb='4px'>
-              {stat.label}
-            </Text>
-            <Text color={textColor} fontSize='sm' fontWeight='700'>
-              {stat.value}
-            </Text>
-          </Box>
-        ))}
-      </SimpleGrid>
-
-            {/* Complete Registration Banner */}
+      {/* Complete Registration Banner */}
       {!allStepsDone && !isVerified && (
         <Box
           bg={regBannerBg}
