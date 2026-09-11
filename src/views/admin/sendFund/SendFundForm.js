@@ -293,40 +293,75 @@ import { updateUserDetails } from "storeMtg/authSlice";
         }
   
     return (
-      <Card {...rest} mb='20px' align='center' p='20px'>
-        <Flex px="5px" mb="8px" justifyContent="space-between" align="center">
-          <Text
-          fontSize={{ sm: '14px', lg: '16px'}}
-          py={1.5}
-          color="gray.700"
-          >
-          Send Funds
-          </Text>
-          
-      </Flex>
-      <Flex px="5px" mb="8px" justifyContent="space-between" align="center">
-          
-          <Text
-          fontSize={{ sm: '14px', lg: '16px'}}
-          py={1.5}
-          color="gray.400"
-          >
-          Enter the receiver Tag ID, select source type and enter the amount you want to send.
-          </Text>
-      </Flex>
+                <Card {...rest} mb='20px' align='center' p='20px'>
+                  <Flex px="5px" mb="8px" justifyContent="space-between" align="center">
+                    <Text
+                    fontSize={{ sm: '14px', lg: '16px'}}
+                    py={1.5}
+                    color="gray.700"
+                    >
+                    Send Funds
+                    </Text>
+                    
+                </Flex>
+                <Flex px="5px" mb="8px" justifyContent="space-between" align="center">
+                    
+                    <Text
+                    fontSize={{ sm: '14px', lg: '16px'}}
+                    py={1.5}
+                    color="gray.400"
+                    >
+                    Enter the receiver Tag ID, select source type and enter the amount you want to send.
+                    </Text>
+                </Flex>
 
-      <Flex direction={{ base: "column", "2xl": "row" }} mb={5}>
-        <HStack gap="10" width="full">
-          <InputGroup flex="1">
-          <InputLeftElement children={<ProfileIcon />} fontSize={'25px'} color={'gray.300'} />
-            <Input placeholder="Receiver Tag ID" width={{base:'100%', lg:'400px', md:'400px'}}
-            value={detailsFormData.tag_id}
-            name="tag_id"
-            onChange={handleDataChange} />
-          </InputGroup>
-        </HStack>
-      </Flex>
-                        {isSelfTransfer && (
+                {/* Move Bonus to Main Quick Button */}
+                  <Box
+                    bg='purple.50'
+                    border='1px solid'
+                    borderColor='purple.200'
+                    borderRadius='12px'
+                    p='12px'
+                    mb='16px'>
+                    <Flex justify='space-between' align='center'>
+                      <Box>
+                        <Text fontSize='xs' fontWeight='700' color='purple.700'>
+                          💰 Bonus Balance: ₦{Number(myBonusBalance).toLocaleString()}
+                        </Text>
+                        <Text fontSize='xs' color='gray.500'>
+                          Move bonus funds into your main wallet
+                        </Text>
+                      </Box>
+                      <Button
+                        size='xs'
+                        colorScheme='purple'
+                        borderRadius='8px'
+                        onClick={() => {
+                          setDetailsFormData(prev => ({
+                            ...prev,
+                            tag_id: myTagId,
+                            account_source: '2',
+                          }))
+                          setIsSelfTransfer(true)
+                          setNewData(null)
+                        }}>
+                        Move to Main
+                      </Button>
+                    </Flex>
+                  </Box>
+
+                  <Flex direction={{ base: "column", "2xl": "row" }} mb={5}>
+                    <HStack gap="10" width="full">
+                      <InputGroup flex="1">
+                      <InputLeftElement children={<ProfileIcon />} fontSize={'25px'} color={'gray.300'} />
+                        <Input placeholder="Receiver Tag ID" width={{base:'100%', lg:'400px', md:'400px'}}
+                        value={detailsFormData.tag_id}
+                        name="tag_id"
+                        onChange={handleDataChange} />
+                      </InputGroup>
+                    </HStack>
+                  </Flex>
+                  {isSelfTransfer && (
                   <Box
                     bg='purple.50'
                     border='2px solid'
@@ -355,7 +390,7 @@ import { updateUserDetails } from "storeMtg/authSlice";
             mt='-10px' mb='12px'>
             <Box w='8px' h='8px' borderRadius='full' bg='green.400' flexShrink='0' />
             <Text fontSize='sm' color='green.700' fontWeight='700'>
-              {newData}
+              {newData?.display_name || newData}
             </Text>
             <Text fontSize='xs' color='green.500' ml='auto'>✓ Verified</Text>
           </Flex>
