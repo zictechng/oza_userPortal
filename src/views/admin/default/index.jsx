@@ -313,10 +313,9 @@ export default function Dashboard() {
           action onAction={() => navigate('/user/withdraw')} actionLabel='Withdraw'
         />
         <WalletCard
-          label='Signup Bonus'
-          value={bonusLoading
-            ? '...'
-            : formatNaira(bonusData?.feedbackBonus || userData?.signup_account || 0)}
+          label='Pending Signup Bonus'
+          value={bonusLoading ? '...' : `$${Number(userData?.signup_account || 0).toLocaleString()}`}
+          subLabel={userData?.signup_bonus_activated ? '✓ Activated — credited to bonus wallet' : 'Complete a qualifying transaction to unlock'}
           icon={MdOutlineWarning}
           color='#F59E0B'
           iconBg='#FEF3C7'
