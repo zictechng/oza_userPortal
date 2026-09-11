@@ -205,9 +205,13 @@ export default function Wallet() {
           iconBg='#FEF3C7'
         />
         <BalanceCard
-          label='All-time USD Volume'
+          label='All-time USD Account'
           value={formatDollar(userData?.tran_account)}
-          subLabel='All-time USD transactions (record only)'
+          subLabel={
+            userData?.signup_account > 0
+              ? `All-time volume · Pending bonus: $${Number(userData?.signup_account || 0).toLocaleString()}`
+              : 'All-time USD transaction volume'
+          }
           icon={MdCurrencyExchange}
           color='#8B5CF6' iconBg='#EDE9FE'
         />

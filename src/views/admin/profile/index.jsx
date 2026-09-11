@@ -284,10 +284,9 @@ export default function Profile() {
       {/* Stats Row */}
       <SimpleGrid columns={{ base: 2, md: 4 }} gap='16px' mb='24px'>
         {[
-          { label: 'Main Wallet', value: `₦${Number(userData?.amount || 0).toLocaleString()}`, color: '#4C5FD5', bg: '#EEF2FF' },
-          { label: 'Bonus Wallet', value: `₦${Number(userData?.all_bonus_acct || 0).toLocaleString()}`, color: '#10B981', bg: '#D1FAE5' },
           { label: 'Member Since', value: userData?.createdOn ? moment(userData.createdOn).format('MMM YYYY') : '—', color: '#F59E0B', bg: '#FEF3C7' },
-          { label: 'Account Status', value: userData?.acct_status || '—', color: '#8B5CF6', bg: '#EDE9FE' },
+          { label: 'KYC Status', value: userData?.acct_approved_status || '—', color: '#10B981', bg: '#D1FAE5' },
+          { label: 'Coins', value: `🪙 ${Number(userData?.coins || 0).toLocaleString()}`, color: '#8B5CF6', bg: '#EDE9FE' },
         ].map((stat, i) => (
           <Box key={i} bg={cardBg} borderRadius='16px' p='16px'
             border='1px solid' borderColor={borderColor}>
@@ -440,7 +439,18 @@ export default function Profile() {
                 { label: 'Email Address', value: userData?.email },
                 { label: 'Tag ID', value: userData?.tag_id },
                 { label: 'Account Type', value: userData?.acct_type },
-                { label: 'Account Status', value: userData?.acct_status },
+                { label: 'Account Status', value: (
+                  <Box
+                    as='span'
+                    px='8px' py='2px'
+                    borderRadius='full'
+                    fontSize='xs'
+                    fontWeight='700'
+                    bg={userData?.acct_status === 'Active' ? 'green.100' : 'red.100'}
+                    color={userData?.acct_status === 'Active' ? 'green.700' : 'red.700'}>
+                    {userData?.acct_status || '—'}
+                  </Box>
+                ) },
                 { label: 'KYC Status', value: userData?.acct_approved_status },
                 { label: 'Member Since', value: userData?.createdOn ? moment(userData.createdOn).format('DD MMMM YYYY') : '—' },
                 { label: 'Date of Birth', value: userData?.dob || '—' },

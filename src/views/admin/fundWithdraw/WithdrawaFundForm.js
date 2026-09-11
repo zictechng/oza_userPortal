@@ -28,7 +28,7 @@ import {
   import Card from "components/card/Card.js";
   import { useNavigate } from 'react-router-dom';
   import { useDispatch, useSelector } from 'react-redux';
-  import { DollarValueFormat } from "components/DollarFormat";
+  import { NairaValueFormat } from "components/NairaFormat";
   import { withdrawFundData, resetWithdrawState} from "storeMtg/withdrawalSlice";
   import { CheckCircleIcon } from "@chakra-ui/icons";
   import { updateUserDetails } from "storeMtg/authSlice";
@@ -223,8 +223,9 @@ import { updateBalance } from "storeMtg/authSlice";
        <Flex direction={{ base: "column", "2xl": "row" }} mb={5}>
         <HStack gap="10" width="full">
           <InputGroup flex="1">
-          <InputLeftElement children='&#36;' fontSize={'25px'} color={'gray.300'}/>
-            <Input placeholder="Amount (in USD)" width={{base:'100%', lg:'400px', md:'400px'}}
+          <InputLeftElement 
+          children={'₦'} fontSize={'25px'} color={'gray.300'}/>
+            <Input placeholder="Amount (NGN)" width={{base:'100%', lg:'400px', md:'400px'}}
               value={detailsFormData.withdraw_amt}
               name="withdraw_amt"
               onChange={handleDataChange}/>
@@ -239,7 +240,7 @@ import { updateBalance } from "storeMtg/authSlice";
           display="inline-flex"
           alignItems="center"
           mr={5}>
-            Current wallet balance: &nbsp; <DollarValueFormat value={user.userData?.all_bonus_acct} />
+            Current wallet balance: &nbsp; <NairaValueFormat value={user.userData?.all_bonus_acct} />
         </Text>
       </Flex>
       
