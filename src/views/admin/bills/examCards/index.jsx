@@ -174,7 +174,7 @@ export default function BuyExamCards() {
 
       {/* Select Exam Type */}
       <FormControl mb='20px'>
-        <FormLabel fontSize='sm' fontWeight='600' color={textColor} mb='8px'>
+        <FormLabel fontSize='15px' fontWeight='600' color={textColor} mb='8px'>
           Select Exam Type *
         </FormLabel>
         {networksLoading ? (
@@ -192,13 +192,15 @@ export default function BuyExamCards() {
                 _hover={{ borderColor: 'brand.500', transform: 'translateY(-2px)' }}
                 transition='all 0.2s'
                 onClick={() => handleExamSelect(exam)}>
-                <Text fontWeight='800'>{exam.name}</Text>
-                  <Text fontSize='13px' opacity={0.8}>
+                <Text fontWeight='800' textTransform='uppercase' letterSpacing='0.5px'>
+                  {exam.name}
+                </Text>
+                <Text fontSize='13px' opacity={0.8}>
                   {selectedExam?.id === exam.id && priceLoading
-                    ? 'Fetching price...'
+                    ? '⏳ Loading...'
                     : selectedExam?.id === exam.id && examPrice > 0
                     ? `₦${examPrice.toLocaleString()}/card`
-                    : 'Tap to see price'}
+                    : '👆 Tap to view details'}
                 </Text>
               </Button>
             ))}
@@ -210,7 +212,7 @@ export default function BuyExamCards() {
       {selectedExam && (
         <Box bg={quickBg} borderRadius='12px' p='12px' mb='16px'>
           <Flex justify='space-between' align='center'>
-            <Text color={subColor} fontSize='sm'>{selectedExam.name} Price</Text>
+            <Text color={subColor} fontSize='sm'  textTransform='uppercase'>{selectedExam.name} Price</Text>
             {priceLoading ? (
               <Spinner size='xs' color='brand.500' />
             ) : (

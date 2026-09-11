@@ -7,6 +7,7 @@ import {
 import { MdArrowBack } from 'react-icons/md';
 import { useNavigate } from 'react-router-dom';
 import { useSelector } from 'react-redux';
+import { CheckCircleIcon } from "@chakra-ui/icons";
 
 export const BillsLayout = ({ title, subtitle, icon, iconBg, iconColor, children }) => {
   const navigate = useNavigate();
@@ -81,7 +82,7 @@ export const BillsSuccess = ({ title, items, onDone }) => {
         bg='green.100' display='flex'
         alignItems='center' justifyContent='center'
         mx='auto' mb='16px'>
-        <Text fontSize='32px'>✅</Text>
+        <CheckCircleIcon fontSize='60px' color={'green.300'} mb='10px' />
       </Box>
       <Text color={textColor} fontSize='lg' fontWeight='800' mb='8px'>{title}</Text>
       <Text color={subColor} fontSize='base' mb='24px'>Transaction completed successfully</Text>
@@ -90,7 +91,7 @@ export const BillsSuccess = ({ title, items, onDone }) => {
         <Flex key={i} justify='space-between' py='10px'
           borderBottom='1px solid' borderColor={borderColor}>
           <Text color={subColor} fontSize='sm'>{item.label}</Text>
-          <Text color={textColor} fontSize='sm' fontWeight='600'>{item.value}</Text>
+          <Text color={textColor} fontSize='sm' textTransform='uppercase' fontWeight='600'>{item.value}</Text>
         </Flex>
       ))}
 

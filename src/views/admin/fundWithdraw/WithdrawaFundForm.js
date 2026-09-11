@@ -319,7 +319,7 @@ import { updateBalance } from "storeMtg/authSlice";
                 
                 </ModalHeader>
                 <Flex justifyContent='center' alignItems='center' direction='column'>
-                   <CheckCircleIcon fontSize='80px' color={'green.300'} mb='10px' />
+                   <CheckCircleIcon fontSize='60px' color={'green.300'} mb='10px' />
                       <Box flex="1" textAlign="left" fontSize={{ base: "30px", lg: "22px" }} mb={5}>
                             Successful
                       </Box>

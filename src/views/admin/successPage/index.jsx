@@ -7,6 +7,8 @@ import { MdCheckCircle, MdHome, MdHistory } from 'react-icons/md';
 import { useSelector } from 'react-redux';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { PageLayout, PageCard } from 'layouts/PageLayout';
+import { CheckCircleIcon } from "@chakra-ui/icons";
+
 
 export default function SuccessPage() {
   const navigate = useNavigate();
@@ -53,7 +55,7 @@ export default function SuccessPage() {
             bg='green.50' display='flex'
             alignItems='center' justifyContent='center'
             mx='auto' mb='24px'>
-            <Icon as={MdCheckCircle} color='green.500' w='48px' h='48px' />
+            <CheckCircleIcon fontSize='60px' color={'green.300'} mb='10px' />
           </Box>
 
           <Text color={textColor} fontSize='2xl' fontWeight='800' mb='8px'>

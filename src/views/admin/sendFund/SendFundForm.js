@@ -46,6 +46,9 @@ import { updateUserDetails } from "storeMtg/authSlice";
     const { used, total, ...rest } = props;
     const [isGettingID, setIsGettingID] = useState(false);
     const [newData, setNewData] = useState('')
+    const [isSelfTransfer, setIsSelfTransfer] = useState(false)
+    const myTagId = user?.userData?.tag_id
+    const myBonusBalance = user?.userData?.all_bonus_acct || 0
 
     const {onClose } = useDisclosure();
     const navigate = useNavigate();
@@ -115,13 +118,23 @@ import { updateUserDetails } from "storeMtg/authSlice";
   }
 
       // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
+          // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
       useEffect(() => {
-        // Use a setTimeout to delay the execution of the function
         const timeoutId = setTimeout(() => {
           if(detailsFormData.tag_id.length === 7){
-            getReceiverDetails();
+            // Detect self-transfer
+            if(detailsFormData.tag_id === myTagId){
+              setIsSelfTransfer(true)
+              setNewData(user?.userData) // show own details
+              // Force account_source to '2' (bonus)
+              setDetailsFormData(prev => ({ ...prev, account_source: '2' }))
+            } else {
+              setIsSelfTransfer(false)
+              getReceiverDetails()
+            }
+          } else {
+            setIsSelfTransfer(false)
           }
-          // Clear the timeout to prevent further execution
           clearTimeout(timeoutId);
         }, 500);
       }, [detailsFormData.tag_id]);
@@ -207,11 +220,12 @@ import { updateUserDetails } from "storeMtg/authSlice";
               return false;
             }
           // check if the user is sending fund to himself 
-          if(detailsFormData.tag_id === user.userData?.tag_id)
+                    // Block main → main self-transfer only
+          if(detailsFormData.tag_id === user.userData?.tag_id && detailsFormData.account_source !== '2')
           {
             toast({
               title: "error!",
-              description: "Sorry, same account can not receive funds sending",
+              description: "You cannot send from your main account to yourself. Use 'Move Bonus to Main' instead.",
               status: "error",
               duration: 5000,
               isClosable: true,
@@ -220,7 +234,7 @@ import { updateUserDetails } from "storeMtg/authSlice";
             return false;
           }
           
-            dispatch(sendFundData(getSendInfo))
+          dispatch(sendFundData(getSendInfo))
           .then((result) => {
                 if (result.payload.msg ==='200') {
                   // Success case
@@ -312,7 +326,28 @@ import { updateUserDetails } from "storeMtg/authSlice";
           </InputGroup>
         </HStack>
       </Flex>
-        {newData && (
+                        {isSelfTransfer && (
+                  <Box
+                    bg='purple.50'
+                    border='2px solid'
+                    borderColor='purple.400'
+                    borderRadius='12px'
+                    p='12px'
+                    mb='8px'>
+                    <Flex align='center' gap='8px'>
+                      <Text fontSize='lg'>🔄</Text>
+                      <Box>
+                        <Text fontSize='sm' fontWeight='700' color='purple.700'>
+                          Bonus → Main Transfer
+                        </Text>
+                        <Text fontSize='xs' color='purple.500'>
+                          Funds will move from your bonus account to your main wallet
+                        </Text>
+                      </Box>
+                    </Flex>
+                  </Box>
+                )}
+          {newData && !isSelfTransfer && (
           <Flex
             align='center' gap='8px'
             bg='green.50' border='1px solid' borderColor='green.200'
@@ -327,10 +362,11 @@ import { updateUserDetails } from "storeMtg/authSlice";
         )}
 
         <Flex direction={{ base: "column", "2xl": "row" }} mb={5}>
-        <Select placeholder="Account Source" color={'gray.500'} width={{base:'100%', lg:'400px', md:'400px'}}
+        <Select
+            name='account_source'
             value={detailsFormData.account_source}
-            name="account_source"
-            onChange={handleDataChange}>
+            onChange={handleDataChange}
+            isDisabled={isSelfTransfer}>
           <option value="2">Account [USD]</option>
           <option value="1">Fund Account [NGN]</option>
         </Select>

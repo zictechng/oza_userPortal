@@ -10,6 +10,8 @@ import { capturePaypalPayment } from 'storeMtg/paypalCheckoutSlice';
 import { useToast } from '@chakra-ui/react';
 import { PageLayout, PageCard } from 'layouts/PageLayout';
 import { PayPalButton } from 'react-paypal-button-v2';
+import { CheckCircleIcon } from "@chakra-ui/icons";
+
 
 export default function CheckoutPaypal() {
   const location = useLocation();
@@ -100,7 +102,8 @@ export default function CheckoutPaypal() {
             <Box w='80px' h='80px' borderRadius='full' bg='green.50'
               display='flex' alignItems='center' justifyContent='center'
               mx='auto' mb='24px'>
-              <Icon as={MdCheckCircle} color='green.500' w='48px' h='48px' />
+              <CheckCircleIcon fontSize='60px' color={'green.300'} mb='10px' />
+
             </Box>
             <Text color={textColor} fontSize='xl' fontWeight='800' mb='8px'>
               Payment Successful!
