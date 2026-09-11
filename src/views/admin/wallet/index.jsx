@@ -18,9 +18,6 @@ import { getPendingBonus, resetState } from 'storeMtg/pendingBonusSlice';
 import { fetchProducts, clearProducts } from 'storeMtg/dashRecentRecordSlice';
 import { PageLayout, PageCard } from 'layouts/PageLayout';
 import WalletAnalytics from 'views/admin/wallet/components/WalletAnalytics';
-import { updateUserDetails } from 'storeMtg/authSlice';
-import client from 'components/client';
-import { useRef } from 'react';
 
 // ── Wallet balance card
 const BalanceCard = ({ label, value, subValue, subLabel, icon, color, iconBg, actions }) => {
@@ -92,34 +89,16 @@ export default function Wallet() {
   const formatNaira = (val) => `₦${Number(val || 0).toLocaleString()}`;
   const formatDollar = (val) => `$${Number(val || 0).toLocaleString()}`;
 
-      const refreshUserData = async () => {
-    if (!userData?._id) return;
-    try {
-      const res = await client.get(`/api/profile/${userData._id}`,
-        { headers: { Authorization: `Bearer ${userToken}` } });
-      if (res.data?.others) {
-        dispatch(updateUserDetails({ userData: res.data.others }));
-      }
-    } catch (e) {
-      console.log('Refresh error:', e.message);
-    }
-  };
-
-  const userIdRef = useRef(null);
-
   useEffect(() => {
-    if (userData?._id && userData._id !== userIdRef.current) {
-      userIdRef.current = userData._id;
-      dispatch(fetchProducts({ userID: userData._id, user_token: userToken }));
-      dispatch(getPendingBonus({ tag_id: userData?.tag_id, user_token: userToken }));
-      refreshUserData();
-    }
+    if (!userData?._id || !userToken) return;
+    dispatch(fetchProducts({ userID: userData._id, user_token: userToken }));
+    dispatch(getPendingBonus({ tag_id: userData?.tag_id, user_token: userToken }));
     return () => {
       dispatch(clearProducts());
       dispatch(resetState());
-    }
+    };
   // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [dispatch, userData?._id, userToken]);
 
   const totalBalance = Number(userData?.amount || 0) + Number(userData?.all_bonus_acct || 0);
 
@@ -152,16 +131,9 @@ export default function Wallet() {
             <Text color='white' fontSize={{ base: '32px', md: '42px' }} fontWeight='800' mb='8px'>
               {formatNaira(totalBalance)}
             </Text>
-            <Flex align='center' gap='8px' mt='4px'>
-            <Text color='whiteAlpha.600' fontSize='xs'>
+            <Text color='whiteAlpha.600' fontSize='sm'>
               Last updated: {moment().format('DD MMM YYYY, hh:mm A')}
             </Text>
-            <Button size='xs' variant='ghost' color='whiteAlpha.700'
-              _hover={{ color: 'white' }}
-              onClick={refreshUserData}>
-              ↻ Refresh
-            </Button>
-          </Flex>
           </Box>
           <Flex gap='10px' flexWrap='wrap'>
             <Button
@@ -322,7 +294,7 @@ export default function Wallet() {
           <Stat>
             <StatLabel color={subColor} fontSize='xs' textTransform='uppercase' letterSpacing='0.5px'>Coins Balance</StatLabel>
             <StatNumber color={textColor} fontSize='xl' mt='4px'>
-              {Number(userData?.coins || 0).toLocaleString()} coins
+              {Number(userData?.coins_balance || 0).toLocaleString()} coins
             </StatNumber>
             <StatHelpText color={subColor} fontSize='sm'>Earn coins on every transaction</StatHelpText>
           </Stat>
