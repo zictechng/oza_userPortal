@@ -267,30 +267,21 @@ import { getFundLimitRate } from "storeMtg/getFundingLimitSlice";
           onChange={(e) => setSendNote(e.target.value)}
           value={sendNote}
           required="required" />
-        <Box>
-            <Flex px="0px" align='center' mb={{ sm: "0px", md: "20px" }} direction='row' >
-                  <SimpleGrid
-                      columns={{ base: 1, md: 2, lg: 3, }}
-                      gap={{ md: '250px', lg: '250px', base: '40px' }}
-                      mb='40px'
-                      mt='40px'
-                      width={{base: '100%' }}>
-                        <Button
-                          w='100%'
-                          h='52px'
-                          bg='#4C5FD5'
-                          color='white'
-                          borderRadius='12px'
-                          fontWeight='700'
-                          fontSize='sm'
-                          _hover={{ bg: '#3D4EAA', transform: 'translateY(-1px)', shadow: 'lg' }}
-                          transition='all 0.2s'
-                          onClick={() => fundAccountForm()}>
-                          Fund Account
-                      </Button>
-                  </SimpleGrid>
-            </Flex>
-          </Box>
+        <Box mt='24px'>
+        <Button
+          w='100%'
+          h='52px'
+          bg='#4C5FD5'
+          color='white'
+          borderRadius='12px'
+          fontWeight='700'
+          fontSize='sm'
+          _hover={{ bg: '#3D4EAA', transform: 'translateY(-1px)', shadow: 'lg' }}
+          transition='all 0.2s'
+          onClick={() => fundAccountForm()}>
+          Fund Account
+        </Button>
+      </Box>
 
       <Modal
         initialFocusRef={initialRef}

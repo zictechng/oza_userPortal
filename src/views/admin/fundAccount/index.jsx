@@ -277,27 +277,45 @@ export default function FundAccount() {
 
         {/* Info */}
         <Flex direction='column' gap='16px'>
-          <Box bg={infoBg} borderRadius='16px' p='16px'>
+          <Box bg={activeTab === 'naira' ? infoBg : 'green.50'}
+            borderRadius='16px' p='16px'
+            border='1px solid'
+            borderColor={activeTab === 'naira' ? 'brand.100' : 'green.200'}>
             <Flex align='center' gap='8px' mb='8px'>
-              <Icon as={MdAccountBalance} color='brand.500' w='18px' h='18px' />
+              <Icon
+                as={activeTab === 'naira' ? MdAccountBalance : MdAttachMoney}
+                color={activeTab === 'naira' ? 'brand.500' : 'green.500'}
+                w='18px' h='18px' />
               <Text color={textColor} fontSize='sm' fontWeight='700'>
-                Current Balance
+                {activeTab === 'naira' ? 'Main Wallet Balance' : 'USD Wallet Balance'}
               </Text>
             </Flex>
-            <Text color='brand.500' fontSize='xl' fontWeight='800'>
-              ₦{Number(user?.userData?.amount || 0).toLocaleString()}
+            <Text
+              color={activeTab === 'naira' ? 'brand.500' : 'green.500'}
+              fontSize='xl' fontWeight='800'>
+              {activeTab === 'naira'
+                ? `₦${Number(user?.userData?.amount || 0).toLocaleString()}`
+                : `$${Number(user?.userData?.usd_balance || 0).toLocaleString()}`}
             </Text>
-            <Text color={subColor} fontSize='xs' mt='4px'>Main wallet</Text>
+            <Text color={subColor} fontSize='xs' mt='4px'>
+              {activeTab === 'naira' ? 'NGN Main wallet' : 'USD spendable wallet'}
+            </Text>
           </Box>
 
           <PageCard p='24px'>
             <Text color={textColor} fontSize='sm' fontWeight='700' mb='12px'>
               💡 Payment Methods
             </Text>
-            {[
-              { method: 'PayStack', desc: 'Instant funding via card or bank transfer' },
-              { method: 'Manual Transfer', desc: 'Transfer to our bank account and upload proof' },
-            ].map((item, i) => (
+            {(activeTab === 'naira'
+              ? [
+                  { method: 'PayStack', desc: 'Instant funding via card or bank transfer' },
+                  { method: 'Manual Transfer', desc: 'Transfer to our bank account and upload proof' },
+                ]
+              : [
+                  { method: 'PayPal', desc: 'Pay via PayPal checkout — instant processing' },
+                  { method: 'Payoneer / Bitcoin', desc: 'Transfer manually and upload proof of payment' },
+                ]
+            ).map((item, i) => (
               <Box key={i}>
                 <Flex align='flex-start' gap='10px' py='12px'>
                   <Box w='8px' h='8px' borderRadius='full'
