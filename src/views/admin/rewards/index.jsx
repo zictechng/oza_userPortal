@@ -24,6 +24,16 @@ export default function Rewards() {
   const userData = user?.userData;
   const [coinsToRedeem, setCoinsToRedeem] = useState('');
   const [redeemLoading, setRedeemLoading] = useState(false);
+  const [rewardsSettings, setRewardsSettings] = useState(null);
+
+  useEffect(() => {
+    client.get('/api/rewards_settings', {
+      headers: { Authorization: `Bearer ${userToken}` }
+    }).then(res => {
+      if (res.data.msg === '200') setRewardsSettings(res.data.settings);
+    }).catch(() => {});
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const textColor = useColorModeValue('navy.700', 'white');
   const subColor = useColorModeValue('gray.500', 'gray.400');
@@ -45,12 +55,12 @@ export default function Rewards() {
     { name: 'Diamond', min: 100000, max: Infinity, color: '#B9F2FF', icon: '💫' },
   ];
 
-    const currentTier = tiers.find(t => coinsBalance >= t.min && coinsBalance <= t.max) || tiers[0];
+  const currentTier = tiers.find(t => coinsBalance >= t.min && coinsBalance <= t.max) || tiers[0];
 
   const handleRedeem = async () => {
     const coins = Number(coinsToRedeem);
-    if (!coins || coins < 100) {
-      toast({ title: 'Minimum 100 coins required', status: 'warning', duration: 3000, position: 'bottom-right' });
+    if (!coins || coins < (rewardsSettings?.min_redeem_coins || 250)) {
+      toast({ title: `Minimum ${rewardsSettings?.min_redeem_coins || 100} coins required`, status: 'warning', duration: 3000, position: 'bottom-right' });
       return;
     }
     if (coins > coinsBalance) {
@@ -227,7 +237,7 @@ export default function Rewards() {
               'Higher tier members earn coins at a faster rate',
               'Coins can be redeemed for NGN credited to your main wallet',
               'Minimum redemption: 100 coins',
-              'Each coin = ₦1 credited to main wallet',
+              `Each coin = ₦${rewardsSettings?.coin_ngn_value || 1} credited to main wallet`,
             ].map((note, i) => (
               <Flex key={i} align='flex-start' gap='8px' mb='8px'>
                 <Box w='6px' h='6px' borderRadius='full'
@@ -248,7 +258,7 @@ export default function Rewards() {
             <Text fontSize='sm' color={subColor} mb='16px'>
               Convert your coins to NGN credited to your main wallet.
               <br />
-              <strong>Rate: 1 coin = ₦1 | Minimum: 100 coins</strong>
+              <strong>Rate: 1 coin = ₦{rewardsSettings?.coin_ngn_value || 1} | Minimum: {rewardsSettings?.min_redeem_coins || 100} coins</strong>
             </Text>
             <Box bg='yellow.50' borderRadius='12px' p='12px' mb='16px'>
               <Flex justify='space-between'>
