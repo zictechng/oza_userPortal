@@ -18,6 +18,8 @@ import { getPendingBonus, resetState } from 'storeMtg/pendingBonusSlice';
 import { fetchProducts, clearProducts } from 'storeMtg/dashRecentRecordSlice';
 import { PageLayout, PageCard } from 'layouts/PageLayout';
 import WalletAnalytics from 'views/admin/wallet/components/WalletAnalytics';
+import { updateUserDetails } from 'storeMtg/authSlice';
+import client from 'components/client';
 
 // ── Wallet balance card
 const BalanceCard = ({ label, value, subValue, subLabel, icon, color, iconBg, actions }) => {
@@ -89,14 +91,28 @@ export default function Wallet() {
   const formatNaira = (val) => `₦${Number(val || 0).toLocaleString()}`;
   const formatDollar = (val) => `$${Number(val || 0).toLocaleString()}`;
 
+   const refreshUserData = async () => {
+    try {
+      const res = await client.get(`/api/profile/${userData?._id}`,
+        { headers: { Authorization: `Bearer ${userToken}` } });
+      if (res.data) {
+        dispatch(updateUserDetails({ userData: res.data }));
+      }
+    } catch (e) {
+      console.log('Refresh error:', e.message);
+    }
+  };
+
   useEffect(() => {
-    if (!userData?._id || !userToken) return;
-    dispatch(fetchProducts({ userID: userData._id, user_token: userToken }));
-    dispatch(getPendingBonus({ tag_id: userData?.tag_id, user_token: userToken }));
+    if (userData?._id) {
+      dispatch(fetchProducts({ userID: userData._id, user_token: userToken }));
+      dispatch(getPendingBonus({ tag_id: userData?.tag_id, user_token: userToken }));
+      refreshUserData();
+    }
     return () => {
       dispatch(clearProducts());
       dispatch(resetState());
-    };
+    }
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, userData?._id, userToken]);
 
@@ -131,9 +147,16 @@ export default function Wallet() {
             <Text color='white' fontSize={{ base: '32px', md: '42px' }} fontWeight='800' mb='8px'>
               {formatNaira(totalBalance)}
             </Text>
-            <Text color='whiteAlpha.600' fontSize='sm'>
+            <Flex align='center' gap='8px' mt='4px'>
+            <Text color='whiteAlpha.600' fontSize='xs'>
               Last updated: {moment().format('DD MMM YYYY, hh:mm A')}
             </Text>
+            <Button size='xs' variant='ghost' color='whiteAlpha.700'
+              _hover={{ color: 'white' }}
+              onClick={refreshUserData}>
+              ↻ Refresh
+            </Button>
+          </Flex>
           </Box>
           <Flex gap='10px' flexWrap='wrap'>
             <Button
@@ -196,27 +219,57 @@ export default function Wallet() {
             </Button>,
           ]}
         />
-        <BalanceCard
-          label='Pending Signup Bonus'
-          value={`$${Number(userData?.signup_account || 0).toLocaleString()}`}
-          subLabel={userData?.signup_bonus_activated ? '✓ Activated — credited to bonus wallet' : 'Complete a qualifying transaction to unlock'}
-          icon={MdCardGiftcard}
-          color='#F59E0B'
-          iconBg='#FEF3C7'
-        />
-        <BalanceCard
-          label='All-time USD Wallet'
-          value={formatDollar(userData?.usd_balance)}
-          subLabel='Fund via PayPal, Payoneer or Bitcoin'
-          icon={MdCurrencyExchange}
-          color='#10B981' iconBg='#D1FAE5'
-          actions={[
-            <Button key='fund-usd' size='xs' colorScheme='green' variant='solid'
-              borderRadius='8px' onClick={() => navigate('/user/fund-account')}>
-              Fund +
-            </Button>,
-          ]}
-        />
+        
+        <Box bg='white' borderRadius='20px' p='20px'
+          border='1px solid' borderColor='gray.100'
+          boxShadow='0 2px 12px rgba(0,0,0,0.06)'>
+          {/* USD Wallet — main */}
+          <Flex justify='space-between' align='flex-start' mb='16px'>
+            <Box>
+              <Flex align='center' gap='8px' mb='6px'>
+                <Box w='36px' h='36px' borderRadius='10px' bg='#D1FAE5'
+                  display='flex' alignItems='center' justifyContent='center'>
+                  <Icon as={MdCurrencyExchange} color='#10B981' w='20px' h='20px' />
+                </Box>
+                <Text fontSize='xs' fontWeight='700' color='gray.500'
+                  textTransform='uppercase' letterSpacing='0.5px'>
+                  USD Wallet
+                </Text>
+              </Flex>
+              <Text fontSize='2xl' fontWeight='900' color='#10B981'>
+                {formatDollar(userData?.usd_balance)}
+              </Text>
+              <Text fontSize='sm' color='gray.400' mt='2px'>
+                Fund via PayPal, Payoneer or Bitcoin
+              </Text>
+            </Box>
+            {/* Pending Signup Bonus — floated right, smaller */}
+            <Box textAlign='right'
+              bg={userData?.signup_bonus_activated ? 'green.50' : 'orange.50'}
+              borderRadius='12px' px='12px' py='8px'
+              border='1px solid'
+              borderColor={userData?.signup_bonus_activated ? 'green.200' : 'orange.200'}>
+              <Text fontSize='9px' fontWeight='700' color='gray.400'
+                textTransform='uppercase' letterSpacing='0.5px' mb='2px'>
+                Signup Bonus
+              </Text>
+              <Text fontSize='sm' fontWeight='800'
+                color={userData?.signup_bonus_activated ? 'green.600' : 'orange.500'}>
+                {userData?.signup_bonus_activated
+                  ? '✓ Activated'
+                  : `$${Number(userData?.pending_signup_bonus_usd || 0).toLocaleString()}`}
+              </Text>
+              <Text fontSize='12px' color='gray.400' mt='1px'>
+                {userData?.signup_bonus_activated ? 'Credited' : 'Pending'}
+              </Text>
+            </Box>
+          </Flex>
+          <Button size='xs' colorScheme='green' variant='solid'
+            borderRadius='8px'
+            onClick={() => navigate('/user/fund-account')}>
+            Fund +
+          </Button>
+        </Box>
         <BalanceCard
           label='All-time USD Volume'
           value={formatDollar(userData?.tran_account)}
@@ -264,7 +317,7 @@ export default function Wallet() {
           <Stat>
             <StatLabel color={subColor} fontSize='xs' textTransform='uppercase' letterSpacing='0.5px'>Coins Balance</StatLabel>
             <StatNumber color={textColor} fontSize='xl' mt='4px'>
-              {Number(userData?.coins_balance || 0).toLocaleString()} coins
+              {Number(userData?.coins || 0).toLocaleString()} coins
             </StatNumber>
             <StatHelpText color={subColor} fontSize='sm'>Earn coins on every transaction</StatHelpText>
           </Stat>

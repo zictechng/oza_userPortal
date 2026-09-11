@@ -49,18 +49,39 @@ function UsdFundingForm() {
   };
 
   // PayPal checkout — only for PayPal
-  const handlePaypalCheckout = () => {
-    setModalOpen(false);
-    navigate('/user/checkout-paypal', {
-      state: {
-        amount: amt,
+   // PayPal checkout — only for PayPal
+  const handlePaypalCheckout = async () => {
+    setLoading(true);
+    try {
+      const res = await client.post('/api/usd_account_funding', {
+        userId: userData?._id,
+        amt: Number(amt),
         serviceName,
-        serviceType: 'USD Funding',
-        isBuy: false,
-        isUsdFunding: true,
+        method: 'PayPal Checkout',
         note,
+      }, { headers: { Authorization: `Bearer ${userToken}` } });
+
+      if (res.data.msg === '200') {
+        setModalOpen(false);
+        navigate('/user/checkout-paypal', {
+          state: {
+            amount: amt,
+            serviceName,
+            serviceType: 'USD Funding',
+            isBuy: false,
+            isUsdFunding: true,
+            track_id: res.data.tid,
+            note,
+          }
+        });
+      } else {
+        toast({ title: res.data.message || 'Request failed', status: 'error', duration: 4000, position: 'bottom-right' });
       }
-    });
+    } catch (e) {
+      toast({ title: 'Connection error. Try again.', status: 'error', duration: 3000, position: 'bottom-right' });
+    } finally {
+      setLoading(false);
+    }
   };
 
   // Manual transfer — for all methods
@@ -174,10 +195,12 @@ function UsdFundingForm() {
           <ModalBody pb={6} pt={4}>
             <Flex direction='column' gap='12px'>
               {/* PayPal Checkout — only shown for PayPal */}
-              {serviceName === 'PayPal' && (
+               {serviceName === 'PayPal' && (
                 <Button w='100%' h='48px' bg='#4C5FD5' color='white'
                   borderRadius='12px' fontWeight='700' fontSize='sm'
                   _hover={{ bg: '#3D4EAA' }}
+                  isLoading={loading}
+                  loadingText='Processing...'
                   onClick={handlePaypalCheckout}>
                   Pay with PayPal
                 </Button>
@@ -186,14 +209,10 @@ function UsdFundingForm() {
               <Button w='100%' h='48px' bg='#10B981' color='white'
                 borderRadius='12px' fontWeight='700' fontSize='sm'
                 _hover={{ bg: '#059669' }}
-                disabled={loading}
+                isLoading={loading}
+                loadingText='Processing...'
                 onClick={handleManualTransfer}>
-                {loading
-                  ? <Text display='flex' alignItems='center' gap='8px'>
-                      <Spinner size='sm' color='white' />
-                      Processing...
-                    </Text>
-                  : 'Manual Transfer'}
+                Manual Transfer
               </Button>
             </Flex>
           </ModalBody>

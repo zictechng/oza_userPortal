@@ -275,13 +275,25 @@ export default function Rewards() {
               </Flex>
             </Box>
             <Input
-              placeholder='Enter coins to redeem (min 100)'
+              placeholder={`Enter coins to redeem (min ${rewardsSettings?.min_redeem_coins || 100})`}
               type='number'
+              min={rewardsSettings?.min_redeem_coins || 100}
+              max={coinsBalance}
               value={coinsToRedeem}
-              onChange={e => setCoinsToRedeem(e.target.value)}
+              onChange={e => {
+                const val = Number(e.target.value)
+                if (val > coinsBalance) {
+                  setCoinsToRedeem(String(coinsBalance))
+                } else {
+                  setCoinsToRedeem(e.target.value)
+                }
+              }}
               borderRadius='10px'
               size='lg'
             />
+            <Text fontSize='xs' color='gray.400' mt='6px'>
+              Maximum: {coinsBalance.toLocaleString()} coins · Value: ₦{(Number(coinsToRedeem || 0) * Number(rewardsSettings?.coin_ngn_value || 1)).toLocaleString()}
+            </Text>
           </ModalBody>
           <ModalFooter gap='8px'>
             <Button variant='ghost' onClick={onClose}>Cancel</Button>
