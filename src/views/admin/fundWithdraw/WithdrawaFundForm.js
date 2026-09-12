@@ -33,12 +33,10 @@ import {
   import { CheckCircleIcon } from "@chakra-ui/icons";
   import { updateUserDetails } from "storeMtg/authSlice";
 import { updateBalance } from "storeMtg/authSlice";
-
   
   // Assets
   
   export default function Upload(props) {
-
     const {onClose } = useDisclosure();
         const navigate = useNavigate();
         const toast = useToast();
@@ -90,35 +88,50 @@ import { updateBalance } from "storeMtg/authSlice";
           });
         };
 
-        //console.log("Setting ", user)
-    // process withdrawal request here 
-     const withdrawFunds = () => {
-            // validate inputs here
-          if(detailsFormData.withdraw_amt === null || detailsFormData.withdraw_amt === '')
-            {
-              toast({
-                title: "Error!",
-                description: "Please, enter withdrawal amount.",
-                status: "warning",
-                duration: 5000,
-                isClosable: true,
-                position: "bottom-right",
-              });
-              return false;
-            }
-          else if (!/^\d+$/.test(detailsFormData.withdraw_amt)) {
+    // process withdrawal request here
+      const withdrawFunds = () => {
+        if (
+          detailsFormData.withdraw_amt === undefined ||
+          detailsFormData.withdraw_amt === ''
+        ) {
+          toast({
+            title: "error!",
+            description: "Amount is required",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+            position: "bottom-right",
+          });
+          return false;
+        }
+        // Validate amount
+        const amount = Number(detailsFormData.withdraw_amt);
+
+        if (!Number.isFinite(amount) || amount <= 0) {
             toast({
               title: "Error!",
-              description: "Please enter a valid digit amount",
-              status: "warning",
+              description: "Please enter a valid amount greater than 0",
+              status: "error",
               duration: 5000,
               isClosable: true,
               position: "bottom-right",
             });
             return false;
           }
-          onOpenRevocationModal()
+        // Prevent negative numbers
+        if (amount < 0) {
+          toast({
+            title: "Error!",
+            description: "Amount cannot be negative",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+            position: "bottom-right",
+          });
+          return false;
         }
+        onOpenRevocationModal();
+      };
 
         // process the request
         const processWithdrawal =() =>{
@@ -138,11 +151,25 @@ import { updateBalance } from "storeMtg/authSlice";
               });
               return false;
             }
-            else if (!/^\d+$/.test(detailsFormData.withdraw_amt)) {
+           const amount = Number(detailsFormData.withdraw_amt);
+
+            if (!Number.isFinite(amount) || amount <= 0) {
+                toast({
+                  title: "Error!",
+                  description: "Please enter a valid amount greater than 0",
+                  status: "error",
+                  duration: 5000,
+                  isClosable: true,
+                  position: "bottom-right",
+                });
+                return false;
+              }
+            // Prevent negative numbers
+            if (amount < 0) {
               toast({
                 title: "Error!",
-                description: "Please enter a valid digit amount",
-                status: "warning",
+                description: "Amount cannot be negative",
+                status: "error",
                 duration: 5000,
                 isClosable: true,
                 position: "bottom-right",
@@ -243,36 +270,27 @@ import { updateBalance } from "storeMtg/authSlice";
         </Text>
       </Flex>
       
-        <Textarea placeholder="Reason/purpose (250 characters max optional)" h={100}
+        <Textarea placeholder="Reason/purpose (250 characters max optional)" h={100} mb={8}
             value={detailsFormData.withdraw_note}
             name="withdraw_note"
             onChange={handleDataChange} />
         <Box>
-            <Flex px="0px" align='center' mb={{ base: "0px", md: "20px" }} direction='column' >
-                  <SimpleGrid
-                      columns={{ base: 1, md: 2, lg: 3, "2xl": 6 }}
-                      gap={{ md: '250px', lg: '250px', base: '40px' }}
-                      mb='40px'
-                      mt='40px'
-                      width={{base: '100%' }}>
-                      <Button
-                      bg='#5464c4'
-                      color='white'
-                      _hover={{ bg: "#5363CE" }}
-                      _active={{ bg: "#5363CE" }}
-                      _focus={{ bg: "#5363CE" }}
-                      fontWeight='500'
-                      fontSize='14px'
-                      py='20px'
-                      px='27'
-                      me='38px' 
-                      width={{ md: '200px', lg: '200px', base: '100%' }}
-                      onClick={() => withdrawFunds()}>
-                      Withdraw
-                      </Button>
-                  </SimpleGrid>
-            </Flex>
-          </Box>
+          <Button w='100%' h='52px' bg='#5464c4'
+            color='white'
+            _hover={{ bg: "#5363CE" }}
+            _active={{ bg: "#5363CE" }}
+            _focus={{ bg: "#5363CE" }}
+            fontWeight='500'
+            fontSize='14px'
+            py='20px'
+            px='27'
+            me='38px' 
+            width={{sm: '100%' }}
+            transition='all 0.2s'
+            onClick={()=>withdrawFunds()}>
+            Withdraw
+          </Button>
+        </Box>
 
           {/* Pin modal */}
           <Modal

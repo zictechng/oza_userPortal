@@ -35,6 +35,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { sendFundData } from "storeMtg/sendFundSlice";
 import { resetAccountState } from "storeMtg/pinUpdateSlice";
 import { updateUserDetails } from "storeMtg/authSlice";
+import { refreshUserProfile } from 'storeMtg/authSlice';
   
   // Assets
   
@@ -105,7 +106,7 @@ import { updateUserDetails } from "storeMtg/authSlice";
             status: "error",
             duration: 5000,
             isClosable: true,
-            position: "bottom",
+            position: "bottom-right",
           });
         }
 
@@ -118,7 +119,6 @@ import { updateUserDetails } from "storeMtg/authSlice";
   }
 
       // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
-          // biome-ignore lint/correctness/useExhaustiveDependencies: <explanation>
       useEffect(() => {
         const timeoutId = setTimeout(() => {
           if(detailsFormData.tag_id.length === 7){
@@ -127,7 +127,7 @@ import { updateUserDetails } from "storeMtg/authSlice";
               setIsSelfTransfer(true)
               setNewData(user?.userData) // show own details
               // Force account_source to '2' (bonus)
-              setDetailsFormData(prev => ({ ...prev, account_source: '2' }))
+              setDetailsFormData(prev => ({ ...prev, account_source: '1' }))
             } else {
               setIsSelfTransfer(false)
               getReceiverDetails()
@@ -135,65 +135,68 @@ import { updateUserDetails } from "storeMtg/authSlice";
           } else {
             setIsSelfTransfer(false)
           }
+          dispatch(refreshUserProfile({ userID: detailsFormData._id, user_token: userToken })); // ← ADD THIS
           clearTimeout(timeoutId);
         }, 500);
       }, [detailsFormData.tag_id]);
 
       // processing fund sending
-
-      const getFundsendingDetails = () => 
-      {
-        if(detailsFormData.tag_id === '' || detailsFormData.tag_id === null)
-        {
+      const getFundsendingDetails = () => {
+        if (detailsFormData.tag_id === '' || detailsFormData.tag_id === null) {
           toast({
             title: "error!",
             description: "Enter receiver Tag ID",
             status: "error",
             duration: 5000,
             isClosable: true,
-            position: "top",
+            position: "bottom-right",
           });
           return false;
         }
-        if(detailsFormData.account_source === undefined || detailsFormData.account_source === '')
-          {
+
+        if (
+          detailsFormData.account_source === undefined ||
+          detailsFormData.account_source === ''
+        ) {
+          toast({
+            title: "error!",
+            description: "Account source is required",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+            position: "bottom-right",
+          });
+          return false;
+        }
+
+        // Validate amount
+        const amount = Number(detailsFormData.sendAmt);
+
+        if (!Number.isFinite(amount) || amount <= 0) {
             toast({
-              title: "error!",
-              description: "Account source is required",
+              title: "Error!",
+              description: "Please enter a valid amount greater than 0",
               status: "error",
               duration: 5000,
               isClosable: true,
-              position: "bottom",
+              position: "bottom-right",
             });
             return false;
           }
-          if(detailsFormData.sendAmt === undefined || detailsFormData.sendAmt === '')
-            {
-              toast({
-                title: "error!",
-                description: "Amount sending is required",
-                status: "error",
-                duration: 5000,
-                isClosable: true,
-                position: "bottom",
-              });
-              return false
-            }
-            if (!/^\d+$/.test(detailsFormData.sendAmt)) {
-              toast({
-                title: "Error!",
-                description: "Please enter a valid digit amount",
-                status: "error",
-                duration: 5000,
-                isClosable: true,
-                position: "bottom",
-              });
-              return false;
-            }
-            else{
-              onOpenRevocationModal();
-            }
+        // Prevent negative numbers
+        if (amount < 0) {
+          toast({
+            title: "Error!",
+            description: "Amount cannot be negative",
+            status: "error",
+            duration: 5000,
+            isClosable: true,
+            position: "bottom-right",
+          });
+          return false;
         }
+        onOpenRevocationModal();
+      };
 
         // processing the sending fund
         const sendFundRequest = () => 
@@ -215,13 +218,13 @@ import { updateUserDetails } from "storeMtg/authSlice";
                 status: "error",
                 duration: 5000,
                 isClosable: true,
-                position: "top",
+                position: "bottom-right",
               });
               return false;
             }
           // check if the user is sending fund to himself 
                     // Block main → main self-transfer only
-          if(detailsFormData.tag_id === user.userData?.tag_id && detailsFormData.account_source !== '2')
+          if(detailsFormData.tag_id === user.userData?.tag_id && detailsFormData.account_source === '2')
           {
             toast({
               title: "error!",
@@ -229,7 +232,7 @@ import { updateUserDetails } from "storeMtg/authSlice";
               status: "error",
               duration: 5000,
               isClosable: true,
-              position: "top",
+              position: "bottom-right",
             });
             return false;
           }
@@ -257,7 +260,7 @@ import { updateUserDetails } from "storeMtg/authSlice";
                       status: "success",
                       duration: 5000,
                       isClosable: true,
-                      position: "top",
+                      position: "bottom-right",
                     });
                     navigate('/user/success', { state: { isSendFund: true } })
                
@@ -270,7 +273,7 @@ import { updateUserDetails } from "storeMtg/authSlice";
                       status: "error",
                       duration: 5000,
                       isClosable: true,
-                      position: "top",
+                      position: "bottom-right",
                     });
                    }
                 else {
@@ -282,7 +285,7 @@ import { updateUserDetails } from "storeMtg/authSlice";
                       status: "error",
                       duration: 5000,
                       isClosable: true,
-                      position: "top",
+                      position: "bottom-right",
                     });
                 }
               })
@@ -363,7 +366,7 @@ import { updateUserDetails } from "storeMtg/authSlice";
                               setDetailsFormData(prev => ({
                                 ...prev,
                                 tag_id: myTagId,
-                                account_source: '2',
+                                account_source: '1',
                               }))
                               setIsSelfTransfer(true)
                               setNewData(null)
@@ -426,7 +429,9 @@ import { updateUserDetails } from "storeMtg/authSlice";
             name='account_source'
             value={detailsFormData.account_source}
             onChange={handleDataChange}
-            isDisabled={isSelfTransfer}>
+            isDisabled={isSelfTransfer}
+            width={{base:'100%', lg:'400px', md:'400px'}}>
+          <option value="">Select Source Account</option>
           <option value="2">Account [USD]</option>
           <option value="1">Main Account [NGN]</option>
         </Select>
@@ -447,35 +452,27 @@ import { updateUserDetails } from "storeMtg/authSlice";
         </HStack>
       </Flex>
       
-        <Textarea placeholder="Reason/purpose (250 characters max optional)" h={100} 
+        <Textarea placeholder="Reason/purpose (250 characters max optional)" h={100} mb={8} 
         value={detailsFormData.send_note}
         name="send_note"
         onChange={handleDataChange}/>
         <Box>
-            <Flex px="0px" align='center' mb={{ sm: "0px", md: "20px" }} direction='column' >
-                  <SimpleGrid
-                      columns={{ base: 1, md: 2, lg: 3, "2xl": 6 }}
-                      gap={{ md: '250px', lg: '250px', sm: '40px' }}
-                      mb='40px'
-                      mt='40px'
-                      width={{sm: '100%' }}>
-                          <Button
-                          bg='#5464c4'
-                          color='white'
-                          _hover={{ bg: "#5363CE" }}
-                          _active={{ bg: "#5363CE" }}
-                          _focus={{ bg: "#5363CE" }}
-                          fontWeight='500'
-                          fontSize='14px'
-                          py='20px'
-                          px='27'
-                          me='38px' 
-                          width={{ md: '200px', lg: '200px', sm: '100%' }}
-                          onClick={() => getFundsendingDetails()}>
-                      Submit
-                      </Button>
-                  </SimpleGrid>
-            </Flex>
+
+            <Button w='100%' h='52px' bg='#5464c4'
+              color='white'
+              _hover={{ bg: "#5363CE" }}
+              _active={{ bg: "#5363CE" }}
+              _focus={{ bg: "#5363CE" }}
+              fontWeight='500'
+              fontSize='14px'
+              py='20px'
+              px='27'
+              me='38px' 
+              width={{sm: '100%' }}
+              transition='all 0.2s'
+              onClick={()=>getFundsendingDetails()}>
+              Submit
+            </Button>
           </Box>
 
       <Modal

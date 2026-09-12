@@ -62,7 +62,6 @@ import { getFundLimitRate } from "storeMtg/getFundingLimitSlice";
     // call paystack button here 
     const handlePaystackButtonClick = () => {
               setPayBtnLoader(true)
-
                 setTimeout(() => {
                   dispatch(getFundLimitRate({amt: sendAmt}))
                   .then((res) =>{
@@ -75,7 +74,7 @@ import { getFundLimitRate } from "storeMtg/getFundingLimitSlice";
                       status: "warning",
                       duration: 5000,
                       isClosable: true,
-                      position: "top",
+                      position: "bottom-right",
                       });
                     setPayBtnLoader(false);
                     return false
@@ -115,8 +114,7 @@ import { getFundLimitRate } from "storeMtg/getFundingLimitSlice";
                   
                 }, 1000); // 2-second delay
             };
-
-
+            
           useEffect(() => {
               const timeId = setTimeout(() => {
             // After 3 seconds set the show value to false
@@ -144,29 +142,41 @@ import { getFundLimitRate } from "storeMtg/getFundingLimitSlice";
                     status: "warning",
                     duration: 5000,
                     isClosable: true,
-                    position: "top",
+                    position: "bottom-right",
                   });
                   return false;
                 }
-                if (!/^\d+$/.test(sendAmt)) {
+                const amount = Number(sendAmt);
+
+                if (!Number.isFinite(amount) || amount <= 0) {
+                    toast({
+                      title: "Error!",
+                      description: "Please enter a valid amount greater than 0",
+                      status: "error",
+                      duration: 5000,
+                      isClosable: true,
+                      position: "bottom-right",
+                    });
+                    return false;
+                  }
+                // Prevent negative numbers
+                if (amount < 0) {
                   toast({
                     title: "Error!",
-                    description: "Please enter a valid digit amount",
-                    status: "warning",
+                    description: "Amount cannot be negative",
+                    status: "error",
                     duration: 5000,
                     isClosable: true,
-                    position: "top",
+                    position: "bottom-right",
                   });
                   return false;
                 }
-                
-                  onOpenRevocationModal()
+                onOpenRevocationModal()
               }
               
               // manual transfer function goes here
               const manualTransfer = () =>
               {
-
                 const userData ={
                   tag_id: user.userData?.tag_id,
                   serviceName: 'Account Funding',
@@ -188,12 +198,11 @@ import { getFundLimitRate } from "storeMtg/getFundingLimitSlice";
                   status: "warning",
                   duration: 5000,
                   isClosable: true,
-                  position: "top",
+                  position: "bottom-right",
                   });
               setBtnLoader(false);
                 return false
                 }
-                
                   dispatch(paystackFundData(userData))
                   .then((successData) =>{
                     //console.log("After Payment Status ", successData.payload)
@@ -222,7 +231,7 @@ import { getFundLimitRate } from "storeMtg/getFundingLimitSlice";
                       status: "warning",
                       duration: 5000,
                       isClosable: true,
-                      position: "top",
+                      position: "bottom-right",
                       });
                     return false
                     }

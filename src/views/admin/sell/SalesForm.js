@@ -169,7 +169,7 @@ import { capturePaypalPayment } from "storeMtg/paypalCheckoutSlice";
             status: "warning",
             duration: 5000,
             isClosable: true,
-            position: "top",
+            position: "bottom-right",
           });
           }
         else if(detailsFormData.sell_amount === null || detailsFormData.sell_amount === '')
@@ -180,7 +180,7 @@ import { capturePaypalPayment } from "storeMtg/paypalCheckoutSlice";
               status: "warning",
               duration: 5000,
               isClosable: true,
-              position: "top",
+              position: "bottom-right",
             });
             return false;
             }
@@ -192,7 +192,7 @@ import { capturePaypalPayment } from "storeMtg/paypalCheckoutSlice";
               status: "warning",
               duration: 5000,
               isClosable: true,
-              position: "top",
+              position: "bottom-right",
             });
             return false;
           }
@@ -229,7 +229,7 @@ import { capturePaypalPayment } from "storeMtg/paypalCheckoutSlice";
                     status: "warning",
                     duration: 5000,
                     isClosable: true,
-                    position: "top",
+                    position: "bottom-right",
                     });
                   setPayBtnLoader(false)
                   }
@@ -254,7 +254,7 @@ import { capturePaypalPayment } from "storeMtg/paypalCheckoutSlice";
                           status: "warning",
                           duration: 5000,
                           isClosable: true,
-                          position: "top",
+                          position: "bottom-right",
                           });
                         return false
                       }
@@ -312,7 +312,7 @@ import { capturePaypalPayment } from "storeMtg/paypalCheckoutSlice";
                 status: "warning",
                 duration: 5000,
                 isClosable: true,
-                position: "top",
+                position: "bottom-right",
                 });
               return false
               }
@@ -346,7 +346,7 @@ import { capturePaypalPayment } from "storeMtg/paypalCheckoutSlice";
                       status: "warning",
                       duration: 5000,
                       isClosable: true,
-                      position: "top",
+                      position: "bottom-right",
                       });
                     return false
                     }
@@ -476,38 +476,29 @@ import { capturePaypalPayment } from "storeMtg/paypalCheckoutSlice";
         </HStack>
       </Flex>
       
-        <Textarea placeholder="Reason/purpose (250 characters max optional)" h={100} 
+        <Textarea placeholder="Reason/purpose (250 characters max optional)" h={100} mb={8} 
             value={detailsFormData.sell_note}
             name="sell_note"
             onChange={handleDataChange}/>
-        <Box>
-            <Flex px="0px" align='center' mb={{ base: "0px", md: "20px" }} direction='column' >
-                  <SimpleGrid
-                      columns={{ base: 1, md: 2, lg: 3, "2xl": 6 }}
-                      gap={{ md: '250px', lg: '250px', sm: '40px' }}
-                      mb='40px'
-                      mt='40px'
-                      width={{sm: '100%' }}>
-                      <Button
-                      bg='#5464c4'
-                      color='white'
-                      _hover={{ bg: "#5363CE" }}
-                      _active={{ bg: "#5363CE" }}
-                      _focus={{ bg: "#5363CE" }}
-                      fontWeight='500'
-                      fontSize='14px'
-                      py='20px'
-                      px='27'
-                      me='38px' 
-                      width={{ md: '200px', lg: '200px', sm: '100%' }}
-                      onClick={()=>processBuyRequest()}>
-                      Submit
-                      </Button>
-               
-                  </SimpleGrid>
-            </Flex>
-          </Box>
 
+      <box px="0px" align='center' mb={{ base: "0px", md: "20px" }} direction='column' mt={8} >
+        <Button w='100%' h='52px' bg='#5464c4'
+          color='white'
+          _hover={{ bg: "#5363CE" }}
+          _active={{ bg: "#5363CE" }}
+          _focus={{ bg: "#5363CE" }}
+          fontWeight='500'
+          fontSize='14px'
+          py='20px'
+          px='27'
+          me='38px' 
+          width={{sm: '100%' }}
+          transition='all 0.2s'
+          onClick={()=>processBuyRequest()}>
+          Send Fund
+        </Button>
+        </box>
+        
         <div>
           
           {resultError && <p>{resultError}</p>}

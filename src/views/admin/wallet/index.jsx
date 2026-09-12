@@ -18,8 +18,7 @@ import { getPendingBonus, resetState } from 'storeMtg/pendingBonusSlice';
 import { fetchProducts, clearProducts } from 'storeMtg/dashRecentRecordSlice';
 import { PageLayout, PageCard } from 'layouts/PageLayout';
 import WalletAnalytics from 'views/admin/wallet/components/WalletAnalytics';
-import { updateUserDetails } from 'storeMtg/authSlice';
-import client from 'components/client';
+
 import { refreshUserProfile } from 'storeMtg/authSlice';
 
 // ── Wallet balance card

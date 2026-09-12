@@ -209,8 +209,9 @@ export default function HistoryContent() {
                     fontSize='base' fontWeight='700' w='120px' textAlign='right'
                     color={tx.tran_type === 'Credit' ? 'green.500' : 'red.500'}>
                     {tx.tran_type === 'Credit' ? '+' : '-'}
-                    {tx.sender_currency_type === '$' ? '$' : '₦'}
+                    {tx.sender_currency_type === '$' || tx.sender_currency_type === '2'? '$' : '₦'}
                     {Number(tx.amount || 0).toLocaleString()}
+                    
                   </Text>
                 </Flex>
                 {i < filtered.length - 1 && <Divider borderColor={borderColor} />}

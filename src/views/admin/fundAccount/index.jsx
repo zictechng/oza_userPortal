@@ -33,6 +33,7 @@ function UsdFundingForm() {
   const [modalOpen, setModalOpen] = useState(false);
   const [paypalLoading, setPaypalLoading] = useState(false);
   const [manualLoading, setManualLoading] = useState(false);
+  const [payBtnLoader, setPayBtnLoader] = useState(false);
 
   const validateForm = () => {
     if (!serviceName) {
@@ -52,8 +53,12 @@ function UsdFundingForm() {
 
    // ✅ FIX ISSUE 1 & 2: PayPal — NO API call here at all.
   // Transaction record is created ONLY inside capturePaypalPayment (after PayPal confirms).
-  const handlePaypalCheckout = () => {
+const handlePaypalCheckout = () => {
+  setPayBtnLoader(true);
+
+  setTimeout(() => {
     setModalOpen(false);
+
     navigate('/user/checkout-paypal', {
       state: {
         amount: amt,
@@ -63,7 +68,8 @@ function UsdFundingForm() {
         note,
       },
     });
-  };
+  }, 1000);
+};
 
   // Manual transfer — this is the ONLY flow that pre-creates a pending record (correct)
   const handleManualTransfer = async () => {
@@ -178,13 +184,32 @@ function UsdFundingForm() {
             <Flex direction='column' gap='12px'>
               {/* PayPal Checkout — only shown for PayPal */}
                {serviceName === 'PayPal' && (
-                <Button w='100%' h='48px' bg='#4C5FD5' color='white'
-                  borderRadius='12px' fontWeight='700' fontSize='sm'
-                  _hover={{ bg: '#3D4EAA' }}
-                  isLoading={paypalLoading}
-                  loadingText='Processing...'
-                  onClick={handlePaypalCheckout}>
-                  Pay with PayPal
+                <Button
+                  bg='#5363CE'
+                  color='white'
+                  _hover={{ bg: "#5464c4" }}
+                  _active={{ bg: "#5464c4" }}
+                  _focus={{ bg: "#5363CE" }}
+                  fontWeight='500'
+                  fontSize='14px'
+                  py='20px'
+                  px='27px'
+                  width='100%'
+                  onClick={handlePaypalCheckout}
+                  disabled={payBtnLoader}
+                >
+                  {payBtnLoader ? (
+                    <Flex align="center" justify="center">
+                      <Spinner
+                        animationDuration="0.8s"
+                        size="sm"
+                        mr="8px"
+                      />
+                      <Text>Waiting...</Text>
+                    </Flex>
+                  ) : (
+                    'Pay With PayPal'
+                  )}
                 </Button>
               )}
               {/* Manual Transfer — always shown */}
