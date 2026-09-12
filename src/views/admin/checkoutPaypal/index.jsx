@@ -42,6 +42,8 @@ export default function CheckoutPaypal() {
     sell_note,
     method,
     serviceType,
+    isUsdFunding,  
+    note,
   } = location.state || {};
 
   // ── ORIGINAL WORKING FUNCTIONS — NOT CHANGED ──────────
@@ -71,7 +73,12 @@ export default function CheckoutPaypal() {
           duration: 5000,
           position: 'top',
         });
-        setTimeout(() => navigate('/user/success', { state: { isPaypal: true } }), 2000);
+        setTimeout(() => navigate('/user/success', {
+          state: {
+            isPaypal: !isUsdFunding,
+            isUsdFunding: !!isUsdFunding,
+          }
+        }), 2000);
       } else {
         toast({
           title: 'Payment Failed',

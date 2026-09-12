@@ -31,6 +31,8 @@ function UsdFundingForm() {
   const [note, setNote] = useState('');
   const [loading, setLoading] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [paypalLoading, setPaypalLoading] = useState(false);
+  const [manualLoading, setManualLoading] = useState(false);
 
   const validateForm = () => {
     if (!serviceName) {
@@ -48,45 +50,24 @@ function UsdFundingForm() {
     if (validateForm()) setModalOpen(true);
   };
 
-  // PayPal checkout — only for PayPal
-   // PayPal checkout — only for PayPal
-  const handlePaypalCheckout = async () => {
-    setLoading(true);
-    try {
-      const res = await client.post('/api/usd_account_funding', {
-        userId: userData?._id,
-        amt: Number(amt),
+   // ✅ FIX ISSUE 1 & 2: PayPal — NO API call here at all.
+  // Transaction record is created ONLY inside capturePaypalPayment (after PayPal confirms).
+  const handlePaypalCheckout = () => {
+    setModalOpen(false);
+    navigate('/user/checkout-paypal', {
+      state: {
+        amount: amt,
         serviceName,
-        method: 'PayPal Checkout',
+        serviceType: 'USD Funding',
+        isUsdFunding: true,
         note,
-      }, { headers: { Authorization: `Bearer ${userToken}` } });
-
-      if (res.data.msg === '200') {
-        setModalOpen(false);
-        navigate('/user/checkout-paypal', {
-          state: {
-            amount: amt,
-            serviceName,
-            serviceType: 'USD Funding',
-            isBuy: false,
-            isUsdFunding: true,
-            track_id: res.data.tid,
-            note,
-          }
-        });
-      } else {
-        toast({ title: res.data.message || 'Request failed', status: 'error', duration: 4000, position: 'bottom-right' });
-      }
-    } catch (e) {
-      toast({ title: 'Connection error. Try again.', status: 'error', duration: 3000, position: 'bottom-right' });
-    } finally {
-      setLoading(false);
-    }
+      },
+    });
   };
 
-  // Manual transfer — for all methods
+  // Manual transfer — this is the ONLY flow that pre-creates a pending record (correct)
   const handleManualTransfer = async () => {
-    setLoading(true);
+    setManualLoading(true);
     try {
       const res = await client.post('/api/usd_account_funding', {
         userId: userData?._id,
@@ -105,7 +86,7 @@ function UsdFundingForm() {
             type: 'USD Funding',
             serviceCategory: serviceName,
             isUsdFunding: true,
-          }
+          },
         });
       } else {
         toast({ title: res.data.message || 'Request failed', status: 'error', duration: 4000, position: 'bottom-right' });
@@ -113,9 +94,10 @@ function UsdFundingForm() {
     } catch (e) {
       toast({ title: 'Connection error. Try again.', status: 'error', duration: 3000, position: 'bottom-right' });
     } finally {
-      setLoading(false);
+      setManualLoading(false);
     }
   };
+
 
   return (
     <Box>
@@ -199,7 +181,7 @@ function UsdFundingForm() {
                 <Button w='100%' h='48px' bg='#4C5FD5' color='white'
                   borderRadius='12px' fontWeight='700' fontSize='sm'
                   _hover={{ bg: '#3D4EAA' }}
-                  isLoading={loading}
+                  isLoading={paypalLoading}
                   loadingText='Processing...'
                   onClick={handlePaypalCheckout}>
                   Pay with PayPal
@@ -209,7 +191,7 @@ function UsdFundingForm() {
               <Button w='100%' h='48px' bg='#10B981' color='white'
                 borderRadius='12px' fontWeight='700' fontSize='sm'
                 _hover={{ bg: '#059669' }}
-                isLoading={loading}
+                isLoading={manualLoading}
                 loadingText='Processing...'
                 onClick={handleManualTransfer}>
                 Manual Transfer

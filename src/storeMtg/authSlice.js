@@ -1,3 +1,4 @@
+// src/storeMtg/authSlice.js
 import { createAsyncThunk, createSlice } from "@reduxjs/toolkit";
 import client from "components/client";
 
@@ -10,26 +11,66 @@ const initialState = {
   isAuth: false,
 };
 
+// ─── Define ALL async thunks FIRST, before the slice ──────────────────────────
+
+export const authUserLogin = createAsyncThunk(
+  "user/auth",
+  async (loginData) => {
+    const auth_request = await client.post(`/api/login`, loginData);
+    const response = await auth_request.data;
+    localStorage.setItem("authUserData", JSON.stringify(response));
+    return response;
+  }
+);
+
+export const authUserLogout = createAsyncThunk(
+  "user/logout",
+  async (logout_data) => {
+    try {
+      const authLogout = await client.get(`/api/user_logout/${logout_data}`);
+      return await authLogout.data;
+    } catch (error) {
+      console.error("Error during logout:", error.message);
+      throw new Error("Logout failed");
+    }
+  }
+);
+
+export const refreshUserProfile = createAsyncThunk(
+  "user/refreshProfile",
+  async ({ userID, user_token }, { rejectWithValue }) => {
+    try {
+      const response = await client.get(`/api/user_wallet_profile/${userID}`, {
+        headers: { Authorization: `Bearer ${user_token}` },
+      });
+      return response.data;
+    } catch (error) {
+      return rejectWithValue(error.response?.data || "Failed to refresh profile");
+    }
+  }
+);
+
+// ─── Now define the slice (thunks are fully defined above) ────────────────────
+
 const authSlice = createSlice({
   name: "authUser",
   initialState,
   reducers: {
     resetAuthState: (state) => {
-      Object.assign(state, initialState); // Reset state to initial values
+      Object.assign(state, initialState);
     },
-    //update user details reducers here
     updateUserDetails: (state, action) => {
-      state.user = { ...state.user, ...action.payload }; // 
+      state.user = { ...state.user, ...action.payload };
     },
-    // update user current balance state
     updateBalance: (state, action) => {
       if (state.user) {
-        state.user.userData.all_bonus_acct = action.payload; // Update the balance in the user object
+        state.user.userData.all_bonus_acct = action.payload;
       }
     },
   },
   extraReducers: (builder) => {
     builder
+      // ── Login ──
       .addCase(authUserLogin.pending, (state) => {
         state.loading = true;
         state.user = null;
@@ -44,94 +85,45 @@ const authSlice = createSlice({
         if (action.payload.msg === "200") {
           state.isAuth = true;
           state.userToken = action.payload.token;
-          //console.log("Login success", action.payload);
         }
       })
+      .addCase(authUserLogin.rejected, (state, action) => {
+        state.loading = false;
+        state.user = null;
+        state.error = action.error.message;
+        if (action.error.message === "Request failed with status code 401") {
+          state.errorMessage = "Invalid login details supplied";
+        } else if (action.error.message === "Network Error") {
+          state.errorMessage = "Network problem occurred! Try again later";
+        } else {
+          state.errorMessage = action.error.message || "Something went wrong! Try again later";
+        }
+      })
+
+      // ── Refresh Profile ──
       .addCase(refreshUserProfile.fulfilled, (state, action) => {
-      if (action.payload?.msg === '200' && state.user) {
-          // Merge fresh userData fields into the persisted auth state
+        if (action.payload?.msg === "200" && state.user?.userData) {
           state.user.userData = {
             ...state.user.userData,
             ...action.payload.userData,
           };
         }
       })
-     .addCase(authUserLogin.rejected, (state, action) => {
-        state.loading = false;
-        state.user = null;
-        state.error = action.error.message;
-        console.error("Login error", action.error.message);
 
-        if (action.error.message === "Request failed with status code 401") {
-          state.errorMessage = "Invalid login details supplied";
-        } else if (action.error.message === "Network Error") {
-          state.errorMessage = "Network problem occurred! Try again later";
-        } else {
-          state.errorMessage =
-            action.error.message || "Something went wrong! Try again later";
-        }
-      })
-      
-    // Logout method comes here
+      // ── Logout ──
       .addCase(authUserLogout.pending, (state) => {
         state.loading = true;
       })
       .addCase(authUserLogout.fulfilled, (state) => {
-        Object.assign(state, initialState); // Reset state after successful logout
-        console.log("Logout successful");
+        Object.assign(state, initialState);
         state.loading = false;
       })
       .addCase(authUserLogout.rejected, (state, action) => {
         state.loading = false;
         state.error = action.error.message;
-        console.error("Logout error", action.error.message);
-      })
-      
+      });
   },
 });
-
-
-// src/storeMtg/authSlice.js
-
-export const refreshUserProfile = createAsyncThunk(
-  'user/refreshProfile',
-  async ({ userID, user_token }, { rejectWithValue }) => {
-    try {
-      const response = await client.get(`/api/user_profile/${userID}`, {
-        headers: { Authorization: `Bearer ${user_token}` },
-      });
-      return response.data;
-    } catch (error) {
-      return rejectWithValue(error.response?.data || 'Failed to refresh profile');
-    }
-  }
-);
-
-
-export const authUserLogin = createAsyncThunk(
-    "user/auth",
-    async (loginData) => {
-      const auth_request = await client.post(`/api/login`, loginData);
-      const response = await auth_request.data;
-      localStorage.setItem("authUserData", JSON.stringify(response)); // Persist data in localStorage
-      return response;
-    }
-  );
-  
-  export const authUserLogout = createAsyncThunk(
-    "user/logout",
-    async (logout_data) => {
-      try {
-        //console.log('logout data send ', logout_data)
-      const authLogout = await client.get(`/api/user_logout/${logout_data}`); // Call logout endpoint
-      const response = await authLogout.data;
-      return response;
-      } catch (error) {
-        console.error("Error during logout:", error.message);
-        throw new Error("Logout failed"); // Optionally handle error
-      }
-    }
-  );
 
 export const { resetAuthState, updateUserDetails, updateBalance } = authSlice.actions;
 export default authSlice.reducer;

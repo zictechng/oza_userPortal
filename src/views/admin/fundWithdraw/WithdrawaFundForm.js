@@ -44,7 +44,6 @@ import { updateBalance } from "storeMtg/authSlice";
         const toast = useToast();
         const dispatch = useDispatch()
 
-
         const {user} = useSelector((state) => state.authUser)
         const {withdrawLoading} = useSelector((state) => state.withdrawFunds)
         const [withdrawPin, setWithdrawPin] = useState('');
@@ -103,7 +102,7 @@ import { updateBalance } from "storeMtg/authSlice";
                 status: "warning",
                 duration: 5000,
                 isClosable: true,
-                position: "top",
+                position: "bottom-right",
               });
               return false;
             }
@@ -114,7 +113,7 @@ import { updateBalance } from "storeMtg/authSlice";
               status: "warning",
               duration: 5000,
               isClosable: true,
-              position: "top",
+              position: "bottom-right",
             });
             return false;
           }
@@ -135,7 +134,7 @@ import { updateBalance } from "storeMtg/authSlice";
                 status: "warning",
                 duration: 5000,
                 isClosable: true,
-                position: "top",
+                position: "bottom-right",
               });
               return false;
             }
@@ -146,7 +145,7 @@ import { updateBalance } from "storeMtg/authSlice";
                 status: "warning",
                 duration: 5000,
                 isClosable: true,
-                position: "top",
+                position: "bottom-right",
               });
               return false;
             }
@@ -158,7 +157,7 @@ import { updateBalance } from "storeMtg/authSlice";
                 status: "warning",
                 duration: 5000,
                 isClosable: true,
-                position: "top",
+                position: "bottom-right",
               });
               return false;
             }
@@ -186,7 +185,7 @@ import { updateBalance } from "storeMtg/authSlice";
                 status: "warning",
                 duration: 5000,
                 isClosable: true,
-                position: "top",
+                position: "bottom-right",
                 });
               return false
               }
