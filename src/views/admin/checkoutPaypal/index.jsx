@@ -165,7 +165,10 @@ export default function CheckoutPaypal() {
             {[
               { label: 'Service', value: serviceName || serviceType || '—' },
               { label: 'You Send (USD)', value: `$${Number(amount || 0).toLocaleString()}` },
-              { label: 'You Receive (NGN)', value: `₦${Number(total_money || 0).toLocaleString()}` },
+              // For USD funding: show "Credits USD Wallet", for Sales: show NGN equivalent
+              isUsdFunding
+                ? { label: 'Credits To', value: 'Your USD Wallet' }
+                : { label: 'You Receive (NGN)', value: `₦${Number(total_money || 0).toLocaleString()}` },
               { label: 'Method', value: 'PayPal' },
             ].map((item, i) => (
               <Flex key={i} justify='space-between' py='12px'

@@ -503,6 +503,7 @@ import { capturePaypalPayment } from "storeMtg/paypalCheckoutSlice";
                       onClick={()=>processBuyRequest()}>
                       Submit
                       </Button>
+               
                   </SimpleGrid>
             </Flex>
           </Box>

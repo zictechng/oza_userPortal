@@ -123,7 +123,7 @@ function UsdFundingForm() {
         </Select>
       </FormControl>
 
-            <FormControl mb='16px'>
+      <FormControl mb='16px'>
         <FormLabel fontSize='sm' fontWeight='600' color={textColor}>
           Amount (USD) *
         </FormLabel>
