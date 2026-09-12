@@ -61,6 +61,7 @@ export default function CheckoutPaypal() {
       myId: user?.userData?._id,
       total_money: total_money,
       serviceType: serviceType,
+      isUsdFunding: !!isUsdFunding,
     };
     dispatch(capturePaypalPayment(captureData)).then(res => {
       setLoading(false);

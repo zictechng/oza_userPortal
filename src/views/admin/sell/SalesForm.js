@@ -233,23 +233,15 @@ import { capturePaypalPayment } from "storeMtg/paypalCheckoutSlice";
                     });
                   setPayBtnLoader(false)
                   }
-                if (gateWayRes.status === '404') 
-                    {
-                      setOnlinePayment(false)
-                      setShowMessageButton('Payment gateway not available at the moment! Please, consider manual transfer')
-                      setPayBtnLoader(false)
-                    }
-                else if (gateWayRes.app_paypal_bnt === false || gateWayRes.app_paypal_bnt === 'false')
-                  {
+                if (gateWayRes.status === '404' || gateWayRes.app_paypal_bnt === false || gateWayRes.app_paypal_bnt === 'false') {
                     setOnlinePayment(false);
-                    setShowMessageButton('Payment gateway not available at the moment! Please, consider manual transfer')
-                    setPayBtnLoader(false)
+                    setShowMessageButton('Payment gateway not available at the moment! Please consider manual transfer.');
+                    return;
                   }
-                else if (gateWayRes.app_paypal_bnt === true || gateWayRes.app_paypal_bnt === 'true')
+                else
                   {
                     setOnlinePayment(true);
                     setShowMessageButton('');
-
                     dispatch(getPaypalPayment(paymentData))
                     .then((res) =>{
                       //console.log('any issue ', res.payload);
