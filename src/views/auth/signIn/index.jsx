@@ -36,36 +36,6 @@ function SignIn() {
     if (userToken) navigate('/');
   }, [navigate, userToken]);
   
-  // SSO from marketing website
-  useEffect(() => {
-    const params = new URLSearchParams(window.location.search);
-    const ssoParam = params.get('sso');
-
-    if (!ssoParam) return;
-
-    // Clean the URL immediately so it doesn't linger
-    window.history.replaceState({}, '', window.location.pathname);
-
-    try {
-      const payload = JSON.parse(atob(ssoParam));
-
-      if (payload?.msg === '200' && payload?.token) {
-        // Persist to localStorage so redux-persist rehydrates correctly on next load
-        localStorage.setItem('authUserData', JSON.stringify(payload));
-
-        // Dispatch the synchronous reducer — works even during PersistGate rehydration
-        dispatch(setSsoAuth(payload));
-
-        // Small delay to let redux-persist write through before navigating
-        setTimeout(() => navigate('/'), 100);
-      }
-    } catch (e) {
-      // Bad token — silently ignore, show login form
-      console.warn('SSO token invalid');
-      }
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
-
   const handleSubmit = () => {
     clearError();
     if (!validateEmail(userEmail)) return;
