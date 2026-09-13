@@ -213,7 +213,7 @@ export default function Dashboard() {
             <Text fontWeight='700' fontSize='sm' color={textColor}>
               Complete your profile
             </Text>
-            <AlertDescription fontSize='xs' color={subColor}>
+            <AlertDescription fontSize='sm' color={subColor}>
               Complete your account registration to unlock all features and receive bonuses.
             </AlertDescription>
           </Box>
@@ -314,7 +314,7 @@ export default function Dashboard() {
         />
         <WalletCard
           label='Pending Signup Bonus'
-          value={bonusLoading ? '...' : `$${Number(userData?.signup_account || 0).toLocaleString()}`}
+          value={bonusLoading ? '...' : (userData?.signup_bonus_activated ? '✓ Activated' : `$${Number(userData?.pending_signup_bonus_usd || 0).toLocaleString()}`)}
           subLabel={userData?.signup_bonus_activated ? '✓ Activated — credited to bonus wallet' : 'Complete a qualifying transaction to unlock'}
           icon={MdOutlineWarning}
           color='#F59E0B'
