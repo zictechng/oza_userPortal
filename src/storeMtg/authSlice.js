@@ -50,21 +50,33 @@ export const refreshUserProfile = createAsyncThunk(
   }
 );
 
-// ─── Now define the slice (thunks are fully defined above) ────────────────────
+// ─── Now define the slice (thunks are fully defined above)
 
 const authSlice = createSlice({
   name: "authUser",
   initialState,
   reducers: {
-    resetAuthState: (state) => {
-      Object.assign(state, initialState);
-    },
-    updateUserDetails: (state, action) => {
-      state.user = { ...state.user, ...action.payload };
-    },
-    updateBalance: (state, action) => {
-      if (state.user) {
-        state.user.userData.all_bonus_acct = action.payload;
+  resetAuthState: (state) => {
+    Object.assign(state, initialState);
+  },
+  updateUserDetails: (state, action) => {
+    state.user = { ...state.user, ...action.payload };
+  },
+  updateBalance: (state, action) => {
+    if (state.user) {
+      state.user.userData.all_bonus_acct = action.payload;
+    }
+  },
+  // ── SSO login from marketing website ──
+  setSsoAuth: (state, action) => {
+    const payload = action.payload;
+    if (payload?.msg === '200' && payload?.token) {
+      state.loading = false;
+      state.user = payload;
+      state.userToken = payload.token;
+      state.isAuth = true;
+      state.error = null;
+      state.errorMessage = '';
       }
     },
   },
@@ -125,5 +137,5 @@ const authSlice = createSlice({
   },
 });
 
-export const { resetAuthState, updateUserDetails, updateBalance } = authSlice.actions;
+export const { resetAuthState, updateUserDetails, updateBalance, setSsoAuth } = authSlice.actions;
 export default authSlice.reducer;

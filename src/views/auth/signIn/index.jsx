@@ -8,7 +8,7 @@ import {
 } from '@chakra-ui/react';
 import DefaultAuth from 'layouts/auth/Default';
 import illustration from 'assets/img/auth/auth.png';
-import { authUserLogin } from 'storeMtg/authSlice';
+import { authUserLogin , setSsoAuth} from 'storeMtg/authSlice';
 import { useAppContext } from 'contexts/AppContext';
 import { AuthAlert } from 'components/auth/AuthCard';
 import { usePasswordToggle } from 'hooks/usePasswordToggle';
@@ -36,37 +36,35 @@ function SignIn() {
     if (userToken) navigate('/');
   }, [navigate, userToken]);
   
-   // SSO from marketing website — reads token from URL query param
+  // SSO from marketing website
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const ssoParam = params.get('sso');
 
-    if (ssoParam && !userToken) {
-      try {
-        const payload = JSON.parse(atob(ssoParam));
+    if (!ssoParam) return;
 
-        // Clear the SSO param from the URL immediately (clean up)
-        window.history.replaceState({}, '', window.location.pathname);
+    // Clean the URL immediately so it doesn't linger
+    window.history.replaceState({}, '', window.location.pathname);
 
-        if (payload?.msg === '200' && payload?.token) {
-          // Inject the full API response into Redux exactly as authUserLogin.fulfilled would
-          dispatch({
-            type: 'authUser/auth/fulfilled',
-            payload: payload,
-          });
+    try {
+      const payload = JSON.parse(atob(ssoParam));
 
-          // Also persist to localStorage so redux-persist picks it up
-          localStorage.setItem('authUserData', JSON.stringify(payload));
+      if (payload?.msg === '200' && payload?.token) {
+        // Persist to localStorage so redux-persist rehydrates correctly on next load
+        localStorage.setItem('authUserData', JSON.stringify(payload));
 
-          navigate('/');
-        }
-      } catch (e) {
-        // Invalid token — ignore and show login form normally
-        window.history.replaceState({}, '', window.location.pathname);
+        // Dispatch the synchronous reducer — works even during PersistGate rehydration
+        dispatch(setSsoAuth(payload));
+
+        // Small delay to let redux-persist write through before navigating
+        setTimeout(() => navigate('/'), 100);
       }
-    }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+    } catch (e) {
+      // Bad token — silently ignore, show login form
+      console.warn('SSO token invalid');
+      }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    }, []);
 
   const handleSubmit = () => {
     clearError();
