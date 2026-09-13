@@ -126,7 +126,7 @@ import { refreshUserProfile } from 'storeMtg/authSlice';
             if(detailsFormData.tag_id === myTagId){
               setIsSelfTransfer(true)
               setNewData(user?.userData) // show own details
-              // Force account_source to '2' (bonus)
+              // account_source '1' = bonus → main self-transfer
               setDetailsFormData(prev => ({ ...prev, account_source: '1' }))
             } else {
               setIsSelfTransfer(false)
@@ -432,8 +432,8 @@ import { refreshUserProfile } from 'storeMtg/authSlice';
             isDisabled={isSelfTransfer}
             width={{base:'100%', lg:'400px', md:'400px'}}>
           <option value="">Select Source Account</option>
-          <option value="2">Account [USD]</option>
-          <option value="1">Main Account [NGN]</option>
+          <option value="1">Main Wallet (₦ NGN)</option>
+          <option value="2">USD Wallet ($)</option>
         </Select>
        </Flex>
        <Flex direction={{ base: "column", "2xl": "row" }} mb={5}>
