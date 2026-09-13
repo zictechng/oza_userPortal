@@ -36,21 +36,33 @@ function SignIn() {
     if (userToken) navigate('/');
   }, [navigate, userToken]);
   
-    // SSO from marketing website
+   // SSO from marketing website — reads token from URL query param
   useEffect(() => {
-    const ssoCredentials = sessionStorage.getItem('ota_sso_credentials');
-    if (ssoCredentials && !userToken) {
+    const params = new URLSearchParams(window.location.search);
+    const ssoParam = params.get('sso');
+
+    if (ssoParam && !userToken) {
       try {
-        const { username, password } = JSON.parse(ssoCredentials);
-        sessionStorage.removeItem('ota_sso_credentials');
-        if (username && password) {
-          dispatch(authUserLogin({ username, password }))
-            .then((res) => {
-              if (res.payload?.msg === '200') navigate('/');
-            });
+        const payload = JSON.parse(atob(ssoParam));
+
+        // Clear the SSO param from the URL immediately (clean up)
+        window.history.replaceState({}, '', window.location.pathname);
+
+        if (payload?.msg === '200' && payload?.token) {
+          // Inject the full API response into Redux exactly as authUserLogin.fulfilled would
+          dispatch({
+            type: 'authUser/auth/fulfilled',
+            payload: payload,
+          });
+
+          // Also persist to localStorage so redux-persist picks it up
+          localStorage.setItem('authUserData', JSON.stringify(payload));
+
+          navigate('/');
         }
       } catch (e) {
-        sessionStorage.removeItem('ota_sso_credentials');
+        // Invalid token — ignore and show login form normally
+        window.history.replaceState({}, '', window.location.pathname);
       }
     }
   // eslint-disable-next-line react-hooks/exhaustive-deps
