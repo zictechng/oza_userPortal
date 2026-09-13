@@ -16,7 +16,7 @@ const ssoParam = params.get('sso');
 // ✅ REPLACE WITH — write to persist:root BEFORE persistStore runs:
 if (ssoParam) {
   try {
-    const payload = JSON.parse(atob(ssoParam));
+    const payload = JSON.parse(decodeURIComponent(escape(atob(ssoParam))));
     if (payload?.msg === '200' && payload?.token) {
 
       // Build exact authUser state shape
