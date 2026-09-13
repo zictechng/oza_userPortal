@@ -35,6 +35,25 @@ function SignIn() {
   useEffect(() => {
     if (userToken) navigate('/');
   }, [navigate, userToken]);
+  // SSO from marketing website — auto login using stored credentials
+  useEffect(() => {
+    const ssoData = sessionStorage.getItem('ota_sso_user');
+    if (ssoData && !userToken) {
+      try {
+        const parsed = JSON.parse(ssoData);
+        if (parsed?.msg === '200' && parsed?.token) {
+          sessionStorage.removeItem('ota_sso_user');
+          sessionStorage.removeItem('ota_sso_token');
+          // Use Redux authUserLogin with SSO bypass
+          dispatch({ type: 'authUser/auth/fulfilled', payload: parsed });
+          navigate('/');
+        }
+      } catch (e) {
+        sessionStorage.removeItem('ota_sso_user');
+      }
+    }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const handleSubmit = () => {
     clearError();
