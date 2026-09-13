@@ -161,7 +161,6 @@ export default function CheckoutPaypal() {
             <Text color={textColor} fontWeight='700' fontSize='md' mb='16px'>
               Order Summary
             </Text>
-
             {[
               { label: 'Service', value: serviceName || serviceType || '—' },
               { label: 'You Send (USD)', value: `$${Number(amount || 0).toLocaleString()}` },

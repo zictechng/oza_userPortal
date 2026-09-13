@@ -277,9 +277,12 @@ export default function Profile() {
                 {userData?.acct_type || 'User'}
               </Badge>
               <Badge
-                colorScheme={userData?.acct_status === 'Active' ? 'green' : 'red'}
-                variant='outline' borderRadius='full' px='10px' fontSize='xs'>
-                {userData?.acct_status || 'Pending'}
+                borderRadius='full' px='10px' fontSize='xs'
+                variant='outline'
+                color='white'
+                borderColor={userData?.acct_status === 'Active' ? 'green.300' : 'red.300'}
+                bg={userData?.acct_status === 'Active' ? 'whiteAlpha.200' : 'whiteAlpha.100'}>
+                {userData?.acct_status === 'Active' ? '● Active' : `● ${userData?.acct_status || 'Pending'}`}
               </Badge>
             </Flex>
           </Box>
