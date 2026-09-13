@@ -4,7 +4,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import {
   Box, Button, Checkbox, Flex, FormControl, FormLabel,
   Heading, Input, InputGroup, InputRightElement,
-  Text, useColorModeValue,
+  Text, useColorModeValue, Spinner,
 } from '@chakra-ui/react';
 import DefaultAuth from 'layouts/auth/Default';
 import illustration from 'assets/img/auth/auth.png';
@@ -13,6 +13,7 @@ import { useAppContext } from 'contexts/AppContext';
 import { AuthAlert } from 'components/auth/AuthCard';
 import { usePasswordToggle } from 'hooks/usePasswordToggle';
 import { useFormValidation } from 'hooks/useFormValidation';
+
 
 function SignIn() {
   const navigate = useNavigate();
@@ -29,12 +30,43 @@ function SignIn() {
 
   const [userEmail, setUserEmail] = useState('');
   const [userPassword, setUserPassword] = useState('');
+  const [ssoWaiting, setSsoWaiting] = useState(
+  () => new URLSearchParams(window.location.search).get('sso') === 'pending'
+  );
 
   const { loading, userToken } = useSelector((state) => state.authUser);
 
-  useEffect(() => {
-    if (userToken) navigate('/');
-  }, [navigate, userToken]);
+  // Update the message handler:
+useEffect(() => {
+  const params = new URLSearchParams(window.location.search);
+  if (params.get('sso') === 'pending') {
+    setSsoWaiting(true); // show spinner instead of login form
+  }
+
+  const handleMessage = (event) => {
+    const allowedOrigin = process.env.REACT_APP_WEBSITE_URL || 'http://localhost:3003';
+    if (event.origin !== allowedOrigin) return;
+    if (event.data?.type !== 'SSO_LOGIN') return;
+    const payload = event.data.payload;
+    if (payload?.msg === '200' && payload?.token) {
+      dispatch(setSsoAuth(payload));
+      navigate('/');
+    }
+  };
+
+  window.addEventListener('message', handleMessage);
+  return () => window.removeEventListener('message', handleMessage);
+}, [dispatch, navigate]);
+
+// At the very top of the return, before anything else:
+if (ssoWaiting) {
+  return (
+    <Flex justify='center' align='center' minH='100vh' direction='column' gap='16px'>
+      <Spinner size='xl' color='brand.500' thickness='4px' />
+      <Text color='gray.500' fontSize='sm'>Signing you in...</Text>
+    </Flex>
+  );
+}
   
   const handleSubmit = () => {
     clearError();
