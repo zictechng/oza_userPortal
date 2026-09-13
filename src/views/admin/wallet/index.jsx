@@ -96,16 +96,15 @@ export default function Wallet() {
   // Then inside useEffect:
   useEffect(() => {
     if (!userData?._id || !userToken) return;
-
     dispatch(fetchProducts({ userID: userData._id, user_token: userToken }));
     dispatch(getPendingBonus({ tag_id: userData?.tag_id, user_token: userToken }));
-    dispatch(refreshUserProfile({ userID: userData._id, user_token: userToken })); // ← ADD THIS
-
+    dispatch(refreshUserProfile({ userID: userData._id, user_token: userToken }));
     return () => {
       dispatch(clearProducts());
       dispatch(resetState());
     };
   }, [dispatch, userData?._id, userData?.tag_id, userToken]);
+
   const totalBalance = Number(userData?.amount || 0) + Number(userData?.all_bonus_acct || 0);
 
   // Calculate tx stats

@@ -39,6 +39,7 @@ export default function PaymentProof() {
   const serviceType = location.state?.type;
   const serviceCategory = location.state?.serviceCategory;
   const fileUploadType = location.state?.fileType || 'image/jpeg';
+  const isUsdFunding = location.state?.isUsdFunding || serviceType === 'USD Funding';
 
   // ── EXACT ORIGINAL WORKING FUNCTIONS
 
@@ -74,7 +75,9 @@ export default function PaymentProof() {
         setUploaded(true);
         toast({
           title: 'Success!',
-          description: 'Payment proof uploaded successfully and is now being reviewed.',
+          description: isUsdFunding
+            ? 'USD funding proof uploaded. Admin will review and credit your USD wallet within 1-24 hours.'
+            : 'Payment proof uploaded successfully and is now being reviewed.',
           status: 'success',
           duration: 5000,
           isClosable: true,
@@ -195,7 +198,7 @@ export default function PaymentProof() {
             <SimpleGrid columns={2} gap='12px'>
               <Button variant='outline' borderColor='brand.500' color='brand.500'
                 borderRadius='12px' h='48px' fontWeight='700'
-                onClick={() => navigate('/user/history')}>
+                onClick={() => navigate(isUsdFunding ? '/user/wallet' : '/user/history')}>
                 View History
               </Button>
               <Button bg='brand.500' color='white'
