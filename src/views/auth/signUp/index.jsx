@@ -15,6 +15,7 @@ import { useAppContext } from 'contexts/AppContext';
 import { AuthAlert, AuthSuccess } from 'components/auth/AuthCard';
 import { usePasswordToggle } from 'hooks/usePasswordToggle';
 import { useFormValidation } from 'hooks/useFormValidation';
+import useAppStatus from 'hooks/useAppStatus';
 
 const STEPS = [
   { title: 'Account' },
@@ -35,6 +36,7 @@ function SignUp() {
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
   const { activeStep, setActiveStep } = useSteps({ index: 0, count: STEPS.length });
+  const { platformDown, signupBlocked, message } = useAppStatus();
 
   const textColor = useColorModeValue('navy.700', 'white');
   const textColorSecondary = useColorModeValue('gray.500', 'gray.400');
@@ -42,6 +44,7 @@ function SignUp() {
   const inputBg = useColorModeValue('white', 'navy.800');
   const borderColor = useColorModeValue('gray.200', 'whiteAlpha.200');
   const stepBg = useColorModeValue('gray.50', 'navy.800');
+  const progressBg = useColorModeValue('gray.200', 'navy.700');
 
   const [form, setForm] = useState({
     display_name: '',
@@ -124,10 +127,36 @@ function SignUp() {
     }
   };
 
+
+
   return (
     <DefaultAuth illustrationBackground={illustration}>
       <Box maxW='440px' w='100%' mx='auto'>
-        {/* Heading */}
+       {/* Inside the existing card/box where the form lives, replace form content with: */}
+        {signupBlocked || platformDown ? (
+          <Box
+            textAlign='center' p='32px'
+            bg={platformDown ? 'orange.50' : 'red.50'}
+            borderRadius='16px'
+            border='1px solid'
+            borderColor={platformDown ? 'orange.200' : 'red.200'}>
+            <Text fontSize='40px' mb='12px'>
+              {platformDown ? '🔧' : '🚫'}
+            </Text>
+            <Text fontWeight='800' fontSize='lg' mb='8px'
+              color={platformDown ? 'orange.700' : 'red.700'}>
+              {platformDown ? "We'll be right back" : 'Signup Temporarily Unavailable'}
+            </Text>
+            <Text color='gray.500' fontSize='18px' lineHeight='1.6'>
+              {message || (platformDown
+                ? 'The platform is under maintenance. Please check back shortly.'
+                : 'New registrations are temporarily paused. Please check back soon.')}
+            </Text>
+          </Box>
+        ) : (
+          <>
+            {/* all existing form fields, button, links — unchanged */}
+            {/* Heading */}
         <Box mb='28px'>
           <Heading
             color={textColor}
@@ -173,7 +202,7 @@ function SignUp() {
             colorScheme='brand'
             borderRadius='full'
             mt='12px'
-            bg={useColorModeValue('gray.200', 'navy.700')}
+            bg={progressBg}
           />
         </Box>
 
@@ -374,6 +403,8 @@ function SignUp() {
             </Flex>
           </FormControl>
         )}
+          </>
+        )}
 
         {/* Sign in link */}
         <Flex justify='center' align='center' mt='24px'>
@@ -389,6 +420,7 @@ function SignUp() {
             </NavLink>
           </Text>
         </Flex>
+
       </Box>
     </DefaultAuth>
   );

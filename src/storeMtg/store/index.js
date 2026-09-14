@@ -40,6 +40,7 @@ import userFundLimit from "storeMtg/getFundingLimitSlice";
 import fundSales from "storeMtg/fundSaleSlice";
 import paypalCheckout from "storeMtg/paypalCheckoutSlice";
 import userNotifications from "storeMtg/notificationSlice"
+import appStatusReducer from 'storeMtg/appStatusSlice';
 
 
 const migrations = {
@@ -86,7 +87,8 @@ const appReducer = combineReducers({
   fundingLimit: userFundLimit,
   sellFunds: fundSales,
   paypalPayment: paypalCheckout,
-  notifications: userNotifications
+  notifications: userNotifications,
+  appStatus: appStatusReducer,
 });
 
 // Root reducer with reset logic

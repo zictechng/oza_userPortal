@@ -13,6 +13,7 @@ import { useAppContext } from 'contexts/AppContext';
 import { AuthAlert } from 'components/auth/AuthCard';
 import { usePasswordToggle } from 'hooks/usePasswordToggle';
 import { useFormValidation } from 'hooks/useFormValidation';
+import useAppStatus from 'hooks/useAppStatus';
 
 
 function SignIn() {
@@ -35,6 +36,7 @@ function SignIn() {
   );
 
   const { loading, userToken } = useSelector((state) => state.authUser);
+  const { platformDown, loginBlocked, message } = useAppStatus();
 
   // Update the message handler:
 useEffect(() => {
@@ -67,6 +69,7 @@ if (ssoWaiting) {
     </Flex>
   );
 }
+
   
   const handleSubmit = () => {
     clearError();
@@ -88,6 +91,29 @@ if (ssoWaiting) {
   return (
     <DefaultAuth illustrationBackground={illustration}>
       <Box maxW='400px' w='100%' mx='auto'>
+        {loginBlocked || platformDown ? (
+          <Box
+            textAlign='center' p='32px'
+            bg={platformDown ? 'orange.50' : 'red.50'}
+            borderRadius='16px'
+            border='1px solid'
+            borderColor={platformDown ? 'orange.200' : 'red.200'}>
+            <Text fontSize='40px' mb='12px'>
+              {platformDown ? '🔧' : '🔒'}
+            </Text>
+            <Text fontWeight='800' fontSize='lg' mb='8px'
+              color={platformDown ? 'orange.700' : 'red.700'}>
+              {platformDown ? "We'll be right back" : 'Login Temporarily Unavailable'}
+            </Text>
+            <Text color='gray.500' fontSize='18px' lineHeight='1.6'>
+              {message || (platformDown
+                ? 'The platform is under maintenance. Please check back shortly.'
+                : 'Login is currently disabled. Please try again later.')}
+            </Text>
+          </Box>
+        ) : (
+          <>
+        {/* all existing form fields, button, links — unchanged */}
         {/* Heading */}
         <Box mb='32px'>
           <Heading
@@ -199,10 +225,13 @@ if (ssoWaiting) {
             onClick={handleSubmit}>
             Sign In
           </Button>
+        </FormControl>
+          </>
+        )}
 
-          {/* Register link */}
+        {/* Register link */}
           <Flex justify='center' align='center'>
-            <Text color={textColorSecondary} fontSize='sm'>
+            <Text color={textColorSecondary} fontSize='sm' mt={loginBlocked ? '24px': ''}>
               Don't have an account?{' '}
               <NavLink to='/auth/sign-up'>
                 <Text
@@ -215,7 +244,7 @@ if (ssoWaiting) {
               </NavLink>
             </Text>
           </Flex>
-        </FormControl>
+      
       </Box>
     </DefaultAuth>
   );
