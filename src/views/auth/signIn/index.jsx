@@ -32,7 +32,7 @@ function SignIn() {
   const [userEmail, setUserEmail] = useState('');
   const [userPassword, setUserPassword] = useState('');
   const [ssoWaiting, setSsoWaiting] = useState(
-  () => new URLSearchParams(window.location.search).get('sso') === 'pending'
+  () => new URLSearchParams(window.location.search).get('sso') === 'validating'
   );
 
   const { loading, userToken } = useSelector((state) => state.authUser);
@@ -41,7 +41,7 @@ function SignIn() {
   // Update the message handler:
 useEffect(() => {
   const params = new URLSearchParams(window.location.search);
-  if (params.get('sso') === 'pending') {
+  if (params.get('sso') === 'validating') {
     setSsoWaiting(true); // show spinner instead of login form
   }
 

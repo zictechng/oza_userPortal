@@ -52,6 +52,7 @@ export default function SupportForm() {
               const postData={
                 'ticket_message': supportMessage,
                 'ticket_type': supportSubject,
+                'subject': supportSubject,
                 'createdBy': user?.userData._id
               }
               dispatch(postSupport(postData)).then((response)=>{
