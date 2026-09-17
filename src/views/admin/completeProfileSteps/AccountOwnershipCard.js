@@ -5,10 +5,9 @@ import {
   SimpleGrid, Divider,
 } from "@chakra-ui/react";
 import client from "components/client";
-import React, { useCallback, useState, useRef } from "react";
-import { useDropzone } from 'react-dropzone';
-import {
-  MdUpload, MdCheckCircle, MdCameraAlt,
+import React, {useState, useRef } from "react";
+
+import { MdCheckCircle, MdCameraAlt,
   MdPerson, MdEmail, MdRefresh,
 } from 'react-icons/md';
 import { useDispatch, useSelector } from 'react-redux';
@@ -289,8 +288,9 @@ export default function AccountOwnerShip(props) {
           {[
             { step: '1', text: 'Click "Send OTP" to get a 6-digit code on your email' },
             { step: '2', text: 'Enter the code in the verification field below' },
-            { step: '3', text: 'Once verified, take a clear selfie' },
-            { step: '4', text: 'Upload the selfie to complete verification' },
+            { step: '3', text: 'Click "Open Camera" and take a clear selfie' },
+            { step: '4', text: 'Click "Submit" to complete your verification' },
+            { step: '5', text: 'Note: We do not store the document, is for verification purpose only.' },
           ].map((item, i) => (
             <Flex key={i} align='flex-start' gap='10px' mb='10px'>
               <Box w='22px' h='22px' borderRadius='full'

@@ -32,6 +32,11 @@ const notificationSlice = createSlice({
       resetPage(state) {
         state.currentPage = 1;  // Reset page number to 1 when page mounts
       },
+      markRead: (state, action) => {
+        const id = action.payload;
+        const notif = state.notificationData.find(n => n._id === id);
+        if (notif) notif.alert_status = 0;
+      },
     },
   extraReducers: (builder) => {
     builder
@@ -80,5 +85,5 @@ export const getNotificationHistory = createAsyncThunk(
   }
 );
 
-export const { clearNotifications, setPage, resetPage } = notificationSlice.actions;
+export const { clearNotifications, setPage, resetPage, markRead } = notificationSlice.actions;
 export default notificationSlice.reducer;
