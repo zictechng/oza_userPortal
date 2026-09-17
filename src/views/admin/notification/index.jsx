@@ -50,8 +50,8 @@ export default function Notifications() {
   const dispatch = useDispatch();
   const { user, userToken } = useSelector(state => state.authUser);
   const {
-    notificationData, currentPage, totalPages,
-    initialLoading, paginationLoading,
+    notificationData, allNotifications, currentPage, totalPages,
+    totalCount, initialLoading, paginationLoading,
   } = useSelector(state => state.notifications);
 
   const { isOpen, onOpen, onClose } = useDisclosure();
@@ -107,9 +107,11 @@ export default function Notifications() {
   };
 
   const notifications = Array.isArray(notificationData) ? notificationData : [];
-  const unreadCount   = notifications.filter(n => n.alert_status === 1).length;
-  const readCount     = notifications.filter(n => n.alert_status === 0).length;
-
+  const allLoaded     = Array.isArray(allNotifications) ? allNotifications : [];
+  const unreadCount   = allLoaded.filter(n => n.alert_status === 1).length;
+  const readCount     = allLoaded.filter(n => n.alert_status === 0).length;
+  const displayTotal  = totalCount || allLoaded.length;
+  
   return (
     <PageLayout>
       {/* ── Stats Bar ──────────────────────────── */}
@@ -121,7 +123,7 @@ export default function Notifications() {
             Total
           </Text>
           <Text color={textColor} fontSize='lg' fontWeight='800'>
-            {notifications.length}
+            {displayTotal}
           </Text>
         </Box>
         <Box bg='brand.50' borderRadius='16px' px='20px' py='14px'

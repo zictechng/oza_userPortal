@@ -3,14 +3,16 @@ import client from 'components/client';
 
 const initialState = {
     notificationData: [],
+    allNotifications: [], // accumulated across all pages for correct counts
     currentPage: 1,
     totalPages: 1,
-    pageSize: 10, // The number of items per page
+    totalCount: 0,
+    pageSize: 10,
     status: 'idle',
     error: null,
-    initialLoading: true, // Show loading when the page is first loaded
-  paginationLoading: false, // Show overlay loader when pagination is loading
-  paginationStatus: 'idle',
+    initialLoading: true,
+    paginationLoading: false,
+    paginationStatus: 'idle',
 };
 
 const notificationSlice = createSlice({
@@ -33,10 +35,12 @@ const notificationSlice = createSlice({
         state.currentPage = 1;  // Reset page number to 1 when page mounts
       },
       markRead: (state, action) => {
-        const id = action.payload;
-        const notif = state.notificationData.find(n => n._id === id);
-        if (notif) notif.alert_status = 0;
-      },
+      const id = action.payload;
+      const notif = state.notificationData.find(n => n._id === id);
+      if (notif) notif.alert_status = 0;
+      const all = state.allNotifications.find(n => n._id === id);
+      if (all) all.alert_status = 0;
+    },
     },
   extraReducers: (builder) => {
     builder
@@ -48,12 +52,24 @@ const notificationSlice = createSlice({
           state.initialLoading = true; // Show initial loading spinner when fetching for the first time
         }
       })
-      .addCase(getNotificationHistory.fulfilled, (state, action) => {
+       .addCase(getNotificationHistory.fulfilled, (state, action) => {
         state.status = 'succeeded';
-        state.notificationData = action.payload.data; // Save the fetched data
-        state.totalPages = action.payload.totalPages; // Save the total pages from API response
+        const newData = action.payload.data || [];
+        // Replace current page data
+        state.notificationData = newData;
+        // Accumulate all pages for accurate counts
+        if (action.payload.currentPage === 1) {
+          state.allNotifications = newData;
+        } else {
+          // Merge avoiding duplicates
+          const existingIds = new Set(state.allNotifications.map(n => n._id));
+          const fresh = newData.filter(n => !existingIds.has(n._id));
+          state.allNotifications = [...state.allNotifications, ...fresh];
+        }
+        state.totalPages = action.payload.totalPages;
+        state.totalCount = action.payload.totalCount || 0;
         state.paginationStatus = 'idle';
-        state.initialLoading = false; // Hide the initial spinner
+        state.initialLoading = false;
         state.paginationLoading = false;
       })
       .addCase(getNotificationHistory.rejected, (state, action) => {
