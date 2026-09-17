@@ -3,11 +3,13 @@ import {
   Box, Flex, Text, Button, Icon, Switch,
   useColorModeValue, FormControl, FormLabel,
   Input, InputGroup, InputRightElement,
-  SimpleGrid, Divider, Badge, useToast
+  SimpleGrid, Divider, Badge, useToast, 
 } from '@chakra-ui/react';
+
 import {
   MdLock, MdNotifications, MdSecurity,
-  MdVisibility, MdVisibilityOff, MdCheckCircle, MdWarning,
+  MdVisibility, MdVisibilityOff, MdCheckCircle, MdWarning, MdChevronRight,
+  MdPerson,
 } from 'react-icons/md';
 import { useDispatch, useSelector } from 'react-redux';
 import { postSetting } from 'storeMtg/emailSettingSlice';
@@ -186,16 +188,51 @@ export default function Settings() {
 
         {/* Notifications Card */}
         <PageCard p='24px'>
-          <Flex align='center' gap='12px' mb='20px'>
-            <Box w='44px' h='44px' borderRadius='12px'
-              bg={iconBg} display='flex' alignItems='center' justifyContent='center'>
-              <Icon as={MdNotifications} color='brand.500' w='22px' h='22px' />
-            </Box>
-            <Box>
-              <Text color={textColor} fontSize='md' fontWeight='700'>Notifications</Text>
-              <Text color={subColor} fontSize='xs'>Manage your notification preferences</Text>
-            </Box>
-          </Flex>
+            <Flex 
+              align="center" 
+              justify="space-between" 
+              mb="20px"
+              wrap="wrap"
+              gap="12px"
+            >
+              {/* Left Section: Notifications */}
+              <Flex align="center" gap="12px">
+                <Box 
+                  w="44px" 
+                  h="44px" 
+                  borderRadius="12px"
+                  bg={iconBg} 
+                  display="flex" 
+                  alignItems="center" 
+                  justifyContent="center"
+                  flexShrink={0}
+                >
+                  <Icon as={MdNotifications} color="brand.500" w="22px" h="22px" />
+                </Box>
+                <Box>
+                  <Text color={textColor} fontSize="md" fontWeight="700">Notifications</Text>
+                  <Text color={subColor} fontSize="xs">Manage your notification preferences</Text>
+                </Box>
+              </Flex>
+
+              {/* Right Section: Clickable Profile Link */}
+              <Flex 
+                align="center" 
+                bg={iconBg} 
+                px="12px" 
+                py="8px" 
+                borderRadius="8px" 
+                gap="4px"
+                cursor="pointer"
+                onClick={() => navigate('/user/profile')} // Replace with your navigation logic if different
+                flexShrink={0}
+                _hover={{ opacity: 0.8 }}
+              >
+                <Icon as={MdPerson} color="brand.500" w="22px" h="22px" />
+                <Text color={textColor} fontSize="base" fontWeight="600">Profile</Text>
+                <Icon as={MdChevronRight} color="brand.500" w="16px" h="16px" />
+              </Flex>
+            </Flex>
 
           <ToggleRow
             label='Email Notifications'
