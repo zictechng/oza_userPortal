@@ -36,6 +36,9 @@ export default function AccountOwnerShip(props) {
   const [DocLoading, setDocLoading] = useState(false);
   const [imageValue, setImageValue] = useState('');
   const [otpSend, setOtpSend] = useState(false);
+  const [otpVerified, setOtpVerified] = useState(false);
+  const [otpCode, setOtpCode] = useState('');
+  const [verifyingOtp, setVerifyingOtp] = useState(false);
   const [documentType, setDocumentType] = useState('');
   const [loading2fa, setLoading2FA] = useState(false);
 
@@ -139,6 +142,30 @@ export default function AccountOwnerShip(props) {
       }
     } catch (error) { console.log(error); }
     finally { setLoading2FA(false); }
+  };
+
+    const verifyOTP = async () => {
+    if (!otpCode || otpCode.length !== 6) {
+      toast({ title: 'Enter OTP', description: 'Please enter the 6-digit code sent to your email.', status: 'warning', duration: 4000, isClosable: true, position: 'bottom' });
+      return;
+    }
+    setVerifyingOtp(true);
+    try {
+      const res = await client.post('/api/user_verify2fa_code',
+        { userId: user.userData._id, otp_code: otpCode.trim() },
+        { headers: { Authorization: `Bearer ${userToken}` } }
+      );
+      if (res.data.msg === '200') {
+        setOtpVerified(true);
+        toast({ title: 'OTP Verified ✅', description: 'Code confirmed. Please take your selfie now.', status: 'success', duration: 4000, isClosable: true, position: 'bottom' });
+      } else {
+        toast({ title: 'Wrong Code', description: res.data.message || 'Incorrect code. Please check your email.', status: 'error', duration: 4000, isClosable: true, position: 'bottom' });
+      }
+    } catch (err) {
+      toast({ title: 'Error', description: 'Could not verify code. Please try again.', status: 'error', duration: 4000, isClosable: true, position: 'bottom' });
+    } finally {
+      setVerifyingOtp(false);
+    }
   };
 
   const deleteImageId = async (data) => {
@@ -277,10 +304,10 @@ export default function AccountOwnerShip(props) {
             📋 How it works
           </Text>
           {[
-            { step: '1', text: 'Click "Send OTP" to get a code on your email' },
-            { step: '2', text: 'Write the OTP code clearly on a piece of paper' },
-            { step: '3', text: 'Take a selfie holding the paper with the code' },
-            { step: '4', text: 'Upload the selfie below' },
+            { step: '1', text: 'Click "Send OTP" to get a 6-digit code on your email' },
+            { step: '2', text: 'Enter the code in the verification field below' },
+            { step: '3', text: 'Once verified, take a clear selfie' },
+            { step: '4', text: 'Upload the selfie to complete verification' },
           ].map((item, i) => (
             <Flex key={i} align='flex-start' gap='10px' mb='10px'>
               <Box w='22px' h='22px' borderRadius='full'
@@ -333,15 +360,56 @@ export default function AccountOwnerShip(props) {
           )}
         </Flex>
       </Box>
+      
+      
+            {/* Step 2b — OTP Input (shows after OTP sent) */}
+      {otpSend && !otpVerified && (
+        <Box p='16px' bg={stepBg} borderRadius='16px'
+          border='1px solid' borderColor='orange.300' mb='20px'>
+          <Text color={textColor} fontSize='sm' fontWeight='700' mb='4px'>
+            Enter Your OTP Code
+          </Text>
+          <Text color={subColor} fontSize='sm' mb='12px'>
+            Enter the 6-digit code sent to <b>{user.userData?.email}</b>
+          </Text>
+          <Flex gap='12px' align='center'>
+            <Input
+              placeholder='Enter 6-digit code'
+              value={otpCode}
+              onChange={e => setOtpCode(e.target.value)}
+              maxLength={6}
+              type='number'
+              size='sm'
+              borderRadius='10px'
+              letterSpacing='4px'
+              fontWeight='700'
+              fontSize='lg'
+              textAlign='center'
+            />
+            <Button
+              size='sm' bg='brand.500' color='white'
+              borderRadius='10px' fontWeight='700'
+              _hover={{ bg: 'brand.600' }}
+              isLoading={verifyingOtp}
+              loadingText='Verifying...'
+              isDisabled={otpCode.length !== 6}
+              onClick={verifyOTP}>
+              Verify Code
+            </Button>
+          </Flex>
+        </Box>
+      )}
 
-      {/* Step 3 — Upload selfie */}
-      <Divider borderColor={borderColor} mb='20px' />
-      <Text color={textColor} fontSize='sm' fontWeight='700' mb='4px'>
-        Upload Your Selfie with OTP Code
-      </Text>
-      <Text color={subColor} fontSize='sm' mb='16px'>
-        Take a clear selfie holding the paper with the OTP code written on it
-      </Text>
+      {/* Step 3 — Upload selfie (only after OTP verified) */}
+      {otpVerified && (
+        <>
+        <Divider borderColor={borderColor} mb='20px' />
+        <Text color={textColor} fontSize='sm' fontWeight='700' mb='4px'>
+          Upload Your Selfie
+        </Text>
+        <Text color={subColor} fontSize='sm' mb='16px'>
+          Take a clear selfie to complete your account ownership verification
+        </Text>
 
       {/* Camera / Upload toggle */}
       <Flex gap='10px' mb='16px'>
@@ -447,7 +515,7 @@ export default function AccountOwnerShip(props) {
         </Box>
       )}
 
-      {error && (
+            {error && (
         <Alert status='error' mb='12px' borderRadius='10px' fontSize='sm'>
           <AlertIcon />{error}
         </Alert>
@@ -465,6 +533,8 @@ export default function AccountOwnerShip(props) {
           ? <Flex align='center' gap='8px'><Spinner size='sm' color='white' /> Uploading...</Flex>
           : 'Submit Selfie for Verification'}
       </Button>
+      </>
+      )}
     </Box>
   );
 }
