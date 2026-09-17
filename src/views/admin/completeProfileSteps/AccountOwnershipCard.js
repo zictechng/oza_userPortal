@@ -49,24 +49,7 @@ export default function AccountOwnerShip(props) {
   const videoRef = useRef(null);
   const canvasRef = useRef(null);
 
-  const onDrop = useCallback((acceptedFiles, fileRejections) => {
-    if (fileRejections.length > 0) {
-      setError("Invalid file type. Only JPEG and PNG files under 5MB are allowed.");
-    } else {
-      setError(null);
-      setCapturedPhoto(null); // clear webcam capture if file selected
-      setFiles(acceptedFiles.map((file) =>
-        Object.assign(file, { preview: URL.createObjectURL(file) })
-      ));
-      setDocumentType(acceptedFiles);
-    }
-  }, []);
-
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({
-    onDrop,
-    accept: ["image/jpeg", "image/png"],
-    maxSize: 5 * 1024 * 1024,
-  });
+  
 
   const removeFile = (fileName) => {
     setFiles((prevFiles) => prevFiles.filter((file) => file.name !== fileName));
@@ -88,7 +71,7 @@ export default function AccountOwnerShip(props) {
       toast({
         title: 'Camera Error',
         description: 'Could not access camera. Please allow camera permission or upload a photo instead.',
-        status: 'error', duration: 5000, isClosable: true, position: 'top',
+        status: 'error', duration: 5000, isClosable: true, position: 'bottom-right',
       });
     }
   };
@@ -122,7 +105,7 @@ export default function AccountOwnerShip(props) {
   const sendOTPCode = async () => {
     const formData = { userId: user.userData._id };
     if (user.userData.email === undefined || user.userData.email === '') {
-      toast({ title: "Error!", description: "Please login to get started.", status: "error", duration: 5000, isClosable: true, position: "bottom" });
+      toast({ title: "Error!", description: "Please login to get started.", status: "error", duration: 5000, isClosable: true, position: 'bottom-right' });
       return;
     }
     try {
@@ -132,13 +115,13 @@ export default function AccountOwnerShip(props) {
       });
       if (res.data.msg === '201') {
         setOtpSend(true);
-        toast({ title: "OTP Sent!", description: "Check your email for the OTP code.", status: "success", duration: 5000, isClosable: true, position: "bottom" });
+        toast({ title: "OTP Sent!", description: "Check your email for the OTP code.", status: "success", duration: 5000, isClosable: true, position: "bottom-right" });
       } else if (res.data.status === '404') {
-        toast({ title: "Error!", description: "No account found.", status: "error", duration: 5000 });
+        toast({ title: "Error!", description: "No account found.", status: "error", duration: 5000, position: 'bottom-right' });
       } else if (res.data.status === '402') {
-        toast({ title: "Error!", description: "Login and try again.", status: "error", duration: 5000 });
+        toast({ title: "Error!", description: "Login and try again.", status: "error", duration: 5000, position: 'bottom-right' });
       } else {
-        toast({ title: "Error!", description: "System error occurred.", status: "error", duration: 5000 });
+        toast({ title: "Error!", description: "System error occurred.", status: "error", duration: 5000, position: 'bottom-right' });
       }
     } catch (error) { console.log(error); }
     finally { setLoading2FA(false); }
@@ -146,7 +129,7 @@ export default function AccountOwnerShip(props) {
 
     const verifyOTP = async () => {
     if (!otpCode || otpCode.length !== 6) {
-      toast({ title: 'Enter OTP', description: 'Please enter the 6-digit code sent to your email.', status: 'warning', duration: 4000, isClosable: true, position: 'bottom' });
+      toast({ title: 'Enter OTP', description: 'Please enter the 6-digit code sent to your email.', status: 'warning', duration: 4000, isClosable: true, position: 'bottom-right' });
       return;
     }
     setVerifyingOtp(true);
@@ -157,12 +140,12 @@ export default function AccountOwnerShip(props) {
       );
       if (res.data.msg === '200') {
         setOtpVerified(true);
-        toast({ title: 'OTP Verified ✅', description: 'Code confirmed. Please take your selfie now.', status: 'success', duration: 4000, isClosable: true, position: 'bottom' });
+        toast({ title: 'OTP Verified ✅', description: 'Code confirmed. Please take your selfie now.', status: 'success', duration: 4000, isClosable: true, position: 'bottom-right' });
       } else {
-        toast({ title: 'Wrong Code', description: res.data.message || 'Incorrect code. Please check your email.', status: 'error', duration: 4000, isClosable: true, position: 'bottom' });
+        toast({ title: 'Wrong Code', description: res.data.message || 'Incorrect code. Please check your email.', status: 'error', duration: 4000, isClosable: true, position: 'bottom-right' });
       }
     } catch (err) {
-      toast({ title: 'Error', description: 'Could not verify code. Please try again.', status: 'error', duration: 4000, isClosable: true, position: 'bottom' });
+      toast({ title: 'Error', description: 'Could not verify code. Please try again.', status: 'error', duration: 4000, isClosable: true, position: 'bottom-right' });
     } finally {
       setVerifyingOtp(false);
     }
@@ -179,7 +162,7 @@ export default function AccountOwnerShip(props) {
 
   const uploadDoc = async () => {
     if (!files || files.length === 0) {
-      toast({ title: "Error!", description: "Please select or take a photo first.", status: "error", duration: 5000, isClosable: true, position: "bottom" });
+      toast({ title: "Error!", description: "Please select or take a photo first.", status: "error", duration: 5000, isClosable: true, position: 'bottom-right' });
       return false;
     }
     const file = files[0];
@@ -222,7 +205,7 @@ export default function AccountOwnerShip(props) {
         headers: { Authorization: `Bearer ${userToken}` },
       });
       if (res.data.msg === '201') {
-        toast({ title: "Success!", description: "Selfie uploaded successfully. We will review your account.", status: "success", duration: 5000, isClosable: true, position: "bottom" });
+        toast({ title: "Success!", description: "Selfie uploaded successfully. We will review your account.", status: "success", duration: 5000, isClosable: true, position: 'bottom-right' });
         setFiles(null); setFiles([]);
         dispatch(updateUserDetails(res.data));
       } else if (res.data.status === '401') {
@@ -411,28 +394,24 @@ export default function AccountOwnerShip(props) {
           Take a clear selfie to complete your account ownership verification
         </Text>
 
-      {/* Camera / Upload toggle */}
+    {/* Camera only */}
       <Flex gap='10px' mb='16px'>
         <Button
           size='sm' borderRadius='10px' fontWeight='600'
           leftIcon={<Icon as={MdCameraAlt} />}
-          bg={showCamera ? 'brand.500' : dropBg}
-          color={showCamera ? 'white' : textColor}
-          border='1px solid' borderColor={showCamera ? 'brand.500' : borderColor}
-          _hover={{ borderColor: 'brand.500' }}
+          bg='brand.500' color='white'
+          _hover={{ bg: 'brand.600' }}
           onClick={() => showCamera ? stopCamera() : startCamera()}>
-          {showCamera ? 'Close Camera' : 'Use Camera'}
+          {showCamera ? 'Close Camera' : 'Open Camera'}
         </Button>
-        <Button
-          size='sm' borderRadius='10px' fontWeight='600'
-          leftIcon={<Icon as={MdUpload} />}
-          bg={!showCamera ? 'brand.500' : dropBg}
-          color={!showCamera ? 'white' : textColor}
-          border='1px solid' borderColor={!showCamera ? 'brand.500' : borderColor}
-          _hover={{ borderColor: 'brand.500' }}
-          onClick={() => { stopCamera(); }}>
-          Upload Photo
-        </Button>
+        {files.length > 0 && (
+          <Button
+            size='sm' borderRadius='10px' fontWeight='600'
+            variant='ghost' color='red.500'
+            onClick={() => removeFile()}>
+            Remove Photo
+          </Button>
+        )}
       </Flex>
 
       {/* Webcam */}
@@ -460,58 +439,41 @@ export default function AccountOwnerShip(props) {
       )}
 
       {/* Dropzone — shown when camera is off */}
-      {!showCamera && (
-        <Box
-          {...getRootProps()}
-          bg={isDragActive ? dropActiveBg : dropBg}
-          border='2px dashed'
-          borderColor={isDragActive ? 'brand.500' : files.length ? 'brand.500' : borderColor}
-          borderRadius='16px'
-          p={files.length || capturedPhoto ? '16px' : '32px'}
-          textAlign='center'
-          cursor='pointer' mb='16px' transition='all 0.2s'
-          _hover={{ borderColor: 'brand.500', bg: dropActiveBg }}>
-          <Input variant='main' {...getInputProps()} />
+            {/* Captured photo preview — shown after camera capture */}
+      {!showCamera && files.length > 0 && (
+        <Box mb='16px' borderRadius='16px' overflow='hidden'
+          border='2px solid' borderColor='green.400' p='16px' textAlign='center'>
+          <Image
+            src={capturedPhoto || files[0].preview}
+            alt='Selfie preview'
+            maxH='240px'
+            borderRadius='12px'
+            objectFit='contain'
+            mx='auto'
+            mb='12px'
+          />
+          <Badge colorScheme='green' borderRadius='full' px='12px' py='4px'>
+            ✓ Photo captured — ready to submit
+          </Badge>
+        </Box>
+      )}
 
-          {files.length > 0 ? (
-            <Flex direction='column' align='center' gap='12px'>
-              <Image
-                src={capturedPhoto || files[0].preview}
-                alt='Selfie preview'
-                maxH='220px'
-                borderRadius='12px'
-                objectFit='contain'
-              />
-              <Flex align='center' gap='8px'>
-                <Badge colorScheme='green' borderRadius='full'>✓ Photo ready</Badge>
-                <Button size='xs' colorScheme='red' variant='ghost'
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    removeFile(files[0].name);
-                    setCapturedPhoto(null);
-                  }}>
-                  Remove
-                </Button>
-              </Flex>
-              <Text color={subColor} fontSize='xs'>Click to change photo</Text>
-            </Flex>
-          ) : (
-            <Flex direction='column' align='center' gap='10px'>
-              <Box w='56px' h='56px' borderRadius='16px'
-                bg='brand.100' display='flex' alignItems='center' justifyContent='center'>
-                <Icon as={isDragActive ? MdPerson : MdUpload}
-                  color='brand.500' w='28px' h='28px' />
-              </Box>
-              <Box>
-                <Text color={textColor} fontSize='sm' fontWeight='700'>
-                  {isDragActive ? 'Drop selfie here' : 'Click or drag selfie here'}
-                </Text>
-                <Text color={subColor} fontSize='xs' mt='4px'>
-                  PNG, JPG files only — max 5MB
-                </Text>
-              </Box>
-            </Flex>
-          )}
+      {/* Placeholder — shown when no photo taken yet */}
+      {!showCamera && files.length === 0 && (
+        <Box mb='16px' p='32px' bg={dropBg}
+          borderRadius='16px' border='2px dashed'
+          borderColor={borderColor} textAlign='center'>
+          <Box w='56px' h='56px' borderRadius='16px'
+            bg='brand.100' display='flex' alignItems='center'
+            justifyContent='center' mx='auto' mb='12px'>
+            <Icon as={MdCameraAlt} color='brand.500' w='28px' h='28px' />
+          </Box>
+          <Text color={textColor} fontSize='sm' fontWeight='700'>
+            No photo taken yet
+          </Text>
+          <Text color={subColor} fontSize='xs' mt='4px'>
+            Click "Open Camera" above to take your selfie
+          </Text>
         </Box>
       )}
 
