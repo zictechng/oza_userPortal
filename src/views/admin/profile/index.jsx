@@ -37,7 +37,6 @@ const KycDocuments = ({ userId, userToken }) => {
   
 
   useEffect(() => {
-    if (!userId) return;
     dispatch(fetchDocument({ userID: userId, user_token: userToken, page: localPage, pageSize: 5 }));
   // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [userId, localPage]);
@@ -152,6 +151,7 @@ export default function Profile() {
   const dividerColor = useColorModeValue('#E2E8F0', 'rgba(255,255,255,0.1)');
   const regBannerBg = useColorModeValue('orange.50', 'navy.700');
   const regBannerBorder = useColorModeValue('orange.200', 'orange.700');
+  const [appInfo, setAppInfo] = useState(null);
 
   const [form, setForm] = useState({
     display_name: '',
@@ -161,6 +161,12 @@ export default function Profile() {
     state: '',
     gender: '',
   });
+
+  useEffect(() => {
+    client.get('/api/fetchAppDetails').then(res => {
+      if (res.data?.infoData) setAppInfo(res.data.infoData);
+    }).catch(() => {});
+  }, []);
 
   useEffect(() => {
     if (userData) {
@@ -479,6 +485,47 @@ export default function Profile() {
             </TabPanel>
 
           </TabPanels>
+      {/* ── Download App ───────────────────────── */}
+      {(appInfo?.app_download_android_link || appInfo?.app_download_ios_link) && (
+        <Box mt='24px' p='20px' bg={rowHoverBg}
+          borderRadius='16px' border='1px solid' borderColor={borderColor}>
+          <Text color={textColor} fontSize='sm' fontWeight='700' mb='12px'>
+            📱 Download Our Mobile App
+          </Text>
+          <Flex gap='10px' flexWrap='wrap'>
+            {appInfo?.app_download_android_link && (
+              <Button
+                as='a'
+                href={appInfo.app_download_android_link}
+                target='_blank'
+                size='sm'
+                bg='#01875f'
+                color='white'
+                borderRadius='10px'
+                fontWeight='700'
+                _hover={{ bg: '#016a4b' }}
+                leftIcon={<Text>▶</Text>}>
+                Google Play
+              </Button>
+            )}
+            {appInfo?.app_download_ios_link && (
+              <Button
+                as='a'
+                href={appInfo.app_download_ios_link}
+                target='_blank'
+                size='sm'
+                bg='#000'
+                color='white'
+                borderRadius='10px'
+                fontWeight='700'
+                _hover={{ bg: '#333' }}
+                leftIcon={<Text>🍎</Text>}>
+                App Store
+              </Button>
+            )}
+          </Flex>
+        </Box>
+      )}
         </Tabs>
       </Box>
   </Box>
