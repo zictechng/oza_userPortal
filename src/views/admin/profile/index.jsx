@@ -525,7 +525,7 @@ export default function Profile() {
             )}
           </Flex>
         </Box>
-      )}
+          )}
         </Tabs>
       </Box>
   </Box>

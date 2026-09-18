@@ -14,6 +14,7 @@ import { AuthAlert } from 'components/auth/AuthCard';
 import { usePasswordToggle } from 'hooks/usePasswordToggle';
 import { useFormValidation } from 'hooks/useFormValidation';
 import useAppStatus from 'hooks/useAppStatus';
+import client from 'components/client';
 
 
 function SignIn() {
@@ -31,13 +32,19 @@ function SignIn() {
 
   const [userEmail, setUserEmail] = useState('');
   const [userPassword, setUserPassword] = useState('');
+  const [appInfo, setAppInfo] = useState(null);
   const [ssoWaiting, setSsoWaiting] = useState(
   () => new URLSearchParams(window.location.search).get('sso') === 'validating'
   );
 
   const { loading, userToken } = useSelector((state) => state.authUser);
   const { platformDown, loginBlocked, message } = useAppStatus();
-
+  
+  useEffect(() => {
+      client.get('/api/fetchAppDetails').then(res => {
+        if (res.data?.infoData) setAppInfo(res.data.infoData);
+      }).catch(() => {});
+    }, []);
   // Update the message handler:
 useEffect(() => {
   const params = new URLSearchParams(window.location.search);
@@ -244,6 +251,45 @@ if (ssoWaiting) {
               </NavLink>
             </Text>
           </Flex>
+
+          {/* ── Download App ────────────────────── */}
+          {(appInfo?.app_download_android_link || appInfo?.app_download_ios_link) && (
+            <Box mt='24px' textAlign='center'>
+              <Text color={textColorSecondary} fontSize='xs' mb='10px' fontWeight='600'>
+                📱 Get the mobile app
+              </Text>
+              <Flex justify='center' gap='8px'>
+                {appInfo?.app_download_android_link && (
+                  <Button
+                    as='a'
+                    href={appInfo.app_download_android_link}
+                    target='_blank'
+                    size='xs'
+                    bg='#01875f'
+                    color='white'
+                    borderRadius='8px'
+                    fontWeight='700'
+                    _hover={{ bg: '#016a4b' }}>
+                    ▶ Google Play
+                  </Button>
+                )}
+                {appInfo?.app_download_ios_link && (
+                  <Button
+                    as='a'
+                    href={appInfo.app_download_ios_link}
+                    target='_blank'
+                    size='xs'
+                    bg='#000'
+                    color='white'
+                    borderRadius='8px'
+                    fontWeight='700'
+                    _hover={{ bg: '#333' }}>
+                    🍎 App Store
+                  </Button>
+                )}
+              </Flex>
+            </Box>
+          )}
       
       </Box>
     </DefaultAuth>

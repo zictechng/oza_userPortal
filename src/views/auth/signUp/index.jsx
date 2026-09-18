@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { NavLink, useNavigate } from 'react-router-dom';
 import {
   Box, Button, Flex, FormControl, FormLabel,
@@ -35,6 +35,7 @@ function SignUp() {
 
   const [success, setSuccess] = useState('');
   const [loading, setLoading] = useState(false);
+  const [appInfo, setAppInfo] = useState(null);
   const { activeStep, setActiveStep } = useSteps({ index: 0, count: STEPS.length });
   const { platformDown, signupBlocked, message } = useAppStatus();
 
@@ -62,6 +63,12 @@ function SignUp() {
     acct_type: 'User',
     share_code: '',
   });
+
+  useEffect(() => {
+    client.get('/api/fetchAppDetails').then(res => {
+      if (res.data?.infoData) setAppInfo(res.data.infoData);
+    }).catch(() => {});
+  }, []);
 
   const handleChange = (field, value) => {
     setForm(prev => ({ ...prev, [field]: value }));
@@ -420,6 +427,45 @@ function SignUp() {
             </NavLink>
           </Text>
         </Flex>
+
+        {/* ── Download App ────────────────────── */}
+        {(appInfo?.app_download_android_link || appInfo?.app_download_ios_link) && (
+          <Box mt='24px' textAlign='center'>
+            <Text color={textColorSecondary} fontSize='xs' mb='10px' fontWeight='600'>
+              📱 Get the mobile app
+            </Text>
+            <Flex justify='center' gap='8px'>
+              {appInfo?.app_download_android_link && (
+                <Button
+                  as='a'
+                  href={appInfo.app_download_android_link}
+                  target='_blank'
+                  size='xs'
+                  bg='#01875f'
+                  color='white'
+                  borderRadius='8px'
+                  fontWeight='700'
+                  _hover={{ bg: '#016a4b' }}>
+                  ▶ Google Play
+                </Button>
+              )}
+              {appInfo?.app_download_ios_link && (
+                <Button
+                  as='a'
+                  href={appInfo.app_download_ios_link}
+                  target='_blank'
+                  size='xs'
+                  bg='#000'
+                  color='white'
+                  borderRadius='8px'
+                  fontWeight='700'
+                  _hover={{ bg: '#333' }}>
+                  🍎 App Store
+                </Button>
+              )}
+            </Flex>
+          </Box>
+        )}
 
       </Box>
     </DefaultAuth>
